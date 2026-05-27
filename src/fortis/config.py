@@ -12,12 +12,12 @@ class Paths:
 
 
 @dataclass
-class Values:
+class ValueSymbols:
     """Text values."""
 
     present: set[str] = field(default_factory=lambda: {"+", "1", "present"})
     absent: set[str] = field(default_factory=lambda: {"-", "0", "absent"})
-    unspecified: set[str] = field(default_factory=lambda: {"", "∅", "none", "null", "unspecified"})
+    unspecified: set[str] = field(default_factory=lambda: {"∅", "none", "null", "unspecified"})
 
 
 @dataclass
@@ -25,7 +25,7 @@ class Config:
     """Configuration."""
 
     paths: Paths = field(default_factory=Paths)
-    values: Values = field(default_factory=Values)
+    value_symbols: ValueSymbols = field(default_factory=ValueSymbols)
 
 
 config = Config()
