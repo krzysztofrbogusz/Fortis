@@ -26,6 +26,7 @@ class Config:
 
     paths: Paths = field(default_factory=Paths)
     value_symbols: ValueSymbols = field(default_factory=ValueSymbols)
+    reserved_symbols: set[str] = field(default_factory=lambda: {"."})
 
 
 config = Config()

@@ -115,3 +115,11 @@ class Err[E]:
 
 # The TypeAlias tying it all together
 type Result[T, E] = Ok[T] | Err[E]
+
+
+def present_errors(errors: str | list[str]) -> str:
+    """Presents errors that were gathered."""
+    if isinstance(errors, str):
+        return errors
+    elif isinstance(errors, list):
+        return "\n".join(errors)

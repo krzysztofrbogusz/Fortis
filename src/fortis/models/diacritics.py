@@ -35,9 +35,9 @@ class DiacriticDefinition:
     symbol: str
     tier: Tier
     type: DiacriticType
-    boundary: bool
-    bundle: FeatureBundle | None
+    bundle: FeatureBundle
     default: bool
+    contour: bool
 
     @classmethod
     def load(
@@ -60,10 +60,6 @@ class DiacriticDefinition:
         if type_result.is_err():
             error_list.append(type_result.unwrap_err())
 
-        boundary_result = cls._load_boundary(symbol, diacritic_def)
-        if boundary_result.is_err():
-            error_list.append(boundary_result.unwrap_err())
-
         bundle_result = cls._load_bundle(symbol, diacritic_def, inventory)
         if bundle_result.is_err():
             error_list.extend(bundle_result.unwrap_err())
@@ -71,6 +67,10 @@ class DiacriticDefinition:
         default_result = cls._load_default(symbol, diacritic_def)
         if default_result.is_err():
             error_list.append(default_result.unwrap_err())
+
+        contour_result = cls._load_contour(symbol, diacritic_def)
+        if contour_result.is_err():
+            error_list.append(contour_result.unwrap_err())
 
         if error_list:
             return Err(error_list)
@@ -80,9 +80,9 @@ class DiacriticDefinition:
                     symbol=symbol,
                     tier=tier_result.unwrap(),
                     type=type_result.unwrap(),
-                    boundary=boundary_result.unwrap(),
                     bundle=bundle_result.unwrap(),
                     default=default_result.unwrap(),
+                    contour=contour_result.unwrap(),
                 )
             )
 
@@ -128,24 +128,7 @@ class DiacriticDefinition:
         return Ok(dtype)
 
     @staticmethod
-    def _load_boundary(symbol: str, diacritic_def: dict) -> Result[bool, str]:
-        """Parse the optional 'boundary' field (defaults to False).
-
-        Args:
-            symbol: Diacritic symbol (for error messages).
-            diacritic_def: Raw dictionary from the TOML file.
-        """
-        value = diacritic_def.get("boundary")
-        if not value:
-            return Ok(False)
-        if not isinstance(value, bool):
-            return Err(f"Diacritic '{present_symbol(symbol)}' 'boundary' must be 'true' or 'false'")
-        return Ok(value)
-
-    @staticmethod
-    def _load_bundle(
-        symbol, diacritic_def: dict, inventory: FeatureInventory
-    ) -> Result[FeatureBundle | None, list[str]]:
+    def _load_bundle(symbol, diacritic_def: dict, inventory: FeatureInventory) -> Result[FeatureBundle, list[str]]:
         """Parse the 'bundle' field; empty string yields None.
 
         Args:
@@ -157,7 +140,7 @@ class DiacriticDefinition:
         if value is None:
             return Err([f"Diacritic '{present_symbol(symbol)}' is missing required field 'bundle'"])
         if value == "":
-            return Ok(None)
+            return Err([f"Diacritic '{present_symbol(symbol)}' is missing required field 'bundle'"])
         bundle_result = FeatureBundle.from_str(value, inventory, bare_unary_means_present=True)
         if bundle_result.is_err():
             return Err(bundle_result.unwrap_err())
@@ -176,6 +159,21 @@ class DiacriticDefinition:
             return Ok(False)
         if not isinstance(value, bool):
             return Err(f"Diacritic '{present_symbol(symbol)}' 'default' must be 'true' or 'false'")
+        return Ok(value)
+
+    @staticmethod
+    def _load_contour(symbol: str, diacritic_def: dict) -> Result[bool, str]:
+        """Parse the optional 'contour' field (defaults to False).
+
+        Args:
+            symbol: Diacritic symbol (for error messages).
+            diacritic_def: Raw dictionary from the TOML file.
+        """
+        value = diacritic_def.get("contour")
+        if not value:
+            return Ok(False)
+        if not isinstance(value, bool):
+            return Err(f"Diacritic '{present_symbol(symbol)}' 'contour' must be 'true' or 'false'")
         return Ok(value)
 
 

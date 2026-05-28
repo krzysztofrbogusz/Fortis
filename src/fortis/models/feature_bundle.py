@@ -2,33 +2,23 @@ from collections import UserDict
 
 from src.fortis.models.feature_inventory import FeatureInventory
 from src.fortis.models.feature_spec import FeatureSpec, Place
+from src.fortis.models.tiers import Tier
 from src.fortis.result import Err, Ok, Result
+
+
+def _present_value(value: int | None) -> str:
+    """Format a single feature value as a display string."""
+    if value is None:
+        return "?"
+    if value == 1:
+        return "+"
+    if value == 0:
+        return "-"
+    return str(value)
 
 
 class FeatureBundle(UserDict[str, FeatureSpec]):
     """A collection of feature specifications, keyed by feature name."""
-
-    def matches(self, other: FeatureBundle, ignore_none: bool = False, place: Place = "any") -> bool:
-        """Check if every feature in this bundle matches the corresponding feature in *other*.
-
-        Features present in *other* but not in *self* are unconstrained (the pattern
-        doesn't care about them). Features present in *self* but not in *other* are
-        treated as unspecified values.
-
-        Args:
-            other: The target bundle to match against.
-            ignore_none: Treat missing features and None values as wildcards.
-            place: Positional control for contour matching, passed to FeatureSpec.matches.
-        """
-        for feature, spec in self.data.items():
-            if feature not in other.data:
-                # Feature not present in target — unspecified
-                if ignore_none:
-                    continue
-                return False
-            if not spec.matches(other.data[feature], ignore_none=ignore_none, place=place):
-                return False
-        return True
 
     @classmethod
     def from_str(
@@ -59,3 +49,89 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
             return Err(error_list)
 
         return Ok(bundle)
+
+    def matches(self, other: FeatureBundle, ignore_none: bool = False, place: Place = "any") -> bool:
+        """Check if every feature in this bundle matches the corresponding feature in *other*.
+
+        Features present in *other* but not in *self* are unconstrained (the pattern
+        doesn't care about them). Features present in *self* but not in *other* are
+        treated as unspecified values.
+
+        Args:
+            other: The target bundle to match against.
+            ignore_none: Treat missing features and None values as wildcards.
+            place: Positional control for contour matching, passed to FeatureSpec.matches.
+        """
+        for feature, spec in self.data.items():
+            if feature not in other.data:
+                # Feature not present in target — unspecified
+                if ignore_none:
+                    continue
+                return False
+            if not spec.matches(other.data[feature], ignore_none=ignore_none, place=place):
+                return False
+        return True
+
+    def present(self, inventory: FeatureInventory) -> str:
+        """Format this bundle as a boxed display string.
+
+        Binary/unary features show as ``+name`` or ``-name`` (using short names).
+        Scalar features show as ``name: label``.
+        Contour values show as ``name: label>label>...``.
+
+        Args:
+            inventory: Feature inventory for name/type/value lookups.
+        """
+        return "\n".join(self.present_lines(inventory))
+
+    def present_lines(self, inventory: FeatureInventory) -> list[str]:
+        """Return the boxed lines for this bundle (for side-by-side display).
+
+        Args:
+            inventory: Feature inventory for name/type/value lookups.
+        """
+        lines: list[str] = []
+        has_syllable = False
+        for feature_name in inventory:
+            if feature_name not in self.data:
+                continue
+            ft_def = inventory[feature_name]
+            if ft_def.tier == Tier.syllable and not has_syllable:
+                lines.append("---")
+                has_syllable = True
+            spec = self.data[feature_name]
+            short = ft_def.short
+            if isinstance(spec.value, list):
+                vals = ">".join(_present_value(v) for v in spec.value)
+                lines.append(f"{short}:{vals}")
+            else:
+                lines.append(f"{short}:{_present_value(spec.value)}")
+
+        if not lines:
+            return ["⎡⎤"]
+
+        width = max(len(line) for line in lines)
+        result = [f"⎡{lines[0]:^{width}}⎤"]
+        if len(lines) > 1:
+            result.extend(f"⎢{line:^{width}}⎥" for line in lines[1:-1])
+            result.append(f"⎣{lines[-1]:^{width}}⎦")
+
+        return result
+
+    def combine_with(self, other: FeatureBundle, form_contours: bool = False) -> FeatureBundle:
+        """Combine this feature bundle with another.
+
+        Args:
+            other: The bundle to merge in.
+            form_contours: If True, overlapping features form contours instead of overriding.
+        """
+        result = FeatureBundle(dict(self.data))
+        for feature_name, feature_spec in other.items():
+            if feature_name not in result:
+                result[feature_name] = feature_spec
+            elif form_contours:
+                result[feature_name] = result[feature_name].form_contour(feature_spec)
+            else:
+                result[feature_name] = feature_spec
+
+        return result

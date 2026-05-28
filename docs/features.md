@@ -12,8 +12,8 @@
 
 ```
 ROOT
-- [±consonantal]
 - [±syllabic]
+- [±consonantal]
 - [±sonorant]
 - [click]
 - [length] – [1: short, 2: long, 3: overlong]

@@ -191,3 +191,29 @@ class FeatureSpec:
             return True
 
         return False
+
+    def form_contour(self, other: FeatureSpec) -> FeatureSpec:
+        """Form a contour by appending *other*'s value onto *self*'s.
+
+        Both specifications must refer to the same feature.
+
+        Args:
+            other: The feature spec to append.
+
+        Returns:
+            A new FeatureSpec whose value is a list combining both values.
+        """
+        if self.feature != other.feature:
+            raise ValueError(f"The two merged features are not the same: '{self.feature}' vs '{other.feature}'")
+
+        if isinstance(self.value, list):
+            self_values = self.value
+        else:
+            self_values = [self.value]
+
+        if isinstance(other.value, list):
+            other_values = other.value
+        else:
+            other_values = [other.value]
+
+        return FeatureSpec(self.feature, self_values + other_values)
