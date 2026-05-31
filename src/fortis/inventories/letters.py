@@ -2,8 +2,8 @@ from collections import UserDict
 from pathlib import Path
 
 from src.fortis.general.file_handling import load_csv_file
+from src.fortis.inventories.feature_inventory import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.feature_inventory import FeatureInventory
 from src.fortis.models.feature_spec import FeatureSpec
 from src.fortis.models.values import single_value_from_str
 from src.fortis.result import Err, Ok, Result

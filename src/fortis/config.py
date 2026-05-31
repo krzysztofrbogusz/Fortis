@@ -9,6 +9,7 @@ class Paths:
     root: Path = Path(__file__).parent.parent.parent
     inventories: Path = root / "inventories"
     letters: Path = inventories / "letters.csv"
+    rules: Path = inventories / "rules.toml"
 
 
 @dataclass

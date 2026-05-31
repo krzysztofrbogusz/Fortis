@@ -1,7 +1,7 @@
 from collections import UserList
 
+from src.fortis.inventories.feature_inventory import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.feature_inventory import FeatureInventory
 from src.fortis.models.tiers import Tier
 from src.fortis.models.values import present_value
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from src.fortis.models.feature_inventory import FeatureInventory
+from src.fortis.inventories.feature_inventory import FeatureInventory
 from src.fortis.models.values import value_from_str
 from src.fortis.result import Err, Ok, Result
 

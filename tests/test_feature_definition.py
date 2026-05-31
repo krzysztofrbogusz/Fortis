@@ -1,7 +1,6 @@
-import pytest
-
-from src.fortis.models.feature_definition import FeatureDefinition, FeatureType, Tier
-from src.fortis.result import Err, Ok
+from src.fortis.inventories.feature_definition import FeatureDefinition
+from src.fortis.models.feature_type import FeatureType
+from src.fortis.models.tiers import Tier
 
 # ——————————————————————————————————————————————————————————————————————————————————————
 # _load_tier

@@ -8,14 +8,14 @@ Fortis is a featural, autosegmental phonology engine. You define your phonologic
 
 Fortis reads six TOML files from the `inventories/` directory:
 
-| File                       | Purpose                                          |
-| -------------------------- | ------------------------------------------------ |
-| `features.toml`            | The phonological feature system                  |
-| `rules.toml`               | Sound change rules                               |
-| `syllable_constraints.toml`| Syllable structure constraints                   |
-| `words.toml`               | Lexicon of words with glosses                    |
-| `sonorities.toml`          | Sonority hierarchy levels                        |
-| `diacritics.toml`          | Diacritics and their feature effects              |
+| File                        | Purpose                              |
+| --------------------------- | ------------------------------------ |
+| `features.toml`             | The phonological feature system      |
+| `rules.toml`                | Sound change rules                   |
+| `syllable_constraints.toml` | Syllable structure constraints       |
+| `words.toml`                | Lexicon of words with glosses        |
+| `sonorities.toml`           | Sonority hierarchy levels            |
+| `diacritics.toml`           | Diacritics and their feature effects |
 
 Each file is described in detail below.
 
@@ -27,10 +27,10 @@ The features file defines the phonological features available in your system. Ea
 
 ### Required fields
 
-| Field   | Type   | Description                                                       |
-| ------- | ------ | ----------------------------------------------------------------- |
-| `tier`  | string | Which tier this feature belongs to. One of: `segment`, `syllable` |
-| `type`  | string | The feature type. One of: `unary`, `binary`, `scalar`            |
+| Field  | Type   | Description                                                       |
+| ------ | ------ | ----------------------------------------------------------------- |
+| `tier` | string | Which tier this feature belongs to. One of: `segment`, `syllable` |
+| `type` | string | The feature type. One of: `unary`, `binary`, `scalar`             |
 
 ### Optional fields
 
@@ -103,11 +103,11 @@ Sound change rules define transformations applied to phonological representation
 
 ### Fields
 
-| Field        | Type   | Description                                             |
-| ------------ | ------ | ------------------------------------------------------- |
-| `name`       | string | Human-readable rule name                                |
-| `description`| string | What the rule does                                      |
-| `definition` | string | The rule written in Fortis notation (see below)         |
+| Field         | Type   | Description                                     |
+| ------------- | ------ | ----------------------------------------------- |
+| `name`        | string | Human-readable rule name                        |
+| `description` | string | What the rule does                              |
+| `definition`  | string | The rule written in Fortis notation (see below) |
 
 ### Rule notation
 
@@ -126,67 +126,57 @@ The context (`/ C_D`) is required. The exception clause (`// E_F`) is optional a
 
 ### Symbols
 
-| Symbol        | Meaning                                    |
-| ------------- | ------------------------------------------ |
-| `p`           | Letter shorthand                           |
-| `[+syll]`     | Feature bundle: syllabic is present        |
-| `[-syll]`     | Feature bundle: syllabic is absent         |
-| `[syll: 1]`   | Feature bundle: syllabic has value 1       |
-| `[2 height]`  | Feature bundle: height has value 2         |
-| `[hgt: high]` | Feature bundle: height has label "high"    |
-| `[]`          | Wildcard — any segment                     |
-| `#`           | Word boundary                              |
-| `$`           | Syllable boundary                          |
-| `∅`           | Null segment (insertion/deletion)          |
+| Symbol        | Meaning                                 |
+| ------------- | --------------------------------------- |
+| `p`           | Letter shorthand                        |
+| `[+syll]`     | Feature bundle: syllabic is present     |
+| `[-syll]`     | Feature bundle: syllabic is absent      |
+| `[syll: 1]`   | Feature bundle: syllabic has value 1    |
+| `[2 height]`  | Feature bundle: height has value 2      |
+| `[hgt: high]` | Feature bundle: height has label "high" |
+| `[]`          | Wildcard — any segment                  |
+| `#`           | Word boundary                           |
+| `$`           | Syllable boundary                       |
+| `∅`           | Null segment (insertion/deletion)       |
 
 ### Quantifiers
 
 Quantifiers specify how many times an element may match:
 
-| Notation      | Meaning            |
-| ------------- | ------------------ |
-| `[+cons]{3}`  | Exactly 3          |
-| `[+cons]{0,3}`| 0 to 3             |
-| `[+cons]{2,}` | 2 or more          |
-| `[+cons]{,3}` | Up to 3            |
-| `[+cons]?`    | 0 or 1             |
-| `[+cons]*`    | 0 or more          |
-| `[+cons]+`    | 1 or more          |
+| Notation       | Meaning   |
+| -------------- | --------- |
+| `[+cons]{3}`   | Exactly 3 |
+| `[+cons]{0,3}` | 0 to 3    |
+| `[+cons]{2,}`  | 2 or more |
+| `[+cons]{,3}`  | Up to 3   |
+| `[+cons]?`     | 0 or 1    |
+| `[+cons]*`     | 0 or more |
+| `[+cons]+`     | 1 or more |
 
 ### Control elements
 
-| Notation              | Meaning                                           |
-| --------------------- | ------------------------------------------------- |
-| `!p`, `![+syll]`      | Negation — not this letter or element             |
-| `([+syll][+cons])`    | Grouping — matched as a unit                      |
-| `([h: 3] \| [h: 2])`  | Disjunction — match any branch                    |
-| `[α high]`            | Alpha variable — bind or match a feature value    |
-| `[!α high]`           | Alpha variable — match any value except the bound one |
-| `[<1: +high>]`        | Conditional feature — apply only if condition holds |
-| `V=[+syll]`           | Save a reference to a matched element            |
-| `@V`                  | Recall a previously saved reference                |
+| Notation             | Meaning                                               |
+| -------------------- | ----------------------------------------------------- |
+| `!p`, `![+syll]`     | Negation — not this letter or element                 |
+| `([+syll][+cons])`   | Grouping — matched as a unit                          |
+| `([h: 3] \| [h: 2])` | Disjunction — match any branch                        |
+| `[α high]`           | Alpha variable — bind or match a feature value        |
+| `[!α high]`          | Alpha variable — match any value except the bound one |
+| `[<1: +high>]`       | Conditional feature — apply only if condition holds   |
+| `V=[+syll]`          | Save a reference to a matched element                 |
+| `@V`                 | Recall a previously saved reference                   |
 
 ### Contour notation
 
 For scalar features with contour values (e.g. tone):
 
-| Notation             | Meaning                                        |
-| -------------------- | ---------------------------------------------- |
-| `[cont: 1>2>3]`     | Contour with values 1, 2, 3 in sequence        |
-| `[cont: @initial]`  | Match at the start of the contour              |
-| `[cont: @final]`    | Match at the end of the contour                |
-| `[cont: @2]`        | Match at the second position of the contour    |
-| `[cont: @all]`      | Match at every position of the contour         |
-
-### Autosegmental notation
-
-`[+syll] ===> [coronal=1] / [+syll, coronal=1] [-syll]* _`
-
-A `===>` arrow links features across tiers. The target segment associates with the specified feature from the context segment.
-
-Named associations:
-
-`[+syll] =x=> [tone: high=1] / [+syll, tone: high=1] _`
+| Notation           | Meaning                                     |
+| ------------------ | ------------------------------------------- |
+| `[cont: 1>2>3]`    | Contour with values 1, 2, 3 in sequence     |
+| `[cont: @initial]` | Match at the start of the contour           |
+| `[cont: @final]`   | Match at the end of the contour             |
+| `[cont: @2]`       | Match at the second position of the contour |
+| `[cont: @all]`     | Match at every position of the contour      |
 
 ### Example
 
@@ -205,11 +195,11 @@ Defines which syllable structures are permitted. Each entry is keyed by a numeri
 
 ### Fields
 
-| Field       | Type   | Description                                                        |
-| ----------- | ------ | ------------------------------------------------------------------ |
-| `onset`     | table  | Constraints on syllable onsets                                    |
-| `onset.required`   | string | Feature bundle that must be present in the onset          |
-| `onset.forbidden`  | string | Feature bundle that must not be present in the onset      |
+| Field             | Type   | Description                                          |
+| ----------------- | ------ | ---------------------------------------------------- |
+| `onset`           | table  | Constraints on syllable onsets                       |
+| `onset.required`  | string | Feature bundle that must be present in the onset     |
+| `onset.forbidden` | string | Feature bundle that must not be present in the onset |
 
 ### Example
 
@@ -228,9 +218,9 @@ The lexicon. Each entry maps a word written in IPA (with stress and syllable mar
 
 ### Fields
 
-| Field   | Type   | Description                    |
-| ------- | ------ | ------------------------------ |
-| `gloss` | string | English gloss for the word     |
+| Field   | Type   | Description                |
+| ------- | ------ | -------------------------- |
+| `gloss` | string | English gloss for the word |
 
 ### Notation in word entries
 
@@ -256,11 +246,11 @@ Defines the sonority hierarchy used for syllabification. Each entry is a sonorit
 
 ### Fields
 
-| Field         | Type    | Description                                                    |
-| ------------- | ------- | -------------------------------------------------------------- |
-| `level`       | integer | Sonority level (higher = more sonorous)                       |
-| `feature_set` | string  | Feature bundle describing this class                           |
-| `nucleus`     | boolean | Whether this class can serve as a syllable nucleus            |
+| Field         | Type    | Description                                        |
+| ------------- | ------- | -------------------------------------------------- |
+| `level`       | integer | Sonority level (higher = more sonorous)            |
+| `feature_set` | string  | Feature bundle describing this class               |
+| `nucleus`     | boolean | Whether this class can serve as a syllable nucleus |
 
 ### Example
 
@@ -280,12 +270,12 @@ Maps Unicode diacritic characters to their phonological effects. Each entry is k
 
 ### Fields
 
-| Field         | Type    | Description                                                              |
-| ------------- | ------- | ------------------------------------------------------------------------ |
-| `tier`        | string  | Which tier this diacritic affects: `segment` or `syllable`               |
-| `type`        | string  | Positioning: `before`, `after`, or `combining`                           |
-| `feature_set` | string  | Feature bundle this diacritic applies                                   |
-| `boundary`    | boolean | Whether this diacritic marks a syllable boundary (optional, default false) |
+| Field         | Type    | Description                                                                  |
+| ------------- | ------- | ---------------------------------------------------------------------------- |
+| `tier`        | string  | Which tier this diacritic affects: `segment` or `syllable`                   |
+| `type`        | string  | Positioning: `before`, `after`, or `combining`                               |
+| `feature_set` | string  | Feature bundle this diacritic applies                                        |
+| `boundary`    | boolean | Whether this diacritic marks a syllable boundary (optional, default false)   |
 | `default`     | boolean | Whether this diacritic is a default representation (optional, default false) |
 
 ### Diacritic types

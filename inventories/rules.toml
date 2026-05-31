@@ -2,3 +2,9 @@
 name = "Final devoicing"
 description = "Devoices the final consonant in a sequence"
 definition = "[+cons, -syll] → [-vc] / _#"
+
+# [1300.backness_harmony]
+# name        = "Backness harmony"
+# description = "Backness spreads rightward from a vowel onto following vowels."
+# definition  = "[+syll] → [α back] / [α back] [-syll]* _"
+# application = "left-to-right"

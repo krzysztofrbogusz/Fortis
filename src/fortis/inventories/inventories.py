@@ -2,14 +2,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from src.fortis.config import config
-from src.fortis.models.diacritics import DiacriticDefinition, DiacriticInventory
-from src.fortis.models.feature_definition import FeatureDefinition
-from src.fortis.models.feature_inventory import FeatureInventory
-from src.fortis.models.letters import LetterInventory
-from src.fortis.models.sonorities import SonorityInventory
-from src.fortis.models.syllable_settings import SyllableSettings
+from src.fortis.inventories.diacritics import DiacriticDefinition, DiacriticInventory
+from src.fortis.inventories.feature_definition import FeatureDefinition
+from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.inventories.letters import LetterInventory
+from src.fortis.inventories.sonorities import SonorityInventory
+from src.fortis.inventories.syllable_settings import SyllableSettings
 from src.fortis.models.tiers import Tier
 from src.fortis.result import present_errors
+from src.fortis.rules.inventory import RuleInventory
 
 
 @dataclass
@@ -28,6 +29,7 @@ class Inventories:
     diacritics: DiacriticInventory
     sonorities: SonorityInventory
     syllable_settings: SyllableSettings
+    rules: RuleInventory
 
     # Pre-computed sorted symbol lists for greedy longest-first matching
     segment_diacritic_keys: list[str] = field(init=False, repr=False)
@@ -82,6 +84,10 @@ class Inventories:
         if syllable_settings_result.is_err():
             error_list.extend(syllable_settings_result.unwrap_err())
 
+        rules_result = RuleInventory.load(dir_path / "rules.toml", features)
+        if rules_result.is_err():
+            error_list.extend(rules_result.unwrap_err())
+
         if error_list:
             raise ValueError(present_errors(error_list))
 
@@ -91,6 +97,7 @@ class Inventories:
             diacritics=diacritics_result.unwrap(),
             sonorities=sonorities_result.unwrap(),
             syllable_settings=syllable_settings_result.unwrap(),
+            rules=rules_result.unwrap(),
         )
 
     def segment_features(self) -> dict[str, FeatureDefinition]:

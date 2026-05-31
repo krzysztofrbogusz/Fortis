@@ -1,4 +1,4 @@
-from src.fortis.models.inventories import Inventories
+from src.fortis.inventories.inventories import Inventories
 from src.fortis.parsing.transcription import string_to_sequence
 
 

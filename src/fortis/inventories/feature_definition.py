@@ -1,16 +1,8 @@
 from dataclasses import dataclass
-from enum import StrEnum, auto
 
+from src.fortis.models.feature_type import FeatureType
 from src.fortis.models.tiers import Tier
 from src.fortis.result import Err, Ok, Result
-
-
-class FeatureType(StrEnum):
-    """Whether a feature is unary, binary, or scalar."""
-
-    unary = auto()
-    binary = auto()
-    scalar = auto()
 
 
 @dataclass

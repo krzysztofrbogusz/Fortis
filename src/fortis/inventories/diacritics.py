@@ -1,22 +1,14 @@
 from collections import UserDict
 from dataclasses import dataclass
-from enum import StrEnum, auto
 from pathlib import Path
 
 from src.fortis.general.file_handling import load_toml_file
 from src.fortis.general.utils import present_symbol
+from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.models.diacritic_type import DiacriticType
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.feature_inventory import FeatureInventory
 from src.fortis.models.tiers import Tier
 from src.fortis.result import Err, Ok, Result
-
-
-class DiacriticType(StrEnum):
-    """Where a diacritic attaches relative to its base symbol."""
-
-    before = auto()
-    combining = auto()
-    after = auto()
 
 
 @dataclass

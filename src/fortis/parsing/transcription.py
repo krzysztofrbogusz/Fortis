@@ -1,6 +1,6 @@
 from src.fortis.config import config
+from src.fortis.inventories.inventories import Inventories
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.inventories import Inventories
 from src.fortis.models.sequence import Sequence
 
 

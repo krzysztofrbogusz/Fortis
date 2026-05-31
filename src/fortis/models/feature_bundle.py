@@ -1,6 +1,6 @@
 from collections import UserDict
 
-from src.fortis.models.feature_inventory import FeatureInventory
+from src.fortis.inventories.feature_inventory import FeatureInventory
 from src.fortis.models.feature_spec import FeatureSpec, Place
 from src.fortis.models.tiers import Tier
 from src.fortis.models.values import present_value

@@ -2,7 +2,7 @@ from collections import UserDict
 from pathlib import Path
 
 from src.fortis.general.file_handling import load_toml_file
-from src.fortis.models.feature_definition import FeatureDefinition
+from src.fortis.inventories.feature_definition import FeatureDefinition
 from src.fortis.result import Err, Ok, Result
 
 

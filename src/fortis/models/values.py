@@ -1,6 +1,6 @@
 from src.fortis.config import config
 from src.fortis.general.utils import safe_int
-from src.fortis.models.feature_inventory import FeatureInventory
+from src.fortis.inventories.feature_inventory import FeatureInventory
 from src.fortis.result import Err, Ok, Result
 
 

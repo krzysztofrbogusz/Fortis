@@ -51,14 +51,6 @@
 - `[cont: @2>3] ` – Existential: F is + at the second and third place in the contour
 - `[cont: @all]` – Existential: F is + in every place in the contour
 
-### 1.6 Autosegmental notation (experimental, not yet for use)
-
-`[+syll] ===> [coronal=1] / [+syll, coronal=1] [-syll]* _`
-
-A `+syll` segment links (`===>`) to a specific coronal feature from a preceding `+syll` segment.
-
-`[+syll]  =x=>  [tone: high=1]  /  [+syll, tone: high=1] _`
-
 ## 2. Rules
 
 ### 1. Structural rules
