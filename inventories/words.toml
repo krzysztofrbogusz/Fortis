@@ -1,4 +1,14 @@
-"ˈxen.ti" = { gloss = "in front" }
-"mexˈteːr" = { gloss = "mother" }
-"ˈɣʷe.roː" = { gloss = "eagle" }
-"ˈbʱleɣʷ.moː" = { gloss = "flower" }
+# Words for testing phonological derivation.
+# Format: IPA = "gloss"
+
+"xenti" = "in front"
+"mexteːr" = "mother"
+"ɣʷeroː" = "eagle"
+"bʱleɣʷmoː" = "flower"
+"kʲm̩tom" = "hundred"
+"n̩ter" = "inside"
+"wl̩kʷos" = "wolf"
+"xr̩tkʲos" = "bear"
+"wergʲom" = "work"
+"wr̩mis" = "worm"
+"gʲʱhjeti" = "go"

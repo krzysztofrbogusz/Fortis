@@ -18,11 +18,11 @@ def sequence_to_string(sequence: Sequence, inventories: Inventories) -> str:
     """
     output = ""
     for segment in sequence:
-        output += _render_segment(segment, inventories)
+        output += render_segment(segment, inventories)
     return output
 
 
-def _render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
+def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
     """Render a single FeatureBundle as an IPA string (letter + diacritics)."""
     # 1. Try exact match first
     for letter_symbol, letter_bundle in inventories.letters.items():

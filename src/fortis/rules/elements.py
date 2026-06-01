@@ -73,6 +73,26 @@ class Bundle:
 
 
 @dataclass(frozen=True)
+class LetterShorthand:
+    """A complete segment specification resolved from a letter in the inventory.
+
+    Unlike :class:`Bundle`, which represents a feature delta that merges
+    into the target via ``combine_with``, a :class:`LetterShorthand` in the
+    result position replaces the target segment entirely — the target's
+    features are discarded and the letter's full feature bundle takes its
+    place.
+
+    In the target position, :class:`LetterShorthand` matches identically to
+    :class:`Bundle` — the segment must satisfy the letter's feature pattern.
+
+    Args:
+        bundle: The complete feature bundle of the letter from the inventory.
+    """
+
+    bundle: FeatureBundle
+
+
+@dataclass(frozen=True)
 class Boundary:
     """A zero-width positional assertion (# word boundary, $ syllable boundary).
 
@@ -139,7 +159,7 @@ class Binding:
 
 
 # The union type for all element variants.
-type Element = Bundle | Boundary | Null | Group | Disjunction | Ref | Binding
+type Element = Bundle | LetterShorthand | Boundary | Null | Group | Disjunction | Ref | Binding
 
 
 # ---- Match environment ----

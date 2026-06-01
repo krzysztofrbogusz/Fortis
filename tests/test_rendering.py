@@ -6,7 +6,7 @@ from src.fortis.inventories.inventories import Inventories
 from src.fortis.models.feature_bundle import FeatureBundle
 from src.fortis.models.feature_spec import FeatureSpec
 from src.fortis.models.sequence import Sequence
-from src.fortis.transcription.rendering import _find_diacritics, _render_segment, sequence_to_string
+from src.fortis.transcription.rendering import _find_diacritics, render_segment, sequence_to_string
 from src.fortis.transcription.parsing import string_to_sequence
 
 
@@ -28,7 +28,7 @@ class TestRoundTrips:
         "ipa",
         [
             # Plain letters
-            "p", "b", "t", "d", "k", "ɡ", "m", "n", "s", "z",
+            "p", "b", "t", "d", "k", "g", "m", "n", "s", "z",
             "i", "e", "a", "o", "u",
             # Affricates and complex symbols
             "t͡s", "d͡z", "t͡ʃ", "d͡ʒ",
@@ -55,14 +55,14 @@ class TestRenderSegment:
         """A letter that exists in the inventory renders as itself."""
         t_bundle = inventories.letters["t"]
         segment = FeatureBundle(dict(t_bundle))
-        assert _render_segment(segment, inventories) == "t"
+        assert render_segment(segment, inventories) == "t"
 
     def test_closest_letter_for_empty(self, inventories: Inventories):
         """An empty segment picks the closest letter (fewest differences)."""
         # An empty bundle doesn't match any letter exactly, so the closest
         # letter by fewest remaining differences is returned
         segment = FeatureBundle()
-        result = _render_segment(segment, inventories)
+        result = render_segment(segment, inventories)
         assert result != ""  # should produce something
         assert "�" not in result  # replacement char only if no letters exist
 

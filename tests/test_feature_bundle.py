@@ -228,8 +228,24 @@ class TestBundleMatchPattern:
         assert target.match_pattern(pattern) is False
 
     def test_missing_feature_in_target_ignore_none(self):
+        """An entirely absent feature never satisfies a positive requirement.
+
+        ignore_none only affects value-level None (unspecified), not a feature
+        that is completely absent from the bundle.  A missing feature means
+        the segment definitively does not have that feature.
+        """
         pattern = self._bundle(cons=1, nasal=1)
         target = self._bundle(cons=1)
+        assert target.match_pattern(pattern, ignore_none=True) is False
+
+    def test_none_value_in_target_ignore_none(self):
+        """ignore_none=True should still match when the feature IS present
+        but has a None value (unspecified).  This is different from a feature
+        being entirely absent."""
+        from src.fortis.models.feature_spec import FeatureSpec
+
+        pattern = self._bundle(cons=1, nasal=1)
+        target = FeatureBundle({"cons": FeatureSpec("cons", 1), "nasal": FeatureSpec("nasal", None)})
         assert target.match_pattern(pattern, ignore_none=True) is True
 
     def test_empty_pattern_matches_anything(self):

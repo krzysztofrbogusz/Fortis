@@ -77,19 +77,26 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
         NOT satisfy that feature's value.  If the feature is absent from the
         segment, the negated condition passes (the positive condition was not met).
 
+        ``ignore_none`` controls how *value-level* ``None`` (unspecified) is
+        treated — when True, a pattern value of ``None`` or a segment value of
+        ``None`` acts as a wildcard.  However, a feature that is **entirely
+        absent** from the segment never satisfies a positive pattern requirement,
+        regardless of ``ignore_none`` — absence means the segment definitively
+        does not have that feature.
+
         Args:
             other: The pattern bundle to match against.
-            ignore_none: Treat missing features and None values as wildcards.
+            ignore_none: Treat None *values* as wildcards, but not absent features.
             place: Positional control for contour matching, passed to FeatureSpec.matches.
         """
         for feature, spec in other.data.items():
             if feature not in self.data:
-                # Feature absent from segment
+                # Feature absent from segment entirely.
+                # Negated: the positive condition wasn't met → negation satisfied.
+                # Positive: the segment does not have this feature, so it cannot
+                # satisfy the requirement — even with ignore_none, because
+                # absence is not the same as an unspecified value.
                 if spec.negated:
-                    # !feature: absent means positive condition not met → negation satisfied
-                    continue
-                # Normal: feature must be present
-                if ignore_none:
                     continue
                 return False
             if spec.negated:
@@ -106,8 +113,7 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
         """Check if this bundle is exactly identical to *other*.
 
         Both bundles must have the same set of features and the same value for
-        every feature. No wildcard or positional semantics — pure structural
-        equality. Negation flags must also match.
+        every feature. Negation flags must also match.
         """
         if set(self.data.keys()) != set(other.data.keys()):
             return False

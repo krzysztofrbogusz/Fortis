@@ -9,6 +9,7 @@ from src.fortis.inventories.letters import LetterInventory
 from src.fortis.inventories.rule_inventory import RuleInventory
 from src.fortis.inventories.sonorities import SonorityInventory
 from src.fortis.inventories.syllable_settings import SyllableSettings
+from src.fortis.inventories.words import WordInventory
 from src.fortis.models.tiers import Tier
 from src.fortis.result import present_errors
 
@@ -30,6 +31,7 @@ class Inventories:
     sonorities: SonorityInventory
     syllable_settings: SyllableSettings
     rules: RuleInventory
+    words: WordInventory
 
     # Pre-computed sorted symbol lists for greedy longest-first matching
     segment_diacritic_keys: list[str] = field(init=False, repr=False)
@@ -84,9 +86,14 @@ class Inventories:
         if syllable_settings_result.is_err():
             error_list.extend(syllable_settings_result.unwrap_err())
 
-        rules_result = RuleInventory.load(dir_path / "rules.toml", features)
+        letters_for_rules = letters_result.unwrap() if letters_result.is_ok() else None
+        rules_result = RuleInventory.load(dir_path / "rules.toml", features, letters_for_rules)
         if rules_result.is_err():
             error_list.extend(rules_result.unwrap_err())
+
+        words_result = WordInventory.load(dir_path / "words.toml")
+        if words_result.is_err():
+            error_list.extend(words_result.unwrap_err())
 
         if error_list:
             raise ValueError(present_errors(error_list))
@@ -98,6 +105,7 @@ class Inventories:
             sonorities=sonorities_result.unwrap(),
             syllable_settings=syllable_settings_result.unwrap(),
             rules=rules_result.unwrap(),
+            words=words_result.unwrap(),
         )
 
     def segment_features(self) -> dict[str, FeatureDefinition]:

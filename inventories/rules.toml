@@ -1,7 +1,17 @@
-[1200.final_devoicing]
-name = "Final devoicing"
-description = "Devoices the final consonant in a sequence"
-definition = "[+cons, -syll] → [-vc] / _#"
+[-2000.laryngeal_coloring]
+name = "Laryngeal coloring"
+description = "Allophonic colouring of /e/ adjacent to laryngeal consonants"
+definition = "xe → xa"
+
+[-2000.centumization]
+name = "Centumization"
+description = "Merging of PIE 'palatovelar' and 'velar' plosives"
+definition = "[+cons, +guttural, +coronal] → [cor: none]"
+
+[-2000.u_epenthesis]
+name = "'u' epenthesis"
+description = "Epenthesis of /u/ before the syllabic sonorants"
+definition = "∅ [+cons, +syll] → u [-syll]"
 
 # [1300.backness_harmony]
 # name        = "Backness harmony"

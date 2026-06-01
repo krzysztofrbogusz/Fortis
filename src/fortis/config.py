@@ -10,6 +10,7 @@ class Paths:
     inventories: Path = root / "inventories"
     letters: Path = inventories / "letters.csv"
     rules: Path = inventories / "rules.toml"
+    words: Path = inventories / "words.toml"
 
 
 @dataclass

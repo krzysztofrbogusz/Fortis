@@ -17,7 +17,15 @@ Typical usage::
     result = apply_rules(seq, inv.rules.sorted_rules)
 """
 
-from src.fortis.rules.apply import Locus, apply_rules, find_loci, rewrite
+from src.fortis.rules.apply import (
+    AppliedLocus,
+    Locus,
+    RuleStep,
+    apply_rules,
+    apply_rules_step_by_step,
+    find_loci,
+    rewrite,
+)
 from src.fortis.rules.elements import (
     Application,
     Binding,
@@ -27,6 +35,7 @@ from src.fortis.rules.elements import (
     Element,
     Env,
     Group,
+    LetterShorthand,
     Null,
     Quantifier,
     Ref,
@@ -44,6 +53,7 @@ __all__ = [
     "Element",
     "Env",
     "Group",
+    "LetterShorthand",
     "Null",
     "Quantifier",
     "Ref",
@@ -53,8 +63,11 @@ __all__ = [
     "parse_rule_definition",
     "parse_spe_definition",
     # Application
+    "AppliedLocus",
     "Locus",
+    "RuleStep",
     "apply_rules",
+    "apply_rules_step_by_step",
     "find_loci",
     "rewrite",
 ]

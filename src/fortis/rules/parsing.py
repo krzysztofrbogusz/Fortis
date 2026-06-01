@@ -18,16 +18,17 @@ Currently supported:
 - Disjunction: | between element lists, e.g. [+cons]|[+nas]
 - Binding: V=[+cons] captures a matched span as reference V
 - Reference: @V recalls a previously saved span
+- Letter shorthands: plain letters (e.g. u, p) resolved from the letter inventory
 - Arrows: → (Unicode) or -> (ASCII)
 - Context clause with ``_`` position marker
 - Word boundary ``#``
+- Syllable boundary ``$``
 - Multi-segment contexts: [+nas][+cons]_
 - Exception clause ``//``
 
 Deferred to later phases:
 - Alpha variables (``[α F]``), conditional features (``[<n: +F>]``)
-- Syllable boundary (``$``), autosegmental notation (``===>``, ``=x=>``)
-- Letter shorthands (``p``)
+- Autosegmental notation (``===>``, ``=x=>``)
 """
 
 from __future__ import annotations
@@ -35,9 +36,23 @@ from __future__ import annotations
 import re
 
 from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.inventories.letters import LetterInventory
 from src.fortis.models.feature_bundle import FeatureBundle
 from src.fortis.result import Err, Ok, Result
-from src.fortis.rules.elements import Application, Binding, Boundary, Bundle, Disjunction, Element, Group, Null, Quantifier, Ref, _ONE
+from src.fortis.rules.elements import (
+    _ONE,
+    Application,
+    Binding,
+    Boundary,
+    Bundle,
+    Disjunction,
+    Element,
+    Group,
+    LetterShorthand,
+    Null,
+    Quantifier,
+    Ref,
+)
 from src.fortis.rules.rule import Rule
 
 # ---------------------------------------------------------------------------
@@ -57,6 +72,7 @@ type RuleParseResult = tuple[
 def parse_rule_definition(
     definition: str,
     inventory: FeatureInventory,
+    letters: LetterInventory | None = None,
     rule_id: str = "",
     name: str = "",
     description: str = "",
@@ -68,6 +84,7 @@ def parse_rule_definition(
     Args:
         definition: The rule definition in SPE notation.
         inventory: Feature inventory for bundle parsing.
+        letters: Letter inventory for letter shorthand resolution (e.g. ``u`` → Bundle).
         rule_id: Rule identifier (from TOML key).
         name: Human-readable rule name.
         description: Rule description.
@@ -77,7 +94,7 @@ def parse_rule_definition(
     Returns:
         Ok(Rule) on success, Err(list[str]) with accumulated errors on failure.
     """
-    result = parse_spe_definition(definition, inventory)
+    result = parse_spe_definition(definition, inventory, letters)
     if result.is_err():
         return Err(result.unwrap_err())
 
@@ -100,7 +117,7 @@ def parse_rule_definition(
     )
 
 
-def parse_spe_definition(definition: str, inventory: FeatureInventory) -> Result[RuleParseResult, list[str]]:
+def parse_spe_definition(definition: str, inventory: FeatureInventory, letters: LetterInventory | None = None) -> Result[RuleParseResult, list[str]]:
     """Parse an SPE-style rule definition string into Element lists.
 
     General form: ``A → B / C_D // E_F``
@@ -111,6 +128,7 @@ def parse_spe_definition(definition: str, inventory: FeatureInventory) -> Result
     Args:
         definition: The rule definition string.
         inventory: Feature inventory for feature-bundle parsing.
+        letters: Letter inventory for letter shorthand resolution.
 
     Returns:
         Ok(tuple) with (target, result, left_ctx, right_ctx, exc_left, exc_right),
@@ -154,14 +172,14 @@ def parse_spe_definition(definition: str, inventory: FeatureInventory) -> Result
     # ------------------------------------------------------------------
     # 4. Parse target and result as Element lists
     # ------------------------------------------------------------------
-    target_result = _parse_element_list(input_part, inventory, "target")
+    target_result = _parse_element_list(input_part, inventory, "target", letters)
     if target_result.is_err():
         errors.extend(target_result.unwrap_err())
         target_elems: list[Element] = []
     else:
         target_elems = target_result.unwrap()
 
-    result_result = _parse_element_list(output_part, inventory, "result")
+    result_result = _parse_element_list(output_part, inventory, "result", letters)
     if result_result.is_err():
         errors.extend(result_result.unwrap_err())
         result_elems: list[Element] = []
@@ -174,7 +192,7 @@ def parse_spe_definition(definition: str, inventory: FeatureInventory) -> Result
     left_ctx: list[Element] | None = None
     right_ctx: list[Element] | None = None
     if context_part is not None:
-        ctx_result = _parse_context(context_part, inventory)
+        ctx_result = _parse_context(context_part, inventory, letters)
         if ctx_result.is_err():
             errors.extend(ctx_result.unwrap_err())
         else:
@@ -186,7 +204,7 @@ def parse_spe_definition(definition: str, inventory: FeatureInventory) -> Result
     exc_left: list[Element] | None = None
     exc_right: list[Element] | None = None
     if exception_part is not None:
-        exc_result = _parse_context(exception_part, inventory)
+        exc_result = _parse_context(exception_part, inventory, letters)
         if exc_result.is_err():
             errors.extend(exc_result.unwrap_err())
         else:
@@ -332,7 +350,7 @@ def _split_on_pipe(text: str) -> list[str]:
     return [p for p in parts if p]
 
 
-def _parse_element_list(text: str, inventory: FeatureInventory, label: str) -> Result[list[Element], list[str]]:
+def _parse_element_list(text: str, inventory: FeatureInventory, label: str, letters: LetterInventory | None = None) -> Result[list[Element], list[str]]:
     """Parse a target or result string into a list of Elements.
 
     Supports:
@@ -342,6 +360,7 @@ def _parse_element_list(text: str, inventory: FeatureInventory, label: str) -> R
     - Null segment: ∅ (U+2205) or 0
     - Groups: (...) with optional quantifiers
     - Disjunction: element | element (splits into branches)
+    - Letter shorthands: plain letters (e.g. u) resolved from the letter inventory
     - Word boundaries: #
     - Syllable boundaries: $
     - Whitespace is ignored between elements
@@ -358,7 +377,7 @@ def _parse_element_list(text: str, inventory: FeatureInventory, label: str) -> R
         all_branches: list[list[Element]] = []
         branch_errors: list[str] = []
         for branch_text in branches:
-            branch_result = _parse_element_list(branch_text, inventory, f"{label} branch")
+            branch_result = _parse_element_list(branch_text, inventory, f"{label} branch", letters)
             if branch_result.is_err():
                 branch_errors.extend(branch_result.unwrap_err())
             else:
@@ -529,7 +548,19 @@ def _parse_element_list(text: str, inventory: FeatureInventory, label: str) -> R
                     errors.append(f"Binding '{name}=' in {label} must be followed by '[' or '(' at position {k}")
                     break
                 continue
-            # Not a binding — fall through to "unrecognised"
+            # Not a binding — try letter shorthand below
+
+        # Letter shorthand: try longest-first match against letter inventory
+        if letters is not None:
+            matched = False
+            for letter_key in sorted(letters.keys(), key=len, reverse=True):
+                if text[i : i + len(letter_key)] == letter_key:
+                    elements.append(LetterShorthand(bundle=FeatureBundle(dict(letters[letter_key].data))))
+                    i += len(letter_key)
+                    matched = True
+                    break
+            if matched:
+                continue
 
         # Unrecognised character
         errors.append(
@@ -543,7 +574,7 @@ def _parse_element_list(text: str, inventory: FeatureInventory, label: str) -> R
 
 
 def _parse_context(
-    context_str: str, inventory: FeatureInventory
+    context_str: str, inventory: FeatureInventory, letters: LetterInventory | None = None
 ) -> Result[tuple[list[Element] | None, list[Element] | None], list[str]]:
     """Parse a context string (after '/') into left and right context.
 
@@ -565,8 +596,8 @@ def _parse_context(
     left_str = context_str[:underscore_pos].strip()
     right_str = context_str[underscore_pos + 1 :].strip()
 
-    left_ctx = _parse_context_side(left_str, inventory, "left", errors)
-    right_ctx = _parse_context_side(right_str, inventory, "right", errors)
+    left_ctx = _parse_context_side(left_str, inventory, "left", errors, letters)
+    right_ctx = _parse_context_side(right_str, inventory, "right", errors, letters)
 
     if errors:
         return Err(errors)
@@ -578,6 +609,7 @@ def _parse_context_side(
     inventory: FeatureInventory,
     side_label: str,
     errors: list[str],
+    letters: LetterInventory | None = None,
 ) -> list[Element] | None:
     """Parse one side of a context string.
 
@@ -764,7 +796,19 @@ def _parse_context_side(
                         errors.append(f"Binding '{name}=' in {side_label} context must be followed by '[' or '('")
                         break
                     continue
-                # Not a binding — fall through to error
+                # Not a binding — try letter shorthand below
+
+            # Letter shorthand: try longest-first match against letter inventory
+            if letters is not None:
+                matched = False
+                for letter_key in sorted(letters.keys(), key=len, reverse=True):
+                    if work[i : i + len(letter_key)] == letter_key:
+                        elements.append(Bundle(bundle=FeatureBundle(dict(letters[letter_key].data))))
+                        i += len(letter_key)
+                        matched = True
+                        break
+                if matched:
+                    continue
 
             errors.append(
                 f"Unexpected character '{ch}' in {side_label} context"

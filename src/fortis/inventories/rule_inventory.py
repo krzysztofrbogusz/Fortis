@@ -24,6 +24,7 @@ from pathlib import Path
 
 from src.fortis.general.file_handling import load_toml_file
 from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.inventories.letters import LetterInventory
 from src.fortis.result import Err, Ok, Result
 from src.fortis.rules.elements import Application
 from src.fortis.rules.parsing import parse_rule_definition
@@ -54,12 +55,15 @@ class RuleInventory(UserDict[str, Rule]):
         return self._sorted
 
     @classmethod
-    def load(cls, path: Path, inventory: FeatureInventory) -> Result[RuleInventory, list[str]]:
+    def load(
+        cls, path: Path, inventory: FeatureInventory, letters: LetterInventory | None = None
+    ) -> Result[RuleInventory, list[str]]:
         """Load all rules from a TOML file.
 
         Args:
             path: Path to the TOML file.
             inventory: Feature inventory for bundle parsing.
+            letters: Letter inventory for letter shorthand resolution (optional).
         """
         error_list: list[str] = []
 
@@ -74,7 +78,6 @@ class RuleInventory(UserDict[str, Rule]):
         entries = _flatten_toml(dict(data))
 
         rules: dict[str, Rule] = {}
-        seen_times: set[int] = set()
 
         for full_key, rule_value in entries:
             # Parse the flattened key: "<time>.<id>.<...>"
@@ -86,9 +89,6 @@ class RuleInventory(UserDict[str, Rule]):
             if rule_id in rules:
                 error_list.append(f"Rule ID '{rule_id}' is already defined")
                 continue
-
-            if time in seen_times:
-                error_list.append(f"Rule '{rule_id}' has the same time ({time}) as another rule")
 
             # Parse the rule entry
             if not isinstance(rule_value, dict):
@@ -118,6 +118,7 @@ class RuleInventory(UserDict[str, Rule]):
             rule_result = parse_rule_definition(
                 definition=definition,
                 inventory=inventory,
+                letters=letters,
                 rule_id=rule_id,
                 name=name,
                 description=description,
@@ -130,7 +131,6 @@ class RuleInventory(UserDict[str, Rule]):
 
             rule = rule_result.unwrap()
             rules[rule_id] = rule
-            seen_times.add(time)
 
         if error_list:
             return Err(error_list)

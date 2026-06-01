@@ -30,6 +30,7 @@ from src.fortis.rules.elements import (
     Element,
     Env,
     Group,
+    LetterShorthand,
     Null,
     Quantifier,
     Ref,
@@ -82,6 +83,13 @@ def _match_rest(
 
     if isinstance(el, Bundle):
         yield from _match_bundle(el, elements, idx, seq, pos, env)
+    elif isinstance(el, LetterShorthand):
+        # Letter shorthands match like a Bundle with (1,1) quantifier
+        if pos >= len(seq.data):
+            return
+        segment = seq.data[pos]
+        if segment.match_pattern(el.bundle, ignore_none=True):
+            yield from _match_rest(elements, idx + 1, seq, pos + 1, env)
     elif isinstance(el, Boundary):
         yield from _match_boundary(el, elements, idx, seq, pos, env)
     elif isinstance(el, Null):
