@@ -1,11 +1,9 @@
-from src.fortis.inventories.diacritics import DiacriticDefinition
-from src.fortis.inventories.inventories import Inventories
-from src.fortis.models.diacritic_type import DiacriticType
+from src.fortis.imports.diacritics import DiacriticDefinition, DiacriticType
+from src.fortis.imports.inventories import Inventories
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.sequence import Sequence
 
 
-def sequence_to_string(sequence: Sequence, inventories: Inventories) -> str:
+def sequence_to_string(sequence: list[FeatureBundle], inventories: Inventories) -> str:
     """Turn a Sequence of FeatureBundles back into an IPA string.
 
     For each segment:
@@ -25,8 +23,8 @@ def sequence_to_string(sequence: Sequence, inventories: Inventories) -> str:
 def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
     """Render a single FeatureBundle as an IPA string (letter + diacritics)."""
     # 1. Try exact match first
-    for letter_symbol, letter_bundle in inventories.letters.items():
-        if segment.match_exact(letter_bundle):
+    for letter_symbol, letter_def in inventories.letters.items():
+        if segment.match_exact(letter_def.bundle):
             return letter_symbol
 
     # 2. Find the best letter: the one whose differences leave the
@@ -39,8 +37,8 @@ def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
 
     segment_diacritics = inventories.segment_diacritics()
 
-    for letter_symbol, letter_bundle in inventories.letters.items():
-        total_diffs = segment.differing(letter_bundle)
+    for letter_symbol, letter_def in inventories.letters.items():
+        total_diffs = segment.differing(letter_def.bundle)
         remaining = set(total_diffs)
         before: list[str] = []
         combining: list[str] = []

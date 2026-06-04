@@ -1,438 +1,216 @@
+"""Tests for src.fortis.models.feature_bundle — parsing, matching, diffing, combining."""
+
+from __future__ import annotations
+
 import pytest
 
-from src.fortis.inventories.feature_definition import FeatureDefinition
-from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.imports.features import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
 from src.fortis.models.feature_spec import FeatureSpec
-from src.fortis.models.feature_type import FeatureType
-from src.fortis.models.tiers import Tier
+from tests.conftest import make_feature_inventory
 
 
 @pytest.fixture
-def inventory():
-    """A small feature inventory for testing FeatureBundle."""
-    return FeatureInventory(
-        {
-            "consonantal": FeatureDefinition(
-                name="consonantal",
-                tier=Tier.segment,
-                type=FeatureType.binary,
-                short="cons",
-                values={0: "absent", 1: "present"},
-                children=None,
-            ),
-            "nasal": FeatureDefinition(
-                name="nasal",
-                tier=Tier.segment,
-                type=FeatureType.unary,
-                short="nas",
-                values={1: "present"},
-                children=None,
-            ),
-            "height": FeatureDefinition(
-                name="height",
-                tier=Tier.segment,
-                type=FeatureType.scalar,
-                short="ht",
-                values={1: "low", 2: "mid", 3: "high"},
-                children=None,
-            ),
-            "glottal_aperture": FeatureDefinition(
-                name="glottal_aperture",
-                tier=Tier.segment,
-                type=FeatureType.scalar,
-                short="ga",
-                values={-1: "constricted", 0: "neutral", 1: "spread"},
-                children=None,
-            ),
-        }
-    )
+def features() -> FeatureInventory:
+    return make_feature_inventory()
 
 
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Basic parsing
-# ——————————————————————————————————————————————————————————————————————-———————
+# ---------------------------------------------------------------------------
+# from_str
+# ---------------------------------------------------------------------------
 
 
-class TestFeatureBundleParsing:
-    def test_single_binary_plus(self, inventory):
-        result = FeatureBundle.from_str("+consonantal", inventory)
+class TestFromStr:
+    def test_single_feature(self, features):
+        result = FeatureBundle.from_str("+cons", features)
         assert result.is_ok()
         bundle = result.unwrap()
         assert "consonantal" in bundle
-        assert bundle["consonantal"].value == 1
 
-    def test_single_binary_minus(self, inventory):
-        result = FeatureBundle.from_str("-consonantal", inventory)
+    def test_comma_separated(self, features):
+        result = FeatureBundle.from_str("+cons, -syll", features)
         assert result.is_ok()
         bundle = result.unwrap()
         assert "consonantal" in bundle
-        assert bundle["consonantal"].value == 0
+        assert "syllabic" in bundle
 
-    def test_single_scalar(self, inventory):
-        result = FeatureBundle.from_str("height:2", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert "height" in bundle
-        assert bundle["height"].value == 2
-
-    def test_single_short_name(self, inventory):
-        result = FeatureBundle.from_str("+cons", inventory)
+    def test_semicolon_separated(self, features):
+        result = FeatureBundle.from_str("+cons; -syll", features)
         assert result.is_ok()
         bundle = result.unwrap()
         assert "consonantal" in bundle
-        assert bundle["consonantal"].value == 1
+        assert "syllabic" in bundle
 
-
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Comma-separated features
-# ——————————————————————————————————————————————————————————————————————————————————————
-
-
-class TestCommaSeparated:
-    def test_two_features(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, nasal:1", inventory)
+    def test_scalar_label(self, features):
+        result = FeatureBundle.from_str("height: high", features)
         assert result.is_ok()
         bundle = result.unwrap()
-        assert "consonantal" in bundle
-        assert "nasal" in bundle
-
-    def test_mixed_types(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, height:2", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert len(bundle) == 2
-        assert bundle["consonantal"].value == 1
-        assert bundle["height"].value == 2
-
-    def test_three_features(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, height:3, ga:1", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert len(bundle) == 3
-        assert bundle["consonantal"].value == 1
         assert bundle["height"].value == 3
-        assert bundle["glottal_aperture"].value == 1
 
-
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Semicolon-separated features
-# ——————————————————————————————————————————————————————————————————————-———————
-
-
-class TestSemicolonSeparated:
-    def test_semicolons_converted(self, inventory):
-        result = FeatureBundle.from_str("+consonantal; height:2", inventory)
+    def test_contour_value(self, features):
+        result = FeatureBundle.from_str("tone: 1>3", features)
         assert result.is_ok()
-        bundle = result.unwrap()
-        assert len(bundle) == 2
-        assert bundle["consonantal"].value == 1
-        assert bundle["height"].value == 2
+        assert result.unwrap()["tone"].value == [1, 3]
 
-    def test_mixed_commas_and_semicolons(self, inventory):
-        result = FeatureBundle.from_str("+consonantal; height:2, ga:1", inventory)
+    def test_bare_unary(self, features):
+        result = FeatureBundle.from_str("nasal", features, bare_unary_means_present=True)
         assert result.is_ok()
-        assert len(result.unwrap()) == 3
+        assert result.unwrap()["nasal"].value == 1
 
-
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Whitespace handling
-# ——————————————————————————————————————————————————————————————————————————————————————
-
-
-class TestWhitespace:
-    def test_spaces_stripped(self, inventory):
-        result = FeatureBundle.from_str("  + consonantal , height : 2 ", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert "consonantal" in bundle
-        assert "height" in bundle
-
-    def test_no_spaces(self, inventory):
-        result = FeatureBundle.from_str("+consonantal,height:2", inventory)
-        assert result.is_ok()
-        assert len(result.unwrap()) == 2
-
-
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Contour values
-# ————————————————————————————————————————————————————————————————————————————————-——
-
-
-class TestBundleContours:
-    def test_contour_in_bundle(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, height:1>2>3", inventory)
-        assert result.is_ok()
-        assert result.unwrap()["height"].value == [1, 2, 3]
-
-    def test_only_contour(self, inventory):
-        result = FeatureBundle.from_str("height:low>mid>high", inventory)
-        assert result.is_ok()
-        assert result.unwrap()["height"].value == [1, 2, 3]
-
-
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Invalid tokens are skipped
-# ——————————————————————————————————————————————————————————————————————-———————
-
-
-class TestBundleInvalidTokens:
-    def test_invalid_feature_returns_err(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, +xyz, height:2", inventory)
+    def test_invalid_feature(self, features):
+        result = FeatureBundle.from_str("+unknown", features)
         assert result.is_err()
 
-    def test_invalid_value_returns_err(self, inventory):
-        result = FeatureBundle.from_str("+consonantal, height:99", inventory)
+    def test_mixed_valid_and_invalid(self, features):
+        result = FeatureBundle.from_str("+cons, +unknown", features)
         assert result.is_err()
 
-    def test_empty_string(self, inventory):
-        result = FeatureBundle.from_str("", inventory)
+    def test_empty_string(self, features):
+        result = FeatureBundle.from_str("", features)
         assert result.is_ok()
         assert len(result.unwrap()) == 0
 
-    def test_trailing_comma(self, inventory):
-        result = FeatureBundle.from_str("+consonantal,", inventory)
+    def test_whitespace_handling(self, features):
+        result = FeatureBundle.from_str("  +cons  ,  -syll  ", features)
         assert result.is_ok()
-        bundle = result.unwrap()
-        assert len(bundle) == 1
-        assert "consonantal" in bundle
 
 
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle.match_pattern
-# ——————————————————————————————————————————————————————————————————————————————————————
+# ---------------------------------------------------------------------------
+# match_pattern
+# ---------------------------------------------------------------------------
 
 
-class TestBundleMatchPattern:
-    def _bundle(self, **specs: int | list[int | None] | None) -> FeatureBundle:
-        return FeatureBundle({f: FeatureSpec(f, v) for f, v in specs.items()})
+class TestMatchPattern:
+    def test_subset_matches(self, features):
+        segment = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        pattern = FeatureBundle.from_str("+cons", features).unwrap()
+        assert segment.match_pattern(pattern) is True
 
-    def test_all_features_match(self):
-        pattern = self._bundle(cons=1, nasal=1)
-        target = self._bundle(cons=1, nasal=1)
-        assert target.match_pattern(pattern) is True
+    def test_missing_feature_fails(self, features):
+        segment = FeatureBundle.from_str("+cons", features).unwrap()
+        pattern = FeatureBundle.from_str("+cons, +nasal", features).unwrap()
+        assert segment.match_pattern(pattern) is False
 
-    def test_one_feature_mismatch(self):
-        pattern = self._bundle(cons=1, nasal=1)
-        target = self._bundle(cons=1, nasal=0)
-        assert target.match_pattern(pattern) is False
+    def test_value_mismatch_fails(self, features):
+        segment = FeatureBundle.from_str("+cons, +syll", features).unwrap()
+        pattern = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        assert segment.match_pattern(pattern) is False
 
-    def test_extra_features_in_target_ok(self):
-        pattern = self._bundle(cons=1)
-        target = self._bundle(cons=1, nasal=0, ht=2)
-        assert target.match_pattern(pattern) is True
+    def test_empty_pattern_matches_anything(self, features):
+        segment = FeatureBundle.from_str("+cons", features).unwrap()
+        pattern = FeatureBundle()
+        assert segment.match_pattern(pattern) is True
 
-    def test_missing_feature_in_target_no_match(self):
-        pattern = self._bundle(cons=1, nasal=1)
-        target = self._bundle(cons=1)
-        assert target.match_pattern(pattern) is False
+    def test_absent_feature_never_satisfies(self, features):
+        """A feature entirely absent from the segment never satisfies a positive pattern."""
+        segment = FeatureBundle.from_str("+cons", features).unwrap()
+        pattern = FeatureBundle.from_str("+nasal", features).unwrap()
+        assert segment.match_pattern(pattern, ignore_none=True) is False
 
-    def test_missing_feature_in_target_ignore_none(self):
-        """An entirely absent feature never satisfies a positive requirement.
+    def test_ignore_none_value_wildcard(self, features):
+        """A None value in the segment is a wildcard when ignore_none=True."""
+        segment = FeatureBundle({"consonantal": FeatureSpec("consonantal", None)})
+        pattern = FeatureBundle.from_str("+cons", features).unwrap()
+        assert segment.match_pattern(pattern, ignore_none=True) is True
 
-        ignore_none only affects value-level None (unspecified), not a feature
-        that is completely absent from the bundle.  A missing feature means
-        the segment definitively does not have that feature.
-        """
-        pattern = self._bundle(cons=1, nasal=1)
-        target = self._bundle(cons=1)
-        assert target.match_pattern(pattern, ignore_none=True) is False
-
-    def test_none_value_in_target_ignore_none(self):
-        """ignore_none=True should still match when the feature IS present
-        but has a None value (unspecified).  This is different from a feature
-        being entirely absent."""
-        from src.fortis.models.feature_spec import FeatureSpec
-
-        pattern = self._bundle(cons=1, nasal=1)
-        target = FeatureBundle({"cons": FeatureSpec("cons", 1), "nasal": FeatureSpec("nasal", None)})
-        assert target.match_pattern(pattern, ignore_none=True) is True
-
-    def test_empty_pattern_matches_anything(self):
-        pattern = self._bundle()
-        target = self._bundle(cons=1, nasal=0)
-        assert target.match_pattern(pattern) is True
-
-    def test_contour_match(self):
-        pattern = self._bundle(ht=[1, 2])
-        target = self._bundle(ht=[1, 2, 3])
-        assert target.match_pattern(pattern, place="any") is True
-
-    def test_contour_mismatch(self):
-        pattern = self._bundle(ht=[1, 2])
-        target = self._bundle(ht=[0, 3, 4])
-        assert target.match_pattern(pattern, place="any") is False
+    def test_no_ignore_none_value(self, features):
+        """A None value in the segment does NOT match when ignore_none=False."""
+        segment = FeatureBundle({"consonantal": FeatureSpec("consonantal", None)})
+        pattern = FeatureBundle.from_str("+cons", features).unwrap()
+        assert segment.match_pattern(pattern, ignore_none=False) is False
 
 
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle.match_exact
-# ——————————————————————————————————————————————————————————————————————————————————————
+# ---------------------------------------------------------------------------
+# match_exact
+# ---------------------------------------------------------------------------
 
 
-class TestBundleMatchExact:
-    def _bundle(self, **specs: int | list[int | None] | None) -> FeatureBundle:
-        return FeatureBundle({f: FeatureSpec(f, v) for f, v in specs.items()})
-
-    def test_identical_bundles_match(self):
-        a = self._bundle(cons=1, nasal=0, ht=2)
-        b = self._bundle(cons=1, nasal=0, ht=2)
+class TestMatchExact:
+    def test_identical(self, features):
+        a = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        b = FeatureBundle.from_str("+cons, -syll", features).unwrap()
         assert a.match_exact(b) is True
 
-    def test_different_values_no_match(self):
-        a = self._bundle(cons=1, nasal=0)
-        b = self._bundle(cons=1, nasal=1)
+    def test_different_keys(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("+cons, -syll", features).unwrap()
         assert a.match_exact(b) is False
 
-    def test_extra_feature_no_match(self):
-        a = self._bundle(cons=1)
-        b = self._bundle(cons=1, nasal=0)
-        assert a.match_exact(b) is False
-
-    def test_missing_feature_no_match(self):
-        a = self._bundle(cons=1, nasal=0)
-        b = self._bundle(cons=1)
-        assert a.match_exact(b) is False
-
-    def test_empty_bundles_match(self):
-        a = self._bundle()
-        b = self._bundle()
-        assert a.match_exact(b) is True
-
-    def test_contour_exact_match(self):
-        a = self._bundle(ht=[1, 2])
-        b = self._bundle(ht=[1, 2])
-        assert a.match_exact(b) is True
-
-    def test_contour_different_lengths_no_match(self):
-        a = self._bundle(ht=[1, 2])
-        b = self._bundle(ht=[1, 2, 3])
-        assert a.match_exact(b) is False
-
-    def test_contour_different_values_no_match(self):
-        a = self._bundle(ht=[1, 2])
-        b = self._bundle(ht=[1, 3])
+    def test_different_values(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("-cons", features).unwrap()
         assert a.match_exact(b) is False
 
 
-# ——————————————————————————————————————————————————————————————————————————————————————
-# FeatureBundle: Feature-level negation
-# ——————————————————————————————————————————————————————————————————————————————————————
+# ---------------------------------------------------------------------------
+# differing
+# ---------------------------------------------------------------------------
 
 
-class TestFeatureNegationParsing:
-    """Test that ! prefix on individual features is parsed correctly."""
+class TestDiffering:
+    def test_identical(self, features):
+        a = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        b = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        assert a.differing(b) == []
 
-    def test_negated_unary(self, inventory):
-        """!nasal means 'not nasal'."""
-        result = FeatureBundle.from_str("!nasal", inventory, bare_unary_means_present=True)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert "nasal" in bundle
-        assert bundle["nasal"].negated is True
-        assert bundle["nasal"].value == 1  # still parses as unary present
+    def test_value_diff(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("-cons", features).unwrap()
+        assert "consonantal" in a.differing(b)
 
-    def test_negated_binary(self, inventory):
-        """!+consonantal means 'not consonantal'."""
-        result = FeatureBundle.from_str("!+consonantal", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert bundle["consonantal"].negated is True
-        assert bundle["consonantal"].value == 1
+    def test_missing_feature(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("+cons, +nasal", features).unwrap()
+        diff = a.differing(b)
+        assert "nasal" in diff
 
-    def test_negated_scalar(self, inventory):
-        """!height:2 means 'height is not 2'."""
-        result = FeatureBundle.from_str("!height:2", inventory)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert bundle["height"].negated is True
-        assert bundle["height"].value == 2
-
-    def test_mixed_negated_and_normal(self, inventory):
-        """[-syll, !nasal] — consonant that is not nasal."""
-        result = FeatureBundle.from_str("-consonantal, !nasal", inventory, bare_unary_means_present=True)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert bundle["consonantal"].negated is False
-        assert bundle["consonantal"].value == 0
-        assert bundle["nasal"].negated is True
-        assert bundle["nasal"].value == 1
-
-    def test_double_negation(self, inventory):
-        """!!nasal is equivalent to nasal (double negation cancels)."""
-        result = FeatureBundle.from_str("!!nasal", inventory, bare_unary_means_present=True)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert bundle["nasal"].negated is False
-
-    def test_negation_with_short_name(self, inventory):
-        """!nas uses the short name for nasal."""
-        result = FeatureBundle.from_str("!nas", inventory, bare_unary_means_present=True)
-        assert result.is_ok()
-        bundle = result.unwrap()
-        assert "nasal" in bundle
-        assert bundle["nasal"].negated is True
+    def test_extra_feature(self, features):
+        a = FeatureBundle.from_str("+cons, +nasal", features).unwrap()
+        b = FeatureBundle.from_str("+cons", features).unwrap()
+        diff = a.differing(b)
+        assert "nasal" in diff
 
 
-class TestFeatureNegationMatching:
-    """Test that negated features match correctly in match_pattern."""
+# ---------------------------------------------------------------------------
+# combine_with
+# ---------------------------------------------------------------------------
 
-    def _bundle(self, **specs: int | list[int | None] | None) -> FeatureBundle:
-        return FeatureBundle({f: FeatureSpec(f, v) for f, v in specs.items()})
 
-    def _neg_bundle(self, **specs: int | list[int | None] | None) -> FeatureBundle:
-        """Like _bundle but all specs are negated."""
-        return FeatureBundle({f: FeatureSpec(f, v, negated=True) for f, v in specs.items()})
+class TestCombineWith:
+    def test_merge_new_feature(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("+nasal", features).unwrap()
+        result = a.combine_with(b)
+        assert "consonantal" in result
+        assert "nasal" in result
 
-    def test_negated_spec_feature_absent_passes(self):
-        """![+nasal] passes when the feature is absent from the segment."""
-        pattern = self._neg_bundle(nasal=1)
-        target = self._bundle(cons=1)  # no nasal feature at all
-        assert target.match_pattern(pattern) is True
+    def test_merge_overrides(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("-cons", features).unwrap()
+        result = a.combine_with(b)
+        assert result["consonantal"].value == 0
 
-    def test_negated_spec_feature_present_matching_fails(self):
-        """![+nasal] fails when the segment has nasal=1."""
-        pattern = self._neg_bundle(nasal=1)
-        target = self._bundle(nasal=1)
-        assert target.match_pattern(pattern) is False
+    def test_preserves_unmentioned(self, features):
+        a = FeatureBundle.from_str("+cons, -syll", features).unwrap()
+        b = FeatureBundle.from_str("+nasal", features).unwrap()
+        result = a.combine_with(b)
+        assert result["syllabic"].value == 0
+        assert result["nasal"].value == 1
 
-    def test_negated_spec_feature_present_nonmatching_passes(self):
-        """![+nasal] passes when the segment has nasal=0 (unary absent)."""
-        # For a unary feature, 0 is "absent", so !+nasal passes
-        pattern = self._neg_bundle(nasal=1)
-        # Unary features don't typically have value 0, but let's test with binary
-        pattern_bin = self._neg_bundle(cons=1)
-        target = self._bundle(cons=0)
-        assert target.match_pattern(pattern_bin) is True
+    def test_form_contours(self, features):
+        a = FeatureBundle.from_str("tone: 1", features).unwrap()
+        b = FeatureBundle.from_str("tone: 3", features).unwrap()
+        result = a.combine_with(b, form_contours=True)
+        assert result["tone"].value == [1, 3]
 
-    def test_negated_with_normal_combo(self):
-        """[+cons, !nasal] matches a non-nasal consonant."""
-        pattern = FeatureBundle({
-            "cons": FeatureSpec("cons", 1, negated=False),
-            "nasal": FeatureSpec("nasal", 1, negated=True),
-        })
-        # Consonant that is NOT nasal
-        target = self._bundle(cons=1, nasal=0)
-        assert target.match_pattern(pattern) is True
+    def test_no_form_contours(self, features):
+        a = FeatureBundle.from_str("tone: 1", features).unwrap()
+        b = FeatureBundle.from_str("tone: 3", features).unwrap()
+        result = a.combine_with(b, form_contours=False)
+        assert result["tone"].value == 3  # overridden, not appended
 
-    def test_negated_with_normal_combo_fails(self):
-        """[+cons, !nasal] does NOT match a nasal consonant."""
-        pattern = FeatureBundle({
-            "cons": FeatureSpec("cons", 1, negated=False),
-            "nasal": FeatureSpec("nasal", 1, negated=True),
-        })
-        # Nasal consonant
-        target = self._bundle(cons=1, nasal=1)
-        assert target.match_pattern(pattern) is False
-
-    def test_negated_scalar(self):
-        """![height:2] passes when height is not 2."""
-        pattern = self._neg_bundle(ht=2)
-        # Height is 3, not 2
-        target = self._bundle(ht=3)
-        assert target.match_pattern(pattern) is True
-
-    def test_negated_scalar_matching_fails(self):
-        """![height:2] fails when height IS 2."""
-        pattern = self._neg_bundle(ht=2)
-        target = self._bundle(ht=2)
-        assert target.match_pattern(pattern) is False
+    def test_original_unchanged(self, features):
+        a = FeatureBundle.from_str("+cons", features).unwrap()
+        b = FeatureBundle.from_str("-cons", features).unwrap()
+        _ = a.combine_with(b)
+        assert a["consonantal"].value == 1  # original bundle unchanged

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from src.fortis.inventories.feature_inventory import FeatureInventory
-from src.fortis.models.values import value_from_str
+from src.fortis.imports.features import FeatureInventory
+from src.fortis.models.value import value_from_str
 from src.fortis.result import Err, Ok, Result
 
-type Place = Literal["any", "initial", "final", "all"] | int | list[int]
+type ContourPosition = Literal["any", "initial", "final", "all"] | int | list[int]
 """Which position(s) in a contour to check during matching."""
 
 
@@ -16,17 +16,14 @@ class FeatureSpec:
     Args:
         feature: Full feature name.
         value: The feature's value (int, contour list, or None).
-        negated: If True, this spec matches when the feature does NOT satisfy
-            the value (feature-level negation, e.g. ``!nasal``).
     """
 
     feature: str
     value: int | list[int | None] | None
-    negated: bool = False
 
     @classmethod
     def from_string(
-        cls, raw_string: str, inventory: FeatureInventory, bare_unary_means_present: bool = False
+        cls, raw_string: str, features: FeatureInventory, bare_unary_means_present: bool = False
     ) -> Result[FeatureSpec, str]:
         """Parse from a string like '+nasal', 'height:2', or 'glottal_aperture:spread'.
 
@@ -34,14 +31,14 @@ class FeatureSpec:
 
         Args:
             raw_string: The raw token to parse.
-            inventory: Feature inventory for name/value resolution.
+            features: Feature inventory for name/value resolution.
             bare_unary_means_present: If True, a bare feature name (no value marker)
                 on a unary feature is interpreted as "+feature" (value 1).
         """
         # Build lookup indices sorted longest-first for greedy matching
-        full_names = sorted(inventory.keys(), key=len, reverse=True)
+        full_names = sorted(features.keys(), key=len, reverse=True)
         short_to_full: dict[str, str] = {}
-        for name, ft_def in inventory.items():
+        for name, ft_def in features.items():
             if ft_def.short != name:
                 short_to_full[ft_def.short] = name
         short_names = sorted(short_to_full.keys(), key=len, reverse=True)
@@ -54,12 +51,12 @@ class FeatureSpec:
         else:
             return Err(f"Could not identify feature in '{raw_string}'")
 
-        value_result = value_from_str(raw_string, feature, inventory, bare_unary_means_present)
+        value_result = value_from_str(raw_string, feature, features, bare_unary_means_present)
         if value_result.is_err():
             return Err(value_result.unwrap_err())
         return Ok(FeatureSpec(feature, value_result.unwrap()))
 
-    def matches(self, other: FeatureSpec, ignore_none: bool = False, place: Place = "any") -> bool:
+    def matches(self, other: FeatureSpec, ignore_none: bool = False, place: ContourPosition = "any") -> bool:
         """Check if this spec matches *other*.
 
         Args:
@@ -89,7 +86,9 @@ class FeatureSpec:
         raise TypeError(f"Wrong matching types: {type(self.value)} vs {type(other.value)}")
 
     @staticmethod
-    def _single_matches_contour(pattern: int, contour: list[int | None], place: Place, ignore_none: bool) -> bool:
+    def _single_matches_contour(
+        pattern: int, contour: list[int | None], place: ContourPosition, ignore_none: bool
+    ) -> bool:
         """Check if a single value appears at the position(s) specified by *place*."""
 
         def matches_at(v: int | None) -> bool:
@@ -138,7 +137,7 @@ class FeatureSpec:
 
     @staticmethod
     def _contour_matches_contour(
-        pattern: list[int | None], target: list[int | None], place: Place, ignore_none: bool
+        pattern: list[int | None], target: list[int | None], place: ContourPosition, ignore_none: bool
     ) -> bool:
         """Element-wise contour comparison with positional control."""
 

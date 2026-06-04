@@ -1,10 +1,9 @@
 from src.fortis.config import config
-from src.fortis.inventories.inventories import Inventories
+from src.fortis.imports.inventories import Inventories
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.sequence import Sequence
 
 
-def string_to_sequence(raw_string: str, inventories: Inventories) -> Sequence:
+def string_to_sequence(raw_string: str, inventories: Inventories) -> list[FeatureBundle]:
     """Turn IPA strings into lists of segments.
 
     Uses greedy longest-first matching so that multi-character symbols
@@ -39,9 +38,10 @@ def string_to_sequence(raw_string: str, inventories: Inventories) -> Sequence:
             # 2. Letters (combine with buffered before-diacritics)
             for letter_symbol in inventories.letter_keys:
                 if remaining.startswith(letter_symbol):
-                    segment = inventories.letters[letter_symbol]
+                    segment = inventories.letters[letter_symbol].bundle
                     segment = segment.combine_with(buffer)
-                    if segment.match_pattern(inventories.syllable_settings.nucleus):
+                    nucleus = inventories.syllable_parts.get_nucleus(inventories.time)
+                    if nucleus is not None and segment.match_pattern(nucleus):
                         segment = segment.combine_with(syllable_buffer)
                         last_nucleus_index = len(segments) - 1
                         syllable_buffer = FeatureBundle()
@@ -71,4 +71,4 @@ def string_to_sequence(raw_string: str, inventories: Inventories) -> Sequence:
                             break
                     else:
                         raise ValueError(f"Unknown character '{raw_string[i]}' at position {i}")
-    return Sequence(segments)
+    return segments

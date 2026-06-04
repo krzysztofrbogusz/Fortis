@@ -2,15 +2,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from src.fortis.config import config
-from src.fortis.inventories.diacritics import DiacriticDefinition, DiacriticInventory
-from src.fortis.inventories.feature_definition import FeatureDefinition
-from src.fortis.inventories.feature_inventory import FeatureInventory
-from src.fortis.inventories.letters import LetterInventory
-from src.fortis.inventories.rule_inventory import RuleInventory
-from src.fortis.inventories.sonorities import SonorityInventory
-from src.fortis.inventories.syllable_settings import SyllableSettings
-from src.fortis.inventories.words import WordInventory
-from src.fortis.models.tiers import Tier
+from src.fortis.imports.diacritics import DiacriticDefinition, DiacriticInventory
+from src.fortis.imports.features import FeatureDefinition, FeatureInventory
+from src.fortis.imports.letters import LetterInventory
+from src.fortis.imports.sonorities import SonorityInventory
+from src.fortis.imports.syllable_parts import SyllablePartsInventory
+from src.fortis.imports.words import WordInventory
+from src.fortis.models.tier import Tier
 from src.fortis.result import present_errors
 
 
@@ -29,9 +27,9 @@ class Inventories:
     letters: LetterInventory
     diacritics: DiacriticInventory
     sonorities: SonorityInventory
-    syllable_settings: SyllableSettings
-    rules: RuleInventory
+    syllable_parts: SyllablePartsInventory
     words: WordInventory
+    time: int = 0
 
     # Pre-computed sorted symbol lists for greedy longest-first matching
     segment_diacritic_keys: list[str] = field(init=False, repr=False)
@@ -39,6 +37,14 @@ class Inventories:
     before_diacritic_keys: list[str] = field(init=False, repr=False)
     letter_keys: list[str] = field(init=False, repr=False)
     attaching_diacritic_keys: list[str] = field(init=False, repr=False)
+
+    @property
+    def earliest_time(self) -> int:
+        """The earliest time across all time-keyed inventories (syllable parts, rules)."""
+        times: set[int] = set()
+        if self.syllable_parts:
+            times.update(self.syllable_parts.keys())
+        return min(times) if times else 0
 
     def __post_init__(self):
         """Post inititation run."""
@@ -53,6 +59,8 @@ class Inventories:
         self.before_diacritic_keys = sorted(before, key=len, reverse=True)
         self.letter_keys = sorted(self.letters, key=len, reverse=True)
         self.attaching_diacritic_keys = sorted(attaching, key=len, reverse=True)
+
+        self.time = self.earliest_time
 
     @classmethod
     def load(cls, inventories_dir: Path | None = None) -> Inventories:
@@ -82,18 +90,16 @@ class Inventories:
         if sonorities_result.is_err():
             error_list.extend(sonorities_result.unwrap_err())
 
-        syllable_settings_result = SyllableSettings.load(dir_path / "syllable_settings.toml", features)
+        syllable_settings_result = SyllablePartsInventory.load(dir_path / "syllable_parts.toml", features)
         if syllable_settings_result.is_err():
             error_list.extend(syllable_settings_result.unwrap_err())
-
-        letters_for_rules = letters_result.unwrap() if letters_result.is_ok() else None
-        rules_result = RuleInventory.load(dir_path / "rules.toml", features, letters_for_rules)
-        if rules_result.is_err():
-            error_list.extend(rules_result.unwrap_err())
 
         words_result = WordInventory.load(dir_path / "words.toml")
         if words_result.is_err():
             error_list.extend(words_result.unwrap_err())
+
+        if error_list:
+            raise ValueError(present_errors(error_list))
 
         if error_list:
             raise ValueError(present_errors(error_list))
@@ -103,8 +109,7 @@ class Inventories:
             letters=letters_result.unwrap(),
             diacritics=diacritics_result.unwrap(),
             sonorities=sonorities_result.unwrap(),
-            syllable_settings=syllable_settings_result.unwrap(),
-            rules=rules_result.unwrap(),
+            syllable_parts=syllable_settings_result.unwrap(),
             words=words_result.unwrap(),
         )
 

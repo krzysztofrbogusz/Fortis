@@ -1,15 +1,23 @@
 from collections import UserDict
 from dataclasses import dataclass
+from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any
 
 from src.fortis.general.file_handling import load_toml_file
-from src.fortis.general.utils import present_symbol
-from src.fortis.inventories.feature_inventory import FeatureInventory
-from src.fortis.models.diacritic_type import DiacriticType
+from src.fortis.general.presentation import present_symbol
+from src.fortis.imports.features import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.tiers import Tier
+from src.fortis.models.tier import Tier
 from src.fortis.result import Err, Ok, Result
+
+
+class DiacriticType(StrEnum):
+    """Where a diacritic attaches relative to its base symbol."""
+
+    before = auto()
+    combining = auto()
+    after = auto()
 
 
 @dataclass
@@ -20,9 +28,9 @@ class DiacriticDefinition:
         symbol: The diacritic character(s).
         tier: Phonological tier this diacritic belongs to.
         type: Where the diacritic attaches relative to its base.
-        boundary: Whether this diacritic marks a boundary.
-        bundle: Feature bundle the diacritic contributes, or None.
+        bundle: Feature bundle the diacritic contributes.
         default: Whether this is the default diacritic for its features.
+        contour: Whether this diacritic forms contours when combined.
     """
 
     symbol: str
@@ -34,14 +42,14 @@ class DiacriticDefinition:
 
     @classmethod
     def load(
-        cls, symbol: str, diacritic_def: dict[str, Any], inventory: FeatureInventory
+        cls, symbol: str, diacritic_def: dict[str, Any], features: FeatureInventory
     ) -> Result[DiacriticDefinition, list[str]]:
         """Build a DiacriticDefinition from a raw TOML entry.
 
         Args:
             symbol: The diacritic character(s).
             diacritic_def: Raw dictionary from the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         error_list = []
 
@@ -53,7 +61,7 @@ class DiacriticDefinition:
         if type_result.is_err():
             error_list.append(type_result.unwrap_err())
 
-        bundle_result = cls._load_bundle(symbol, diacritic_def, inventory)
+        bundle_result = cls._load_bundle(symbol, diacritic_def, features)
         if bundle_result.is_err():
             error_list.extend(bundle_result.unwrap_err())
 
@@ -121,20 +129,22 @@ class DiacriticDefinition:
         return Ok(dtype)
 
     @staticmethod
-    def _load_bundle(symbol: str, diacritic_def: dict[str, Any], inventory: FeatureInventory) -> Result[FeatureBundle, list[str]]:
+    def _load_bundle(
+        symbol: str, diacritic_def: dict[str, Any], features: FeatureInventory
+    ) -> Result[FeatureBundle, list[str]]:
         """Parse the 'bundle' field; empty string yields None.
 
         Args:
             symbol: Diacritic symbol (for error messages).
             diacritic_def: Raw dictionary from the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         value = diacritic_def.get("bundle")
         if value is None:
             return Err([f"Diacritic '{present_symbol(symbol)}' is missing required field 'bundle'"])
         if value == "":
             return Err([f"Diacritic '{present_symbol(symbol)}' is missing required field 'bundle'"])
-        bundle_result = FeatureBundle.from_str(value, inventory, bare_unary_means_present=True)
+        bundle_result = FeatureBundle.from_str(value, features, bare_unary_means_present=True)
         if bundle_result.is_err():
             return Err(bundle_result.unwrap_err())
         return Ok(bundle_result.unwrap())
@@ -174,12 +184,12 @@ class DiacriticInventory(UserDict[str, DiacriticDefinition]):
     """Diacritic symbols mapped to their definitions."""
 
     @classmethod
-    def load(cls, path: Path, inventory: FeatureInventory) -> Result[DiacriticInventory, list[str]]:
+    def load(cls, path: Path, features: FeatureInventory) -> Result[DiacriticInventory, list[str]]:
         """Load all diacritics from a TOML file.
 
         Args:
             path: Path to the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         error_list = []
 
@@ -195,7 +205,7 @@ class DiacriticInventory(UserDict[str, DiacriticDefinition]):
                 error_list.append(f"Diacritic '{present_symbol(symbol)}' is already defined")
                 continue
 
-            diacritic_def_result = DiacriticDefinition.load(symbol, diacritic_def_dict, inventory)
+            diacritic_def_result = DiacriticDefinition.load(symbol, diacritic_def_dict, features)
             if diacritic_def_result.is_err():
                 error_list.extend(diacritic_def_result.unwrap_err())
                 continue
@@ -206,12 +216,33 @@ class DiacriticInventory(UserDict[str, DiacriticDefinition]):
             return Err(error_list)
 
         inv = cls(diacritic_inventory)
-        check_result = inv.validate()
+        check_result = inv.validate(features)
         if check_result.is_err():
             return Err(check_result.unwrap_err())
 
         return Ok(inv)
 
-    def validate(self) -> Result[None, list[str]]:
-        """Check for non-boundary diacritics with identical bundles on the same tier."""
+    def validate(self, features: FeatureInventory) -> Result[None, list[str]]:
+        """Check for cross-diacritic consistency issues.
+
+        Validates that each diacritic's bundle features match its declared tier.
+        Duplicate bundles on the same tier and type are allowed — the same
+        feature bundle may be expressed by multiple input symbols.
+        """
+        error_list: list[str] = []
+
+        # Bundle-tier consistency
+        for symbol, diacritic_def in self.data.items():
+            for feature_name in diacritic_def.bundle:
+                if feature_name not in features:
+                    continue  # already caught during bundle parsing
+                feature_tier = features[feature_name].tier
+                if feature_tier != diacritic_def.tier:
+                    error_list.append(
+                        f"Diacritic '{present_symbol(symbol)}' (tier: {diacritic_def.tier.value}) "
+                        f"uses feature '{feature_name}' which belongs to tier: {feature_tier.value}"
+                    )
+
+        if error_list:
+            return Err(error_list)
         return Ok(None)

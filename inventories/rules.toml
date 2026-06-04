@@ -1,20 +1,24 @@
-[-2000.laryngeal_coloring]
+[laryngeal_coloring]
+time = -2000
 name = "Laryngeal coloring"
 description = "Allophonic colouring of /e/ adjacent to laryngeal consonants"
 definition = "xe → xa"
 
-[-2000.centumization]
+[centumization]
+time = -2000
 name = "Centumization"
 description = "Merging of PIE 'palatovelar' and 'velar' plosives"
 definition = "[+cons, +guttural, +coronal] → [cor: none]"
 
-[-2000.u_epenthesis]
+[u_epenthesis]
+time = -2000
 name = "'u' epenthesis"
 description = "Epenthesis of /u/ before the syllabic sonorants"
 definition = "∅ [+cons, +syll] → u [-syll]"
 
-# [1300.backness_harmony]
-# name        = "Backness harmony"
+# [backness_harmony]
+# time = 1300
+# name = "Backness harmony"
 # description = "Backness spreads rightward from a vowel onto following vowels."
-# definition  = "[+syll] → [α back] / [α back] [-syll]* _"
-# application = "left-to-right"
+# definition = "[+syll] → [α cor, β gut] / [+syll, α cor, β gut] [-syll]* _"
+# application = "left_to_right"

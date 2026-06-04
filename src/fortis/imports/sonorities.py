@@ -4,20 +4,19 @@ from pathlib import Path
 from typing import Any
 
 from src.fortis.general.file_handling import load_toml_file
-from src.fortis.inventories.feature_inventory import FeatureInventory
+from src.fortis.imports.features import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
 from src.fortis.result import Err, Ok, Result
 
 
 @dataclass
 class SonorityDefinition:
-    """A sonority level with its feature bundle and nucleus flag.
+    """A sonority level with its feature bundle.
 
     Args:
         label: Name/label of this sonority level.
         level: Numerical sonority level (higher = more sonorous).
         bundle: Feature bundle for this level, or None.
-        nucleus: Whether this level counts as a syllable nucleus.
     """
 
     label: str
@@ -26,14 +25,14 @@ class SonorityDefinition:
 
     @classmethod
     def load(
-        cls, label: str, sonority_def_dict: dict[str, Any], inventory: FeatureInventory
+        cls, label: str, sonority_def_dict: dict[str, Any], features: FeatureInventory
     ) -> Result[SonorityDefinition, list[str]]:
         """Build a SonorityDefinition from a raw TOML entry.
 
         Args:
             label: Name/label of this sonority level.
             sonority_def_dict: Raw dictionary from the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         error_list = []
 
@@ -41,7 +40,7 @@ class SonorityDefinition:
         if level_result.is_err():
             error_list.append(level_result.unwrap_err())
 
-        bundle_result = cls._load_bundle(label, sonority_def_dict, inventory)
+        bundle_result = cls._load_bundle(label, sonority_def_dict, features)
         if bundle_result.is_err():
             error_list.extend(bundle_result.unwrap_err())
 
@@ -76,21 +75,21 @@ class SonorityDefinition:
 
     @staticmethod
     def _load_bundle(
-        label: str, sonority_def_dict: dict[str, Any], inventory: FeatureInventory
+        label: str, sonority_def_dict: dict[str, Any], features: FeatureInventory
     ) -> Result[FeatureBundle | None, list[str]]:
         """Parse the 'feature_bundle' field; empty string yields None.
 
         Args:
             label: Sonority label (for error messages).
             sonority_def_dict: Raw dictionary from the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         value = sonority_def_dict.get("feature_bundle")
         if value is None:
             return Err([f"Sonority '{label}' is missing required field 'feature_bundle'"])
         if value == "":
             return Ok(None)
-        bundle_result = FeatureBundle.from_str(value, inventory, bare_unary_means_present=True)
+        bundle_result = FeatureBundle.from_str(value, features, bare_unary_means_present=True)
         if bundle_result.is_err():
             return Err(bundle_result.unwrap_err())
         return Ok(bundle_result.unwrap())
@@ -110,12 +109,12 @@ class SonorityInventory(UserDict[str, SonorityDefinition]):
         )
 
     @classmethod
-    def load(cls, path: Path, inventory: FeatureInventory) -> Result[SonorityInventory, list[str]]:
+    def load(cls, path: Path, features: FeatureInventory) -> Result[SonorityInventory, list[str]]:
         """Load sonority levels from a TOML file.
 
         Args:
             path: Path to the TOML file.
-            inventory: Feature inventory for bundle parsing.
+            features: Feature inventory for bundle parsing.
         """
         error_list = []
 
@@ -134,7 +133,7 @@ class SonorityInventory(UserDict[str, SonorityDefinition]):
                 error_list.append(f"Sonority '{label}' is already defined")
                 continue
 
-            sonority_def_result = SonorityDefinition.load(label, sonority_def_dict, inventory)
+            sonority_def_result = SonorityDefinition.load(label, sonority_def_dict, features)
             if sonority_def_result.is_err():
                 error_list.extend(sonority_def_result.unwrap_err())
                 continue

@@ -16,7 +16,7 @@ oral = { tier = "segment", type = "unary", children = ["labial", "dental", "ling
         rounded = { tier = "segment", type = "unary", short = "rnd"}
         compressed = { tier = "segment", type = "unary", short = "cmpr"}
     dental = { tier = "segment", type = "unary", short = "dnt"}
-    lingual = { tier = "segment", type = "unary", short = "ling", children = ["coronal", "guttural", "aperture", "advancement" ] }
+    lingual = { tier = "segment", type = "unary", short = "ling", children = ["coronal", "guttural", "aperture", "advancement"] }
         coronal = { tier = "segment", type = "unary", short = "cor", children = ["anterior", "posterior", "apical", "retroflex"] }
             anterior = { tier = "segment", type = "unary", short = "ant"}
             posterior = { tier = "segment", type = "unary", short = "post"}

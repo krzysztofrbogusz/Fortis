@@ -1,11 +1,12 @@
 import csv
 import tomllib
 from pathlib import Path
+from typing import Any
 
 from src.fortis.result import Err, Ok, Result
 
 
-def load_toml_file(path: Path) -> Result[dict[str, dict[str, str | dict[int, str]]], str]:
+def load_toml_file(path: Path) -> Result[dict[str, Any], str]:
     """Load a TOML file into a dict. Return an Ok with the dict or Err with description."""
     # Path checks
     if not path.is_file():

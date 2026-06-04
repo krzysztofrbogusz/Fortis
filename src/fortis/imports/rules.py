@@ -7,11 +7,12 @@ are already done; application code can assume the rule is well-formed.
 
 from dataclasses import dataclass, field
 
-from src.fortis.rules.elements import Application, Element
+from src.fortis.models.application_type import ApplicationType
+from src.fortis.models.element import Element
 
 
-@dataclass(frozen=True)
-class Rule:
+@dataclass
+class RuleDefinition:
     """A phonological rule parsed from SPE notation.
 
     The general form is  A → B / C_D // E_F  where:
@@ -48,4 +49,4 @@ class Rule:
     right_context: list[Element] | None = None
     exception_left: list[Element] | None = None
     exception_right: list[Element] | None = None
-    application: Application = Application.simultaneous
+    application: ApplicationType = ApplicationType.simultaneous

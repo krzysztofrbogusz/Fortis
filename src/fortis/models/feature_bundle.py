@@ -1,7 +1,7 @@
 from collections import UserDict
 
-from src.fortis.inventories.feature_inventory import FeatureInventory
-from src.fortis.models.feature_spec import FeatureSpec, Place
+from src.fortis.imports.features import FeatureInventory
+from src.fortis.models.feature_spec import ContourPosition, FeatureSpec
 from src.fortis.result import Err, Ok, Result
 
 
@@ -10,53 +10,51 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
 
     def __repr__(self) -> str:
         """Represent a feature bundle."""
+
+        def _repr_value(value: int | None) -> str:
+            """Format a value for __repr__ (inlined to avoid circular import with presentation.py)."""
+            if value is None:
+                return "∅"
+            if value == 1:
+                return "+"
+            if value == 0:
+                return "-"
+            return str(value)
+
         parts: list[str] = []
         for name, spec in self.data.items():
-            prefix = "!" if spec.negated else ""
             if spec.value is None:
-                parts.append(f"{prefix}{name}: ∅")
+                parts.append(f"{name}: ∅")
             elif isinstance(spec.value, list):
                 vals = ">".join(_repr_value(v) for v in spec.value)
-                parts.append(f"{prefix}{name}: {vals}")
+                parts.append(f"{name}: {vals}")
             else:
-                parts.append(f"{prefix}{name}: {_repr_value(spec.value)}")
+                parts.append(f"{name}: {_repr_value(spec.value)}")
         return "{" + ", ".join(parts) + "}"
 
     @classmethod
     def from_str(
-        cls, raw_string: str, inventory: FeatureInventory, bare_unary_means_present: bool = False
+        cls, raw_string: str, features: FeatureInventory, bare_unary_means_present: bool = False
     ) -> Result[FeatureBundle, list[str]]:
         """Parse a comma-separated feature bundle string (e.g. '+syll, -cons, height:2').
 
         Args:
             raw_string: Comma- or semicolon-separated feature specs.
-            inventory: Feature inventory for name/value resolution.
+            features: Feature inventory for name/value resolution.
             bare_unary_means_present: If True, a bare feature name on a unary
                 feature is interpreted as present (value 1).
         """
         error_list = []
-        string = raw_string.replace(" ", "").replace(";", ",")
-        tokens = [t for t in string.split(",") if t]
+        string = raw_string.replace(";", ",")
+        tokens = [t.strip() for t in string.split(",") if t.strip()]
 
         bundle = cls()
         for token in tokens:
-            # Feature-level negation: ! before a feature spec
-            negated = False
-            work = token
-            while work.startswith("!"):
-                negated = not negated
-                work = work[1:]
-
-            # For negated bare unary features, treat as present+negated
-            # (e.g. !nasal = "not present" = negation of +nasal)
-            effective_bare = bare_unary_means_present or negated
-            result = FeatureSpec.from_string(work, inventory, effective_bare)
+            result = FeatureSpec.from_string(token, features, bare_unary_means_present)
             if result.is_err():
                 error_list.append(result.unwrap_err())
                 continue
             spec = result.unwrap()
-            if negated:
-                spec = FeatureSpec(spec.feature, spec.value, negated=True)
             bundle[spec.feature] = spec
 
         if error_list:
@@ -64,18 +62,14 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
 
         return Ok(bundle)
 
-    def match_pattern(self, other: FeatureBundle, ignore_none: bool = False, place: Place = "any") -> bool:
+    def match_pattern(
+        self, other: FeatureBundle, ignore_none: bool = False, contour_position: ContourPosition = "any"
+    ) -> bool:
         """Check if this bundle satisfies the pattern defined by *other*.
 
-        *other* is the pattern (typically a rule condition or sonority definition);
-        *self* is the target segment being tested.  Every feature in *other* must
-        be present in *self* with a compatible value.  Features in *self* that
-        *other* does not mention are unconstrained — the pattern doesn't care
-        about them.
-
-        A negated spec (``negated=True``) inverts the match: the segment must
-        NOT satisfy that feature's value.  If the feature is absent from the
-        segment, the negated condition passes (the positive condition was not met).
+        *other* is the pattern; *self* is the target segment being tested.
+        Every feature in *other* must be present in *self* with a compatible value.
+        Features in *self* that *other* does not mention are unconstrained.
 
         ``ignore_none`` controls how *value-level* ``None`` (unspecified) is
         treated — when True, a pattern value of ``None`` or a segment value of
@@ -87,25 +81,12 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
         Args:
             other: The pattern bundle to match against.
             ignore_none: Treat None *values* as wildcards, but not absent features.
-            place: Positional control for contour matching, passed to FeatureSpec.matches.
+            contour_position: Positional control for contour matching, passed to FeatureSpec.matches.
         """
         for feature, spec in other.data.items():
             if feature not in self.data:
-                # Feature absent from segment entirely.
-                # Negated: the positive condition wasn't met → negation satisfied.
-                # Positive: the segment does not have this feature, so it cannot
-                # satisfy the requirement — even with ignore_none, because
-                # absence is not the same as an unspecified value.
-                if spec.negated:
-                    continue
                 return False
-            if spec.negated:
-                # Negated: segment must NOT satisfy the positive spec
-                if spec.matches(self.data[feature], ignore_none=False, place=place):
-                    return False
-                # Positive match fails → negation satisfied
-                continue
-            if not spec.matches(self.data[feature], ignore_none=ignore_none, place=place):
+            if not spec.matches(self.data[feature], ignore_none=ignore_none, place=contour_position):
                 return False
         return True
 
@@ -113,14 +94,12 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
         """Check if this bundle is exactly identical to *other*.
 
         Both bundles must have the same set of features and the same value for
-        every feature. Negation flags must also match.
+        every feature.
         """
         if set(self.data.keys()) != set(other.data.keys()):
             return False
         for feature in self.data:
-            self_spec = self.data[feature]
-            other_spec = other.data[feature]
-            if self_spec.value != other_spec.value or self_spec.negated != other_spec.negated:
+            if self.data[feature].value != other.data[feature].value:
                 return False
         return True
 
@@ -157,14 +136,3 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
                 result[feature_name] = feature_spec
 
         return result
-
-
-def _repr_value(value: int | None) -> str:
-    """Format a value for __repr__ (inlined to avoid circular import with presentation.py)."""
-    if value is None:
-        return "∅"
-    if value == 1:
-        return "+"
-    if value == 0:
-        return "-"
-    return str(value)
