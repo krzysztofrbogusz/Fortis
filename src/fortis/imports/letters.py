@@ -6,7 +6,6 @@ from typing import Any
 from src.fortis.general.file_handling import load_csv_file
 from src.fortis.imports.features import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
-from src.fortis.models.feature_spec import FeatureSpec
 from src.fortis.models.feature_value import FeatureValue
 from src.fortis.result import Err, Ok, Result
 
@@ -43,7 +42,7 @@ class LetterDefinition:
             value = value_result.unwrap()
             if value.value is None:
                 continue  # parsed as unspecified = omitted from bundle
-            bundle[feature_name] = FeatureSpec(feature_name, value)
+            bundle[feature_name] = value
 
         if error_list:
             return Err(error_list)
@@ -128,8 +127,8 @@ class LetterInventory(UserDict[str, LetterDefinition]):
             key = tuple(
                 sorted(
                     (k, tuple(v) if isinstance(v, list) else v)
-                    for k, spec in letter_def.bundle.items()
-                    for v in [spec.value.value]
+                    for k, value in letter_def.bundle.items()
+                    for v in [value.value]
                 )
             )
             bundle_to_symbols.setdefault(key, []).append(symbol)

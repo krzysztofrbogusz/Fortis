@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from src.fortis.config import config
 from src.fortis.general.utils import safe_int
 from src.fortis.imports.features import FeatureInventory
+from src.fortis.models.feature_value import FeatureValue
 from src.fortis.models.values import ContourPosition, SingleValue, Value
 from src.fortis.result import Err, Ok, Result
 
@@ -15,18 +16,19 @@ if TYPE_CHECKING:
 
 @dataclass
 class PatternSpec:
-    """A feature name paired with its value.
+    """A feature value in a pattern specification.
 
-    Unlike FeatureSpec (realized material), PatternSpec supports negation
-    and is used in rule target, result, context, and exception positions.
+    Unlike FeatureValue (realized material), PatternSpec supports negation
+    and is used in rule target, context, and exception positions.
+
+    The feature name is the key in the enclosing PatternBundle dict, not a
+    field on this class.
 
     Args:
-        feature: Full feature name.
         value: The pattern's value.
         negated: If the feature is negated.
     """
 
-    feature: str
     value: Value
     negated: bool = False
     contour_position: ContourPosition = "any"
@@ -34,7 +36,7 @@ class PatternSpec:
     @classmethod
     def from_string(
         cls, raw_spec_string: str, features: FeatureInventory, bindings: Bindings | None = None
-    ) -> Result[PatternSpec, str]:
+    ) -> Result[tuple[str, PatternSpec], str]:
         """Parse from a string like '+ nasal', '!+ nasal', 'height:2@initial', '-α high'.
 
         Matches feature names longest-first (full names, then short names).
@@ -46,13 +48,6 @@ class PatternSpec:
         """
         # Clean input
         raw_spec_string = raw_spec_string.replace(" ", "")
-
-        # Identify feature name via greedy longest-first matching
-        match features.identify_feature(raw_spec_string):
-            case Ok(name):
-                feature_name = name
-            case Err() as err:
-                return err
 
         # Negation
         if "!" in raw_spec_string:
@@ -70,6 +65,13 @@ class PatternSpec:
                 case Ok(contour_position_spec):
                     contour_position = contour_position_spec
             raw_spec_string = raw_spec_string.split("@")[0]
+
+        # Identify feature name via greedy longest-first matching
+        match features.identify_feature(raw_spec_string):
+            case Ok(name):
+                feature_name = name
+            case Err() as err:
+                return err
 
         # Stripping the feature name
         raw_value_string = raw_spec_string.replace(feature_name, "", 1)
@@ -108,12 +110,12 @@ class PatternSpec:
                 case Ok(single_value):
                     value = single_value
 
-        pattern_spec = PatternSpec(feature_name, value, negated, contour_position)
+        pattern_spec = PatternSpec(value, negated, contour_position)
         match pattern_spec.validate():
             case Err() as err:
                 return err
             case Ok():
-                return Ok(pattern_spec)
+                return Ok((feature_name, pattern_spec))
 
     def validate(self) -> Result[bool, str]:
         """Validate the pattern spec."""
@@ -132,17 +134,15 @@ class PatternSpec:
 
         return Ok(True)
 
-    def matches_against(self, segment_spec: "FeatureSpec", bindings: "Bindings | None" = None) -> bool:
-        """Whether this pattern spec matches a realized segment's feature spec.
+    def matches_against(self, segment_value: FeatureValue, bindings: Bindings | None = None) -> bool:
+        """Whether this pattern spec's value matches a realized segment's value.
 
         For non-negated specs: the segment value must equal the pattern value.
         For negated specs: the segment value must *not* equal the pattern value.
         """
-        from src.fortis.models.feature_spec import FeatureSpec
-
         pattern_atoms: list[SingleValue] = self.value if isinstance(self.value, list) else [self.value]
         segment_atoms: list[SingleValue] = (
-            segment_spec.value.value if isinstance(segment_spec.value.value, list) else [segment_spec.value.value]
+            segment_value.value if isinstance(segment_value.value, list) else [segment_value.value]
         )
 
         # Simple value comparison (alpha resolution is Phase 5 territory)
