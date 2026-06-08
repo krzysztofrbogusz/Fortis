@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from src.fortis.imports.features import FeatureInventory
 from src.fortis.models.feature_bundle import FeatureBundle
+from src.fortis.models.feature_value import FeatureValue
 from src.fortis.models.pattern_spec import PatternSpec
 from src.fortis.result import Err, Ok, Result
 
@@ -23,8 +24,8 @@ class PatternBundle(UserDict[str, PatternSpec]):
     def __repr__(self) -> str:
         """Represent a pattern bundle."""
         parts: list[str] = []
-        for _, spec in self.data.items():
-            parts.append(f"{spec}")
+        for feature, spec in self.data.items():
+            parts.append(f"{feature}: {spec}")
         return "[" + ", ".join(parts) + "]"
 
     @classmethod
@@ -48,8 +49,8 @@ class PatternBundle(UserDict[str, PatternSpec]):
             if result.is_err():
                 error_list.append(result.unwrap_err())
                 continue
-            spec = result.unwrap()
-            bundle[spec.feature] = spec
+            feature_name, spec = result.unwrap()
+            bundle[feature_name] = spec
 
         if error_list:
             return Err(error_list)
@@ -66,9 +67,6 @@ class PatternBundle(UserDict[str, PatternSpec]):
         For negated pattern specs, the match condition is inverted: the
         segment must *not* have the specified value for that feature.
 
-        For pattern specs with contour positions, the realized segment's
-        contour value is checked at the specified positions.
-
         Args:
             segment: The realized segment to test against.
             bindings: Optional bindings dict for alpha variable resolution.
@@ -79,8 +77,8 @@ class PatternBundle(UserDict[str, PatternSpec]):
                 if pattern_spec.negated:
                     continue
                 return False
-            segment_spec = segment[feature]
-            if not pattern_spec.matches_against(segment_spec, bindings):
+            segment_value = segment[feature]
+            if not pattern_spec.matches_against(segment_value, bindings):
                 return False
         return True
 
@@ -93,7 +91,7 @@ class PatternBundle(UserDict[str, PatternSpec]):
         if set(self.data.keys()) != set(other.data.keys()):
             return False
         for feature in self.data:
-            if self.data[feature].value.value != other.data[feature].value.value:
+            if self.data[feature].value != other.data[feature].value:
                 return False
         return True
 
@@ -104,7 +102,7 @@ class PatternBundle(UserDict[str, PatternSpec]):
             if feature not in other.data:
                 differing.append(feature)
                 continue
-            if self.data[feature].value.value != other.data[feature].value.value:
+            if self.data[feature].value != other.data[feature].value:
                 differing.append(feature)
                 continue
         for feature in other.data:
@@ -116,5 +114,5 @@ class PatternBundle(UserDict[str, PatternSpec]):
     def negated(self) -> PatternBundle:
         """Return a new pattern bundle with every spec's negation flag flipped."""
         return PatternBundle(
-            {name: PatternSpec(spec.feature, spec.value, negated=not spec.negated) for name, spec in self.data.items()}
+            {name: PatternSpec(spec.value, negated=not spec.negated) for name, spec in self.data.items()}
         )

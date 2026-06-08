@@ -57,13 +57,13 @@ class TestLetterDefinitionLoad:
         row = {"symbol": "a", "height": "3"}
         result = LetterDefinition.load(row, features)
         assert result.is_ok()
-        assert result.unwrap().bundle["height"].value.value == 3
+        assert result.unwrap().bundle["height"].value == 3
 
     def test_contour_value(self, features):
         row = {"symbol": "x", "height": "1>3"}
         result = LetterDefinition.load(row, features)
         assert result.is_ok()
-        assert result.unwrap().bundle["height"].value.value == [1, 3]
+        assert result.unwrap().bundle["height"].value == [1, 3]
 
 
 # ---------------------------------------------------------------------------

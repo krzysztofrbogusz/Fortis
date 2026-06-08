@@ -1,12 +1,12 @@
 from collections import UserDict
 
 from src.fortis.imports.features import FeatureInventory
-from src.fortis.models.feature_spec import FeatureSpec
+from src.fortis.models.feature_value import FeatureValue
 from src.fortis.result import Err, Ok, Result
 
 
-class FeatureBundle(UserDict[str, FeatureSpec]):
-    """A collection of realized feature specifications, keyed by feature name.
+class FeatureBundle(UserDict[str, FeatureValue]):
+    """A collection of realized feature values, keyed by feature name.
 
     Used for concrete phonological material — segments in the lexicon,
     diacritics, syllable parts, etc. No matching or negation methods;
@@ -16,8 +16,8 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
     def __repr__(self) -> str:
         """Represent a feature bundle."""
         parts: list[str] = []
-        for _, spec in self.data.items():
-            parts.append(f"{spec}")
+        for feature, value in self.data.items():
+            parts.append(f"{feature}: {value}")
         return "[" + ", ".join(parts) + "]"
 
     @classmethod
@@ -34,12 +34,19 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
 
         bundle = cls()
         for token in tokens:
-            result = FeatureSpec.from_str(token, features)
-            if result.is_err():
-                error_list.append(result.unwrap_err())
+            # Identify feature name first, then parse value
+            match features.identify_feature(token.replace(" ", "")):
+                case Ok(feature_name):
+                    pass
+                case Err() as err:
+                    error_list.append(err.unwrap_err())
+                    continue
+
+            value_result = FeatureValue.from_str(token, feature_name, features)
+            if value_result.is_err():
+                error_list.append(value_result.unwrap_err())
                 continue
-            spec = result.unwrap()
-            bundle[spec.feature] = spec
+            bundle[feature_name] = value_result.unwrap()
 
         if error_list:
             return Err(error_list)
@@ -54,14 +61,14 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
             form_contours: If True, overlapping features form contours instead of overriding.
         """
         result = FeatureBundle(dict(self.data))
-        for feature_name, feature_spec in other.items():
+        for feature_name, value in other.items():
             if feature_name not in result:
-                result[feature_name] = feature_spec
+                result[feature_name] = value
             elif form_contours:
-                new_value = result[feature_name].value.form_contour_with(feature_spec.value)
-                result[feature_name] = FeatureSpec(feature_name, new_value)
+                new_value = result[feature_name].form_contour_with(value)
+                result[feature_name] = new_value
             else:
-                result[feature_name] = feature_spec
+                result[feature_name] = value
 
         return result
 
@@ -74,7 +81,7 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
         if set(self.data.keys()) != set(other.data.keys()):
             return False
         for feature in self.data:
-            if self.data[feature].value.value != other.data[feature].value.value:
+            if self.data[feature].value != other.data[feature].value:
                 return False
         return True
 
@@ -85,7 +92,7 @@ class FeatureBundle(UserDict[str, FeatureSpec]):
             if feature not in other.data:
                 differing.append(feature)
                 continue
-            if self.data[feature].value.value != other.data[feature].value.value:
+            if self.data[feature].value != other.data[feature].value:
                 differing.append(feature)
                 continue
         for feature in other.data:

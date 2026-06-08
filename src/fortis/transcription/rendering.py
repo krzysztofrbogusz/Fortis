@@ -92,8 +92,8 @@ def _find_diacritics(
             # with the same value (otherwise the diacritic would create
             # a new difference or express the wrong value).
             fits = True
-            for feature, spec in dia_def.bundle.items():
-                if feature not in target_bundle or spec.value.value != target_bundle[feature].value.value:
+            for feature, value in dia_def.bundle.items():
+                if feature not in target_bundle or value.value != target_bundle[feature].value:
                     fits = False
                     break
             if not fits:
