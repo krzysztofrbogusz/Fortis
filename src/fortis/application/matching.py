@@ -22,12 +22,17 @@ spec), so the matcher runs in two passes per candidate locus:
   whole environment in that order (seeded with pass 1's references), so the
   target's alpha resolves against an already-bound left context.
 
+The ``$`` syllable boundary is a zero-width assertion checked against a set of
+boundary positions threaded in alongside ``letters`` (empty when the form is
+unsyllabified, so ``$`` then simply never matches); the positions come from
+``application.syllabifying``.
+
 Deferred for v1 (each is an explicit no-match or error, never a silent pass):
-syllable-boundary assertions (no syllable tier yet), multi-segment reference
-bindings (only single-segment ``n=`` is captured), contour positional windowing
-(inherited from ``pattern_matches``), and references *bound* in a context/
-exception and recalled in an earlier position — only target bindings are
-order-independent; context bindings follow the left → target → right order.
+multi-segment reference bindings (only single-segment ``n=`` is captured),
+contour positional windowing (inherited from ``pattern_matches``), and references
+*bound* in a context/exception and recalled in an earlier position — only target
+bindings are order-independent; context bindings follow the left → target → right
+order.
 
 Negated alpha is fully supported at both layers, since pass 1 is alpha-blind and
 defers either to pass 2: a negated *element* wrapping an alpha bundle (``![αF]``)
@@ -133,7 +138,11 @@ def pattern_matches(
 
     Every feature the pattern mentions must be present in the segment with a
     compatible value; features the pattern does not mention are unconstrained.
-    A negated spec is satisfied by an absent feature.
+
+    Against an *absent* feature: a ``none`` spec (``[F: none]``, value ``None``)
+    matches — it asserts F is unspecified — as does a negated concrete spec
+    (``[F: !val]``); a plain concrete spec fails, and ``[F: !none]`` (negated
+    ``none``, i.e. "must be specified") fails.
 
     Args:
         pattern: The pattern bundle to test.
@@ -142,8 +151,13 @@ def pattern_matches(
     """
     for feature, pattern_spec in pattern.data.items():
         if feature not in segment:
-            if pattern_spec.negated:
+            if pattern_spec.value is None:
+                # "F: none" is satisfied by absence; "F: !none" requires presence.
+                if pattern_spec.negated:
+                    return False
                 continue
+            if pattern_spec.negated:
+                continue  # "F: !val" is satisfied by absence
             return False
         if not _spec_matches(pattern_spec, segment[feature], bindings):
             return False
@@ -182,11 +196,13 @@ def _match_element(
     pos: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Iterator[tuple[int, Bindings]]:
     """Yield every ``(end_pos, bindings)`` for matching one *element* at *pos*.
 
     Bindings are copied before any mutation, so each yielded branch is
-    independent and the caller's environment is never disturbed.
+    independent and the caller's environment is never disturbed. *boundaries* are
+    the syllable-boundary positions, consulted only by the ``$`` assertion.
     """
     match element:
         case BundleElem(bundle):
@@ -208,16 +224,22 @@ def _match_element(
             if pos == 0 or pos == len(segments):
                 yield pos, bindings
 
+        case SyllableBoundary():
+            # Zero-width assertion at a syllable edge; boundaries come from
+            # syllabification (empty when the form is unsyllabified).
+            if pos in boundaries:
+                yield pos, bindings
+
         case Null():
             # ∅ in target is a zero-width insertion point.
             yield pos, bindings
 
         case Group(inner):
-            yield from _match_sequence(inner, segments, pos, bindings, letters)
+            yield from _match_sequence(inner, segments, pos, bindings, letters, boundaries)
 
         case Disjunction(branches):
             for branch in branches:
-                yield from _match_sequence(branch, segments, pos, bindings, letters)
+                yield from _match_sequence(branch, segments, pos, bindings, letters, boundaries)
 
         case Negated(inner):
             # One segment that the inner element does NOT match. Bindings from the
@@ -232,18 +254,20 @@ def _match_element(
                     return
                 matched = any(
                     end == pos + 1
-                    for end, _ in _match_element(inner, segments, pos, _copy(bindings), letters)
+                    for end, _ in _match_element(
+                        inner, segments, pos, _copy(bindings), letters, boundaries
+                    )
                 )
                 if not matched:
                     yield pos + 1, bindings
 
         case Quantified(inner, quant):
             yield from _match_repeat(
-                inner, segments, pos, bindings, letters, quant.min, quant.max, 0
+                inner, segments, pos, bindings, letters, boundaries, quant.min, quant.max, 0
             )
 
         case Bound(ref, inner):
-            for end, branch in _match_element(inner, segments, pos, bindings, letters):
+            for end, branch in _match_element(inner, segments, pos, bindings, letters, boundaries):
                 captured = _copy(branch)
                 if end == pos + 1:  # single-segment binding (multi-segment deferred)
                     captured.reference[ref] = segments[pos]
@@ -253,9 +277,6 @@ def _match_element(
             bound = bindings.reference.get(ref)
             if bound is not None and pos < len(segments) and matches_exactly(segments[pos], bound):
                 yield pos + 1, bindings
-
-        case SyllableBoundary():
-            raise NotImplementedError("syllable-boundary matching is not yet supported")
 
         case _:
             raise NotImplementedError(f"cannot match element {element!r} in this position")
@@ -267,16 +288,19 @@ def _match_repeat(
     pos: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
     min_n: int,
     max_n: int | None,
     count: int,
 ) -> Iterator[tuple[int, Bindings]]:
     """Greedy quantifier match: try more repetitions before fewer."""
     if max_n is None or count < max_n:
-        for end, branch in _match_element(inner, segments, pos, bindings, letters):
+        for end, branch in _match_element(inner, segments, pos, bindings, letters, boundaries):
             if end == pos:  # zero-width progress would loop forever
                 continue
-            yield from _match_repeat(inner, segments, end, branch, letters, min_n, max_n, count + 1)
+            yield from _match_repeat(
+                inner, segments, end, branch, letters, boundaries, min_n, max_n, count + 1
+            )
     if count >= min_n:
         yield pos, bindings
 
@@ -287,14 +311,15 @@ def _match_sequence(
     pos: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Iterator[tuple[int, Bindings]]:
     """Yield every ``(end_pos, bindings)`` for matching *elements* in order at *pos*."""
     if not elements:
         yield pos, bindings
         return
     first, rest = elements[0], elements[1:]
-    for mid, branch in _match_element(first, segments, pos, bindings, letters):
-        yield from _match_sequence(rest, segments, mid, branch, letters)
+    for mid, branch in _match_element(first, segments, pos, bindings, letters, boundaries):
+        yield from _match_sequence(rest, segments, mid, branch, letters, boundaries)
 
 
 def _match_ending_at(
@@ -303,6 +328,7 @@ def _match_ending_at(
     end: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Iterator[Bindings]:
     """Yield bindings for which *elements* match a span ending exactly at *end*.
 
@@ -310,7 +336,9 @@ def _match_ending_at(
     but whose left edge floats.
     """
     for start in range(end, -1, -1):
-        for stop, branch in _match_sequence(elements, segments, start, bindings, letters):
+        for stop, branch in _match_sequence(
+            elements, segments, start, bindings, letters, boundaries
+        ):
             if stop == end:
                 yield branch
 
@@ -321,13 +349,14 @@ def _match_starting_at(
     start: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Iterator[Bindings]:
     """Yield bindings for which *elements* match a span starting at *start*.
 
     Used for right context/exception, whose left edge is anchored to the target
     but whose right edge floats.
     """
-    for _stop, branch in _match_sequence(elements, segments, start, bindings, letters):
+    for _stop, branch in _match_sequence(elements, segments, start, bindings, letters, boundaries):
         yield branch
 
 
@@ -338,12 +367,13 @@ def _exception_blocks(
     end: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> bool:
     """Whether the exception environment holds around the locus (blocking the rule)."""
     if not (sd.left_exception or sd.right_exception):
         return False
-    for left in _match_ending_at(sd.left_exception, segments, start, bindings, letters):
-        for _ in _match_starting_at(sd.right_exception, segments, end, left, letters):
+    for left in _match_ending_at(sd.left_exception, segments, start, bindings, letters, boundaries):
+        for _ in _match_starting_at(sd.right_exception, segments, end, left, letters, boundaries):
             return True
     return False
 
@@ -360,9 +390,10 @@ def _match_span(
     end: int,
     bindings: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Iterator[Bindings]:
     """Yield bindings for which *elements* match *segments* consuming exactly ``[start, end)``."""
-    for stop, branch in _match_sequence(elements, segments, start, bindings, letters):
+    for stop, branch in _match_sequence(elements, segments, start, bindings, letters, boundaries):
         if stop == end:
             yield branch
 
@@ -371,6 +402,7 @@ def find_matches(
     sd: StructuralDescription,
     segments: list[FeatureBundle],
     letters: LetterInventory | None = None,
+    boundaries: frozenset[int] = frozenset(),
 ) -> list[Match]:
     """Find every locus in *segments* where rule *sd* applies.
 
@@ -388,6 +420,8 @@ def find_matches(
         sd: The parsed rule to apply.
         segments: The realized word, as a list of feature bundles.
         letters: Letter inventory for resolving letter shorthands in the rule.
+        boundaries: Syllable-boundary positions for the ``$`` assertion; empty
+            (the default) means the form is unsyllabified, so ``$`` never matches.
     """
     letters = letters if letters is not None else LetterInventory()
     matches: list[Match] = []
@@ -399,8 +433,12 @@ def find_matches(
         # a true superset of valid spans in greedy order, so the greediest fully
         # valid span is still reached and none is missed.
         seed_pass1 = Bindings(permissive_alpha=True)
-        for end, pass1 in _match_sequence(sd.target, segments, start, seed_pass1, letters):
-            located = _locate(sd, segments, start, end, _seed_references(pass1), letters)
+        for end, pass1 in _match_sequence(
+            sd.target, segments, start, seed_pass1, letters, boundaries
+        ):
+            located = _locate(
+                sd, segments, start, end, _seed_references(pass1), letters, boundaries
+            )
             if located is not None:
                 matches.append(located)
                 break  # greediest fully-valid target parse at this start wins
@@ -414,6 +452,7 @@ def _locate(
     end: int,
     seed: Bindings,
     letters: LetterInventory,
+    boundaries: frozenset[int],
 ) -> Match | None:
     """Pass 2: evaluate the environment in alpha order; return the Match or None.
 
@@ -422,11 +461,15 @@ def _locate(
     context, then the exception. *seed* carries the target's reference bindings
     from pass 1.
     """
-    for after_left in _match_ending_at(sd.left_context, segments, start, seed, letters):
-        for after_target in _match_span(sd.target, segments, start, end, after_left, letters):
+    for after_left in _match_ending_at(sd.left_context, segments, start, seed, letters, boundaries):
+        for after_target in _match_span(
+            sd.target, segments, start, end, after_left, letters, boundaries
+        ):
             for after_right in _match_starting_at(
-                sd.right_context, segments, end, after_target, letters
+                sd.right_context, segments, end, after_target, letters, boundaries
             ):
-                if not _exception_blocks(sd, segments, start, end, after_right, letters):
+                if not _exception_blocks(
+                    sd, segments, start, end, after_right, letters, boundaries
+                ):
                     return Match(start=start, end=end, bindings=after_right)
     return None

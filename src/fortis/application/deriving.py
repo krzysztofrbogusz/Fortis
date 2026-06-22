@@ -28,21 +28,29 @@ change the form contribute a ``DerivationStep``. The step's ``change`` summary i
 a provisional feature-level diff — IPA rendering is a later milestone — and is
 cosmetic: derivation correctness never depends on it.
 
-Planned hook (syllabification, §7 — not yet built): each word is to be
-syllabified on input and **re-syllabified after every rule application**, using
-the ``SyllablePartsInventory`` constraints in force at that rule's ``time``. When
-it lands, ``derive`` interleaves a resyllabify pass after each ``apply_rule``
-(and once over the initial form); that pass is what makes the ``$`` boundary
-assertion matchable (the matcher currently defers it).
+Syllabification (§7): each rule (re)syllabifies the current form for its match
+pass, using the ``SyllablePartsInventory`` constraints in force at the rule's
+``time`` — so the input is syllabified before the first rule and the structure is
+refreshed after every rule. This is what makes the ``$`` boundary assertion
+matchable; with no ``sonorities``/``syllable_parts`` supplied there are no
+boundaries and ``$`` simply never matches. (No rule in the current set uses
+``$``, so this integration is presently preparatory — it changes no derivation
+output, only enables ``$``-conditioned rules.)
 """
 
 from src.fortis.application.applying import apply_match
 from src.fortis.application.combining import differing, matches_exactly
 from src.fortis.application.matching import Match, find_matches
+from src.fortis.application.syllabifying import syllabify
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.derivation import Derivation, DerivationStep
 from src.fortis.models.features import FeatureInventory
-from src.fortis.models.inventories import LetterInventory, Word
+from src.fortis.models.inventories import (
+    LetterInventory,
+    SonoritiesInventory,
+    SyllablePartsInventory,
+    Word,
+)
 from src.fortis.models.rules import (
     ApplicationMode,
     Rule,
@@ -51,24 +59,45 @@ from src.fortis.models.rules import (
 )
 
 
+def _boundaries(
+    form: list[FeatureBundle],
+    sonorities: SonoritiesInventory | None,
+    syllable_parts: SyllablePartsInventory | None,
+    time: int,
+) -> frozenset[int]:
+    """Syllable boundaries of *form* at *time*, or none if syllabification is unconfigured."""
+    if sonorities is None or syllable_parts is None:
+        return frozenset()
+    return syllabify(form, sonorities, syllable_parts, time)
+
+
 def apply_rule(
     rule: Rule,
     segments: list[FeatureBundle],
     letters: LetterInventory,
     features: FeatureInventory,
+    sonorities: SonoritiesInventory | None = None,
+    syllable_parts: SyllablePartsInventory | None = None,
 ) -> list[FeatureBundle]:
     """Apply *rule* to *segments* once, per its application mode.
 
     Returns a new form; *segments* is never mutated. A rule whose loci do not
-    match returns an unchanged copy.
+    match returns an unchanged copy. The form is (re)syllabified for each match
+    pass using the syllable-part constraints in force at ``rule.time``; the ``$``
+    assertion matches against those boundaries.
     """
     match rule.application:
         case ApplicationMode.simultaneous:
-            return _apply_simultaneous(rule.sd, segments, letters, features)
+            boundaries = _boundaries(segments, sonorities, syllable_parts, rule.time)
+            return _apply_simultaneous(rule.sd, segments, letters, features, boundaries)
         case ApplicationMode.left_to_right:
-            return _apply_directional(rule.sd, segments, letters, features, reverse=False)
+            return _apply_directional(
+                rule.sd, segments, letters, features, sonorities, syllable_parts, rule.time, False
+            )
         case ApplicationMode.right_to_left:
-            return _apply_directional(rule.sd, segments, letters, features, reverse=True)
+            return _apply_directional(
+                rule.sd, segments, letters, features, sonorities, syllable_parts, rule.time, True
+            )
 
 
 def _select_non_overlapping(matches: list[Match]) -> list[Match]:
@@ -87,9 +116,10 @@ def _apply_simultaneous(
     segments: list[FeatureBundle],
     letters: LetterInventory,
     features: FeatureInventory,
+    boundaries: frozenset[int],
 ) -> list[FeatureBundle]:
     """Find every locus against the original form, then splice all rewrites at once."""
-    selected = _select_non_overlapping(find_matches(sd, segments, letters))
+    selected = _select_non_overlapping(find_matches(sd, segments, letters, boundaries))
     out = list(segments)
     # Splice right-to-left so each replacement's indices stay valid, and compute
     # every replacement from the ORIGINAL form (no application sees another's output).
@@ -103,21 +133,31 @@ def _apply_directional(
     segments: list[FeatureBundle],
     letters: LetterInventory,
     features: FeatureInventory,
+    sonorities: SonoritiesInventory | None,
+    syllable_parts: SyllablePartsInventory | None,
+    time: int,
     reverse: bool,
 ) -> list[FeatureBundle]:
-    """Scan and rewrite in place; each output is visible to later loci in the pass."""
+    """Scan and rewrite in place; each output is visible to later loci in the pass.
+
+    Because the form mutates as it is rewritten, it is re-syllabified before each
+    scan so the ``$`` assertion always reflects the current form.
+    """
     form = list(segments)
     cursor = len(form) if reverse else 0
     while True:
+        boundaries = _boundaries(form, sonorities, syllable_parts, time)
         if reverse:
-            candidates = [m for m in find_matches(sd, form, letters) if m.end <= cursor]
+            candidates = [m for m in find_matches(sd, form, letters, boundaries) if m.end <= cursor]
             if not candidates:
                 break
             # Rightmost, tie-broken to longest (min start) — the mirror of
             # leftmost-longest. (max end, then min start.)
             match = max(candidates, key=lambda m: (m.end, -m.start))
         else:
-            candidates = [m for m in find_matches(sd, form, letters) if m.start >= cursor]
+            candidates = [
+                m for m in find_matches(sd, form, letters, boundaries) if m.start >= cursor
+            ]
             if not candidates:
                 break
             # Leftmost; the matcher already made it longest for that start.
@@ -166,8 +206,15 @@ def derive(
     rules: RuleInventory,
     letters: LetterInventory,
     features: FeatureInventory,
+    sonorities: SonoritiesInventory | None = None,
+    syllable_parts: SyllablePartsInventory | None = None,
 ) -> Derivation:
     """Sweep *segments* through every rule in time order, recording firing steps.
+
+    Each rule (re)syllabifies the current form for its match pass, so the input is
+    syllabified before the first rule and the structure is refreshed after every
+    rule — without ``sonorities``/``syllable_parts`` there are simply no
+    boundaries and the ``$`` assertion never matches.
 
     Args:
         word: The word being derived (carried into the trace).
@@ -175,6 +222,8 @@ def derive(
         rules: Rules keyed by time; applied ascending by time, file order within.
         letters: Letter inventory, for shorthands and recalls.
         features: Feature inventory, for the geometry-aware merge.
+        sonorities: Sonority scale for syllabification (optional).
+        syllable_parts: Syllable-part constraints supplying the nucleus (optional).
     """
     input_form = list(segments)
     current = list(segments)
@@ -183,7 +232,7 @@ def derive(
     for time in sorted(rules.keys()):
         for rule in rules[time]:
             before = list(current)
-            after = apply_rule(rule, current, letters, features)
+            after = apply_rule(rule, current, letters, features, sonorities, syllable_parts)
             if _fired(before, after):
                 steps.append(
                     DerivationStep(

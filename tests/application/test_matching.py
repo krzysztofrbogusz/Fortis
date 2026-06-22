@@ -36,6 +36,19 @@ class TestPatternMatches:
     def test_negated_blocks_matching_value(self):
         assert not pattern_matches(_pb(PatternSpec("voice", 1, negated=True)), _fb(voice=1))
 
+    def test_none_matches_absent_feature(self):
+        # "F: none" asserts F is unspecified — satisfied by an absent feature.
+        assert pattern_matches(_pb(PatternSpec("nasal", None)), _fb(voice=1))
+
+    def test_none_fails_specified_feature(self):
+        # A present feature is specified, so "F: none" does not match.
+        assert not pattern_matches(_pb(PatternSpec("nasal", None)), _fb(nasal=0))
+
+    def test_negated_none_requires_presence(self):
+        # "F: !none" means F must be specified — an absent feature fails it.
+        assert not pattern_matches(_pb(PatternSpec("nasal", None, negated=True)), _fb(voice=1))
+        assert pattern_matches(_pb(PatternSpec("nasal", None, negated=True)), _fb(nasal=0))
+
     def test_contour_matches_equal_length(self):
         assert pattern_matches(_pb(PatternSpec("tone", (1, 2))), _fb(tone=(1, 2)))
 
@@ -100,6 +113,23 @@ class TestSequenceMatcher:
         sd = parse_definition("[+nasal] -> [+voice] / _ #", features).unwrap()
         segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
         assert _spans(find_matches(sd, segs)) == [(2, 3)]
+
+    def test_syllable_boundary_never_matches_when_unsyllabified(self, features):
+        sd = parse_definition("[+cons] -> [+voice] / $ _", features).unwrap()
+        segs = [_fb(consonantal=1), _fb(consonantal=1)]
+        assert find_matches(sd, segs) == []  # no boundaries supplied
+
+    def test_syllable_boundary_left_onset(self, features):
+        sd = parse_definition("[+cons] -> [+voice] / $ _", features).unwrap()
+        segs = [_fb(consonantal=1), _fb(consonantal=1), _fb(consonantal=1)]
+        # Onset consonants sit just after a syllable boundary.
+        assert _spans(find_matches(sd, segs, boundaries=frozenset({0, 2}))) == [(0, 1), (2, 3)]
+
+    def test_syllable_boundary_right_coda(self, features):
+        sd = parse_definition("[+cons] -> [+voice] / _ $", features).unwrap()
+        segs = [_fb(consonantal=1), _fb(consonantal=1), _fb(consonantal=1)]
+        # A coda consonant sits just before a syllable boundary.
+        assert _spans(find_matches(sd, segs, boundaries=frozenset({2}))) == [(1, 2)]
 
     def test_exception_blocks(self, features):
         sd = parse_definition("[+nasal] -> [+voice] // [+voice] _", features).unwrap()
