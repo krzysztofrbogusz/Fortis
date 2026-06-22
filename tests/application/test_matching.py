@@ -1,0 +1,214 @@
+"""Tests for single-segment pattern matching (application/matching.py)."""
+
+from src.fortis.application.matching import Match, find_matches, pattern_matches
+from src.fortis.models.bindings import Bindings
+from src.fortis.models.bundles import FeatureBundle, PatternBundle
+from src.fortis.models.inventories import Letter, LetterInventory
+from src.fortis.models.specs import FeatureSpec, PatternSpec
+from src.fortis.models.values import AlphaOp, AlphaRef
+from src.fortis.parsing.notation import parse_definition
+
+
+def _fb(**features: object) -> FeatureBundle:
+    """Build a realized FeatureBundle from feature=value kwargs."""
+    return FeatureBundle({f: FeatureSpec(feature=f, value=v) for f, v in features.items()})
+
+
+def _pb(*specs: PatternSpec) -> PatternBundle:
+    """Build a PatternBundle from pattern specs."""
+    return PatternBundle({s.feature: s for s in specs})
+
+
+class TestPatternMatches:
+    def test_subsumption_match(self):
+        # Pattern mentions a subset; extra segment features are unconstrained.
+        assert pattern_matches(_pb(PatternSpec("voice", 1)), _fb(voice=1, nasal=0))
+
+    def test_value_mismatch_fails(self):
+        assert not pattern_matches(_pb(PatternSpec("voice", 1)), _fb(voice=0))
+
+    def test_absent_feature_fails_positive(self):
+        assert not pattern_matches(_pb(PatternSpec("voice", 1)), _fb(nasal=0))
+
+    def test_absent_feature_passes_negated(self):
+        assert pattern_matches(_pb(PatternSpec("voice", 1, negated=True)), _fb(nasal=0))
+
+    def test_negated_blocks_matching_value(self):
+        assert not pattern_matches(_pb(PatternSpec("voice", 1, negated=True)), _fb(voice=1))
+
+    def test_contour_matches_equal_length(self):
+        assert pattern_matches(_pb(PatternSpec("tone", (1, 2))), _fb(tone=(1, 2)))
+
+    def test_contour_length_mismatch_fails(self):
+        assert not pattern_matches(_pb(PatternSpec("tone", (1, 2))), _fb(tone=1))
+
+
+class TestAlpha:
+    def test_alpha_binds_then_agrees(self):
+        bindings = Bindings()
+        pat = _pb(PatternSpec("high", AlphaRef("α")), PatternSpec("back", AlphaRef("α")))
+        # high=1 binds α to 1; back must also be 1 to agree.
+        assert pattern_matches(pat, _fb(high=1, back=1), bindings)
+        assert bindings.alpha["α"] == 1
+
+    def test_alpha_disagreement_fails(self):
+        bindings = Bindings()
+        pat = _pb(PatternSpec("high", AlphaRef("α")), PatternSpec("back", AlphaRef("α")))
+        assert not pattern_matches(pat, _fb(high=1, back=0), bindings)
+
+    def test_alpha_in_contour_limb(self):
+        bindings = Bindings()
+        bindings.alpha["α"] = 2
+        # tone: 2>α — first limb concrete, second recalls α (=2 here).
+        pat = _pb(PatternSpec("tone", (2, AlphaRef("α", AlphaOp.same))))
+        assert pattern_matches(pat, _fb(tone=(2, 2)), bindings)
+        assert not pattern_matches(pat, _fb(tone=(2, 3)), bindings)
+
+
+def _spans(matches: list[Match]) -> list[tuple[int, int]]:
+    """The (start, end) spans of a list of matches."""
+    return [(m.start, m.end) for m in matches]
+
+
+class TestSequenceMatcher:
+    def test_target_only_finds_every_locus(self, features):
+        sd = parse_definition("[+nasal] -> [+voice]", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(0, 1), (2, 3)]
+
+    def test_no_locus_when_target_absent(self, features):
+        sd = parse_definition("[+nasal] -> [+voice]", features).unwrap()
+        assert find_matches(sd, [_fb(voice=1), _fb(voice=1)]) == []
+
+    def test_left_context_required(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] / [+voice] _", features).unwrap()
+        # nasal at 1 is preceded by voice; nasal at 2 is preceded by a nasal.
+        segs = [_fb(voice=1), _fb(nasal=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(1, 2)]
+
+    def test_right_context_required(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] / _ [+voice]", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(0, 1)]
+
+    def test_word_boundary_left(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] / # _", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(0, 1)]
+
+    def test_word_boundary_right(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] / _ #", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(2, 3)]
+
+    def test_exception_blocks(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] // [+voice] _", features).unwrap()
+        # The nasal at 1 is preceded by voice, so the exception blocks it.
+        segs = [_fb(voice=1), _fb(nasal=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(2, 3)]
+
+    def test_quantifier_greedy(self, features):
+        sd = parse_definition("[+nasal]{2} -> [+voice]", features).unwrap()
+        segs = [_fb(nasal=1), _fb(nasal=1), _fb(voice=1)]
+        assert _spans(find_matches(sd, segs)) == [(0, 2)]
+
+    def test_disjunction_matches_either_branch(self, features):
+        sd = parse_definition("([+nasal]|[+lateral]) -> [+voice]", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(lateral=1)]
+        assert _spans(find_matches(sd, segs)) == [(0, 1), (2, 3)]
+
+    def test_negation_matches_non_target(self, features):
+        sd = parse_definition("![+nasal] -> [+voice]", features).unwrap()
+        segs = [_fb(nasal=1), _fb(voice=1)]
+        assert _spans(find_matches(sd, segs)) == [(1, 2)]
+
+    def test_alpha_agreement_across_context(self, features):
+        sd = parse_definition("[αhigh] -> [+voice] / [αhigh] _", features).unwrap()
+        # `same` agreement is symmetric, so binding-site order is invisible here:
+        # the left neighbour and target must share a high value either way.
+        assert _spans(find_matches(sd, [_fb(high=1), _fb(high=1)])) == [(1, 2)]
+        assert find_matches(sd, [_fb(high=0), _fb(high=1)]) == []
+
+    def test_letter_ref_resolves_against_inventory(self, features):
+        sd = parse_definition("m -> [+voice]", features).unwrap()
+        m = _fb(nasal=1, labial=1)
+        letters = LetterInventory({"m": Letter(symbol="m", bundle=m)})
+        segs = [_fb(voice=1), m]
+        assert _spans(find_matches(sd, segs, letters)) == [(1, 2)]
+
+    def test_reference_bind_and_recall(self, features):
+        sd = parse_definition("1=[+nasal] -> [+voice] / @1 _", features).unwrap()
+        # @1 in the left context must be the same realized material as the target.
+        # References are scope-based: the target is ref-bound first (pass 1), so a
+        # recall to its left resolves even though it sits earlier in the string.
+        same = _fb(nasal=1, labial=1)
+        assert _spans(find_matches(sd, [same, same])) == [(1, 2)]
+        # A different left neighbour does not satisfy the recall.
+        other = _fb(nasal=1, labial=0)
+        assert find_matches(sd, [other, same]) == []
+
+
+class TestBindingOrder:
+    """Pin the two-pass semantics: alpha is left-first, references are target-first."""
+
+    def test_alpha_binds_in_left_context_not_target(self, features):
+        # `[-αhigh]` on the left and `[αhigh]` (same) on the target. First occurrence
+        # binds regardless of op, evaluated left context → target → right context, so
+        # the LEFT neighbour binds α and the target must agree → high values must be
+        # EQUAL. (Target-first binding would instead force them to DIFFER — the old,
+        # pre-rebuild behaviour. This test is what distinguishes the two.)
+        sd = parse_definition("[αhigh] -> [+voice] / [-αhigh] _", features).unwrap()
+        assert _spans(find_matches(sd, [_fb(high=1), _fb(high=1)])) == [(1, 2)]
+        assert find_matches(sd, [_fb(high=0), _fb(high=1)]) == []
+
+    def test_pass1_is_alpha_blind_for_multi_occurrence_target(self, features):
+        # Regression: a two-segment target whose FIRST alpha occurrence is non-`same`,
+        # with α bound in the left context. Pass 2 honours the op against the bound
+        # context (target[0] opposite → differs; target[1] same → agrees). Pass 1 must
+        # be alpha-blind: were it to bind α from target[0] instead, it would impose a
+        # bogus stricter constraint and miss the span entirely.
+        sd = parse_definition("[-αhigh][αhigh] -> [+voice] / [αhigh] _", features).unwrap()
+        # left binds α=1; target high [0, 1]: 0≠1 ✓ then 1==1 ✓.
+        assert _spans(find_matches(sd, [_fb(high=1), _fb(high=0), _fb(high=1)])) == [(1, 3)]
+        # left binds α=0; target high [1, 1]: 1≠0 ✓ then 1==0 ✗ → no locus.
+        assert find_matches(sd, [_fb(high=0), _fb(high=1), _fb(high=1)]) == []
+
+    def test_negated_alpha_element_defers_to_pass_two(self, features):
+        # Regression: a negated element wrapping an alpha bundle. Alpha-blind pass 1
+        # must defer (consume + leave the truth to pass 2), not treat the inner as a
+        # guaranteed match — which would make the negation never hold and miss the span.
+        sd = parse_definition("![αhigh] -> [+voice] / [αhigh] _", features).unwrap()
+        # left binds α=1; target high=0 → [αhigh] fails → ![αhigh] holds.
+        assert _spans(find_matches(sd, [_fb(high=1), _fb(high=0)])) == [(1, 2)]
+        # left binds α=1; target high=1 → [αhigh] holds → ![αhigh] fails.
+        assert find_matches(sd, [_fb(high=1), _fb(high=1)]) == []
+
+    def test_negated_alpha_spec_defers_to_pass_two(self, features):
+        # Regression: `!-α` is a negated alpha *spec* (negated=True over an opposite
+        # alpha) — "not opposite", i.e. agreement. Alpha-blind pass 1 must defer the
+        # whole spec; letting permissive alpha resolve it would flip under negation
+        # and miss the span.
+        sd = parse_definition("[!-αhigh] -> [+voice] / [αhigh] _", features).unwrap()
+        # left binds α=1; target high=1 → not-opposite holds → match.
+        assert _spans(find_matches(sd, [_fb(high=1), _fb(high=1)])) == [(1, 2)]
+        # left binds α=1; target high=0 → opposite holds → not-opposite fails.
+        assert find_matches(sd, [_fb(high=1), _fb(high=0)]) == []
+
+
+class TestSequenceEdgeCases:
+    def test_null_target_marks_insertion_points(self, features):
+        sd = parse_definition("∅ -> [+voice] / [+nasal] _", features).unwrap()
+        # A zero-width locus sits just after each nasal.
+        segs = [_fb(nasal=1), _fb(voice=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(1, 1), (3, 3)]
+
+    def test_zero_rep_quantifier(self, features):
+        sd = parse_definition("[+nasal]{0,2} [+voice] -> [+lateral]", features).unwrap()
+        # With no nasal present the {0,2} contributes zero reps; the voice still matches.
+        assert _spans(find_matches(sd, [_fb(voice=1)])) == [(0, 1)]
+
+    def test_right_only_exception(self, features):
+        sd = parse_definition("[+nasal] -> [+voice] // _ [+lateral]", features).unwrap()
+        # The nasal before the lateral is blocked; the final nasal applies.
+        segs = [_fb(nasal=1), _fb(lateral=1), _fb(nasal=1)]
+        assert _spans(find_matches(sd, segs)) == [(2, 3)]

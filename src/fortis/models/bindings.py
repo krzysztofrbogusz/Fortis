@@ -13,7 +13,15 @@ from src.fortis.models.values import Value
 
 @dataclass
 class Bindings:
-    """Bindings for different elements."""
+    """Bindings for different elements.
+
+    ``permissive_alpha`` is a resolution mode, not stored data: when set, alpha
+    references match unconditionally and bind nothing. The sequence matcher's
+    first pass uses it to find a target's structural span and capture its
+    reference bindings without committing alpha (which must bind left-context
+    first, in the second pass).
+    """
 
     alpha: dict[str, Value] = field(default_factory=dict)
     reference: dict[int, FeatureBundle] = field(default_factory=dict)
+    permissive_alpha: bool = False
