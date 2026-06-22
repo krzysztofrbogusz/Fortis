@@ -132,6 +132,40 @@ class TestDerive:
         assert [s.rule for s in result.steps] == [b]
         assert _values(result.surface) == [{"nasal": 1, "voice": 1}]
 
+    def test_syllable_conditioned_rule_via_full_derive(
+        self, features, letters, sonorities, syllable_parts
+    ):
+        # apta → ap.ta (boundary at 2). A coda rule voices the consonant before a
+        # syllable boundary: the p (coda) voices, the t (onset) does not. Exercises
+        # syllabify → boundaries → matcher $ → derive end to end.
+        word = Word(ipa="apta")
+        rule = _rule("[+cons] -> [+voice] / _ $", features)
+        rules = RuleInventory({0: (rule,)})
+        V = _fb(syllabic=1, consonantal=0)
+        p = _fb(consonantal=1, sonorant=0, voice=0)
+        t = _fb(consonantal=1, sonorant=0, voice=0)
+        result = derive(word, [V, p, t, V], rules, letters, features, sonorities, syllable_parts)
+        assert _values(result.surface) == [
+            {"syllabic": 1, "consonantal": 0},
+            {"consonantal": 1, "sonorant": 0, "voice": 1},  # coda p → voiced
+            {"consonantal": 1, "sonorant": 0, "voice": 0},  # onset t → unchanged
+            {"syllabic": 1, "consonantal": 0},
+        ]
+
+    def test_syllabification_is_inert_for_rules_without_boundary(
+        self, features, letters, sonorities, syllable_parts
+    ):
+        # A rule set that never uses $ must derive identically with or without
+        # syllabification supplied — syllabification only enables $, it never
+        # perturbs unrelated derivations.
+        word = Word(ipa="amna")
+        rule = _rule("[+nasal] -> [+voice]", features)
+        rules = RuleInventory({0: (rule,)})
+        segs = [_fb(syllabic=1, consonantal=0), _fb(nasal=1, voice=0), _fb(syllabic=1)]
+        without = derive(word, segs, rules, letters, features)
+        with_syll = derive(word, segs, rules, letters, features, sonorities, syllable_parts)
+        assert _values(with_syll.surface) == _values(without.surface)
+
     def test_input_snapshot_unchanged_by_derivation(self, features, letters):
         word = Word(ipa="snap")
         a = _rule("[+nasal] -> [+voice]", features, time=0)
