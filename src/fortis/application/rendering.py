@@ -1,8 +1,10 @@
+from src.fortis.application.combining import differing, matches_exactly
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.inventories import Diacritic, DiacriticKind
+from src.fortis.models.project import Project
 
 
-def sequence_to_string(sequence: list[FeatureBundle], inventories: Inventories) -> str:
+def sequence_to_string(sequence: list[FeatureBundle], inventories: Project) -> str:
     """Turn a Sequence of FeatureBundles back into an IPA string.
 
     For each segment:
@@ -19,11 +21,28 @@ def sequence_to_string(sequence: list[FeatureBundle], inventories: Inventories) 
     return output
 
 
-def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
+def render_syllabified(
+    sequence: list[FeatureBundle], boundaries: frozenset[int], inventories: Project
+) -> str:
+    """Render *sequence* as IPA with ``.`` at each interior syllable boundary.
+
+    Each segment goes through the full ``render_segment`` (letter + diacritics);
+    the word-edge boundaries (``0`` and ``len``) are not shown.
+    """
+    interior = boundaries - {0, len(sequence)}
+    parts: list[str] = []
+    for i, segment in enumerate(sequence):
+        if i in interior:
+            parts.append(".")
+        parts.append(render_segment(segment, inventories))
+    return "".join(parts)
+
+
+def render_segment(segment: FeatureBundle, inventories: Project) -> str:
     """Render a single FeatureBundle as an IPA string (letter + diacritics)."""
     # 1. Try exact match first
     for letter_symbol, letter_def in inventories.letters.items():
-        if segment.matches_exactly(letter_def.bundle):
+        if matches_exactly(segment, letter_def.bundle):
             return letter_symbol
 
     # 2. Find the best letter: the one whose differences leave the
@@ -37,7 +56,7 @@ def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
     segment_diacritics = inventories.diacritics.segment_dict
 
     for letter_symbol, letter_def in inventories.letters.items():
-        total_diffs = segment.differing(letter_def.bundle)
+        total_diffs = differing(segment, letter_def.bundle)
         remaining = set(total_diffs)
         before: list[str] = []
         combining: list[str] = []
@@ -65,7 +84,7 @@ def render_segment(segment: FeatureBundle, inventories: Inventories) -> str:
 def _find_diacritics(
     target_bundle: FeatureBundle,
     remaining_diffs: set[str],
-    diacritics: dict[str, DiacriticDefinition],
+    diacritics: dict[str, Diacritic],
     before: list[str],
     combining: list[str],
     after: list[str],
@@ -79,7 +98,7 @@ def _find_diacritics(
     """
     while remaining_diffs:
         best_symbol: str | None = None
-        best_def: DiacriticDefinition | None = None
+        best_def: Diacritic | None = None
         best_coverage = 0
 
         for dia_symbol, dia_def in diacritics.items():
@@ -120,9 +139,9 @@ def _find_diacritics(
             break
 
         remaining_diffs -= set(best_def.bundle.keys())
-        if best_def.type == DiacriticKind.before:
+        if best_def.kind == DiacriticKind.before:
             before.append(best_symbol)
-        elif best_def.type == DiacriticKind.combining:
+        elif best_def.kind == DiacriticKind.combining:
             combining.append(best_symbol)
         else:
             after.append(best_symbol)

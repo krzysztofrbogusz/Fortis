@@ -160,6 +160,23 @@ class TestDerive:
         ]
         # The surface syllable structure (ap.ta) is carried for output.
         assert result.surface_boundaries == frozenset({0, 2, 4})
+        # Each firing step also carries the structure of its before/after forms,
+        # for a syllabified trace.
+        assert result.steps[0].before_boundaries == frozenset({0, 2, 4})
+        assert result.steps[0].after_boundaries == frozenset({0, 2, 4})
+
+    def test_step_boundaries_populated_for_boundary_free_rule(
+        self, features, letters, sonorities, syllable_parts
+    ):
+        # Per-step structure is display-only, so it appears even when the rule does
+        # not use $ (the matcher gate does not suppress it).
+        word = Word(ipa="apa")
+        rule = _rule("[+cons] -> [+voice]", features)  # no $
+        rules = RuleInventory({0: (rule,)})
+        segs = [_fb(syllabic=1, consonantal=0), _fb(consonantal=1, sonorant=0, voice=0),
+                _fb(syllabic=1, consonantal=0)]
+        result = derive(word, segs, rules, letters, features, sonorities, syllable_parts)
+        assert result.steps[0].after_boundaries == frozenset({0, 1, 3})  # a.pa
 
     def test_syllabification_is_inert_for_rules_without_boundary(
         self, features, letters, sonorities, syllable_parts
