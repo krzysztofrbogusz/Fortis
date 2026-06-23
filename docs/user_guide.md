@@ -122,7 +122,7 @@ The sonority scale is user-defined in `sonorities.toml`, both in the number of l
 | 2     | Fricatives |
 | 1     | Stops      |
 
-but the number of levels, their ordering, and the predicates are all yours to define. Sonority feeds syllabification, which is not yet implemented (see §7).
+but the number of levels, their ordering, and the predicates are all yours to define. Sonority feeds syllabification (§7): it drives the default onset/coda division by the Maximal Onset Principle.
 
 ---
 
@@ -140,9 +140,11 @@ Every inventory Fortis uses is loaded from a file. All of them are user-authored
 | `words.toml`           | The lexicon                                             |
 | `rules.toml`           | Phonological rules                                      |
 
-`syllable_parts.toml` is already loaded (its nucleus definitions drive nucleus
-identification during parsing). The full sonority-driven syllabification pass that
-places syllable boundaries is still planned (§7).
+`syllable_parts.toml` supplies the **nucleus** definition (a feature pattern that
+identifies syllable peaks) and, optionally, **onset**/**coda** patterns that
+constrain the division (§7). Each part's `definition` is the relevant notation:
+a single-segment bundle for the nucleus, an element sequence for an onset or coda
+(e.g. `definition = "[+cons][-syll, -cons]?"`).
 
 ### 4.1 words.toml
 
@@ -426,9 +428,16 @@ Two rules sharing both a `time` and an adjacent file position with overlapping l
 
 ## 7. Syllabification
 
-**Not yet implemented — TODO.**
+Syllabification places syllable boundaries on a form without inserting or deleting segments. It runs on the input and is refreshed before each rule that uses the `$` assertion, so `$` always reflects current structure. A word's two edges count as syllable boundaries; a word with no nucleus is unsyllabifiable and gets none.
 
-Syllabification is planned to sit between parsing and rule application, placing boundaries between pre-identified nuclei without inserting or deleting segments, driven by the user-defined sonority scale (§3.3) and the `syllable_parts.toml` parameter file. Until it lands, sequences are not syllabified, the `$` syllable-boundary assertion has nothing to match against, and rules should not rely on syllable structure.
+**Nuclei** are the segments matching the `nucleus` definition (§4). Between each adjacent pair of nuclei, the intervening consonants are divided into the preceding syllable's coda and the following syllable's onset:
+
+- By default the division follows the **Maximal Onset Principle** under sonority sequencing (§3.4): the onset is the longest run whose sonority rises toward the nucleus; the rest is coda.
+- If an `onset` and/or `coda` **pattern** is defined in `syllable_parts.toml`, that pattern *defines* legality instead: every split point is considered and the longest onset whose onset and coda each fully match their patterns wins — so a pattern may license a non-sonority-rising onset (e.g. *s*+stop). The patterns are ordinary element sequences (`[nasal]` is a mandatory single-nasal coda; `[nasal]?` an optional one; `[+cons][-syll, -cons]?` a consonant plus optional glide). A cluster with no pattern-legal division is reported as unsyllabifiable.
+
+Onset/coda patterns constrain only the interior division where there is a choice; word-edge onsets and codas are forced and not checked.
+
+The `$` assertion matches at any syllable boundary (interior or word edge). Syllable-tier diacritics (tone, stress) attach to the nucleus of their syllable during segmentation; rendering them back to IPA is not yet implemented.
 
 ---
 
@@ -440,22 +449,16 @@ For each word, Fortis records the sequence of forms from the input through every
 
 ### 8.2 Output format
 
-The report shows only the rules that actually changed the form:
+Each word prints its verbatim headword and gloss, then one line per rule that fired — `[rule_id]`, the resulting form (with `.` between syllables), and a parenthesised summary of what changed — and finally the surface form. Rules that did not fire are omitted.
 
 ```
-ɣʷeroː  "eagle"
-  →  [laryngeal_coloring]  ɣʷeroː       (no match)   ← omitted
-  →  [centumization]       ɣweroː       gʷ: [cor: none]
-Surface: ɣweroː
+kʲm̩tom  "hundred"
+  →  [centumization]  km̩.tom   (kʲ→k)
+  →  [u_epenthesis]   kum.tom   (m̩→um)
+Surface: kum.tom
 ```
 
-In practice the omitted line above does not appear; only steps that change the form are printed. A compact rendering of the same derivation:
-
-```
-ɣʷeroː  "eagle"
-  →  [centumization]  ɣweroː   gʷ: [cor: none]
-Surface: ɣweroː
-```
+The change summary shows the segments that changed as `old→new` (e.g. `kʲ→k`); for a length change it trims the shared prefix/suffix and shows just the differing region (`m̩→um`, with `∅` for a fully inserted or deleted side).
 
 ---
 
@@ -465,8 +468,8 @@ Rule definitions are validated at load time. Errors are collected rather than fa
 
 **Structural**
 
-- Target and result have different numbers of elements (`∅` counts as an element).
-- Corresponding target and result elements carry different quantifiers (except `∅`, which carries none).
+- Target and result have different numbers of elements **when the result contains a feature bundle** (`∅` counts; a full-replacement letter/recall result may collapse or expand the span, so it need not match — see §5.1).
+- A result **bundle** carries a different quantifier from its corresponding target (a full-replacement letter result is unconstrained by the target's quantifier; `∅` carries none).
 - A boundary (`#`, `$`) is the sole element in the target.
 - A feature specified more than once within a single bundle (e.g. [+high, −high]).
 
