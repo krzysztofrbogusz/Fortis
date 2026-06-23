@@ -8,7 +8,7 @@ definition = "xe → xa"
 time = -2000
 name = "Centumization"
 description = "Merging of PIE 'palatovelar' and 'velar' plosives"
-definition = "[+cons, +sonorant, -voice] → [+voice]"
+definition = "[+cons, -sonorant, +back, +front] → [front: none]"
 
 [u_epenthesis]
 time = -2000
