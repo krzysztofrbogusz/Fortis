@@ -39,6 +39,15 @@ name = "'u' epenthesis"
 description = "Epenthesis of /u/ before the syllabic sonorants"
 definition = "∅ [+cons, +syll] → u [-syll]"
 
+# A dental stop + epenthetic s + dental stop collapses to ss (*TsT > ss): the dental
+# stops ([+cons,-continuant,+anterior,-sonorant], i.e. t/d) become s, the span
+# shrinking 3→2. The result is letters (replacement path) so the lengths may differ.
+[dental_cluster]
+time = -2000
+name = "Dental cluster simplification"
+description = "*TsT > ss — *wid-tós (*widstos) > *wissós 'certain'"
+definition = "[+cons, -continuant, +anterior, -sonorant] s [+cons, -continuant, +anterior, -sonorant] → s s"
+
 [backness_harmony]
 time = 1300
 name = "Backness harmony"
