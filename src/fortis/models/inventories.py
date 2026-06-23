@@ -78,6 +78,11 @@ class DiacriticInventory(UserDict[str, Diacritic]):
         )
 
     @cached_property
+    def segment_dict(self) -> dict[str, Diacritic]:
+        """Segment-tier diacritics keyed by symbol."""
+        return {s: d for s, d in self.data.items() if d.tier == Tier.segment}
+
+    @cached_property
     def syllable_keys(self) -> list[str]:
         """Syllable-tier diacritic symbols sorted longest-first."""
         return sorted(

@@ -5,18 +5,9 @@ The ``sonorities`` and ``syllable_parts`` fixtures come from conftest.
 
 import pytest
 
-from src.fortis.application.syllabifying import (
-    SyllabificationError,
-    render_syllabified,
-    syllabify,
-)
+from src.fortis.application.syllabifying import SyllabificationError, syllabify
 from src.fortis.models.bundles import FeatureBundle
-from src.fortis.models.inventories import (
-    Letter,
-    LetterInventory,
-    SyllablePart,
-    SyllablePartsInventory,
-)
+from src.fortis.models.inventories import SyllablePart, SyllablePartsInventory
 from src.fortis.models.specs import FeatureSpec
 from src.fortis.parsing.bundles import parse_pattern_bundle
 from src.fortis.parsing.notation import parse_sequence
@@ -133,24 +124,3 @@ class TestOnsetCodaConstraints:
         parts = self._parts(features, onset="[]", coda="[]")
         with pytest.raises(SyllabificationError):
             syllabify(word, sonorities, parts, 0)
-
-
-class TestRenderSyllabified:
-    def test_boundaries_shown_as_dots(self, sonorities, syllable_parts):
-        # planta → plan.ta; each segment is an exact-match letter (distinct bundles).
-        p = _fb(consonantal=1, sonorant=0, labial=1)
-        ll = _fb(consonantal=1, sonorant=1, lateral=1)
-        a = _fb(syllabic=1, consonantal=0)
-        n = _fb(consonantal=1, sonorant=1, nasal=1)
-        t = _fb(consonantal=1, sonorant=0)
-        letters = LetterInventory(
-            {"p": Letter("p", p), "l": Letter("l", ll), "a": Letter("a", a),
-             "n": Letter("n", n), "t": Letter("t", t)}
-        )
-        word = [p, ll, a, n, t, a]
-        boundaries = syllabify(word, sonorities, syllable_parts, 0)
-        assert render_syllabified(word, boundaries, letters) == "plan.ta"
-
-    def test_unmatched_segment_is_question_mark(self):
-        seg = _fb(consonantal=1)
-        assert render_syllabified([seg], frozenset({0, 1}), LetterInventory()) == "?"

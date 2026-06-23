@@ -3,6 +3,7 @@
 import pytest
 
 from src.fortis.loaders.features import load_feature_inventory
+from src.fortis.loaders.project import load_project
 from src.fortis.models.features import FeatureInventory
 from src.fortis.models.inventories import (
     SonoritiesInventory,
@@ -10,7 +11,16 @@ from src.fortis.models.inventories import (
     SyllablePart,
     SyllablePartsInventory,
 )
+from src.fortis.models.project import Project
 from src.fortis.parsing.bundles import parse_pattern_bundle
+
+
+@pytest.fixture(scope="session")
+def project() -> Project:
+    """The real project loaded from the repo's ``inventories/`` directory."""
+    result = load_project()
+    assert result.is_ok(), f"Failed to load project: {result.unwrap_err()}"
+    return result.unwrap()
 
 MINIMAL_FEATURES_TOML = """\
 [consonantal]

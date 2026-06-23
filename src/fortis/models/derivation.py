@@ -9,12 +9,19 @@ from src.fortis.models.rules import Rule
 
 @dataclass(frozen=True)
 class DerivationStep:
-    """One firing rule: the form before, the rule, a change summary, the after."""
+    """One firing rule: the form before, the rule, a change summary, the after.
+
+    ``before_boundaries``/``after_boundaries`` carry each form's syllable structure
+    for the trace; empty when syllabification is unconfigured or the form is
+    unsyllabifiable.
+    """
 
     before: list[FeatureBundle]
     rule: Rule
     change: str
     after: list[FeatureBundle]
+    before_boundaries: frozenset[int] = frozenset()
+    after_boundaries: frozenset[int] = frozenset()
 
 
 @dataclass(frozen=True)

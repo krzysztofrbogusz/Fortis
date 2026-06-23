@@ -1,3 +1,5 @@
+from src.fortis.application.combining import combine
+from src.fortis.application.matching import pattern_matches
 from src.fortis.config import config
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.project import Project
@@ -27,12 +29,12 @@ def string_to_sequence(raw_string: str, project: Project) -> list[FeatureBundle]
             if remaining.startswith(diacritic_symbol):
                 diacritic_def = project.diacritics[diacritic_symbol]
                 if diacritic_symbol in project.diacritics.syllable_keys:
-                    syllable_buffer = syllable_buffer.combine_with(
-                        diacritic_def.bundle, form_contours=diacritic_def.contour
+                    syllable_buffer = combine(
+                        syllable_buffer, diacritic_def.bundle, form_contours=diacritic_def.contour
                     )
                 else:
-                    buffer = buffer.combine_with(
-                        diacritic_def.bundle, form_contours=diacritic_def.contour
+                    buffer = combine(
+                        buffer, diacritic_def.bundle, form_contours=diacritic_def.contour
                     )
                 i += len(diacritic_symbol)
                 break
@@ -41,11 +43,15 @@ def string_to_sequence(raw_string: str, project: Project) -> list[FeatureBundle]
             for letter_symbol in project.letters.sorted_keys:
                 if remaining.startswith(letter_symbol):
                     segment = project.letters[letter_symbol].bundle
-                    segment = segment.combine_with(buffer)
+                    segment = combine(segment, buffer)
                     nucleus = project.syllable_parts.get_nucleus(project.time)
-                    if nucleus is not None and nucleus.matches_against(segment):
-                        segment = segment.combine_with(syllable_buffer)
-                        last_nucleus_index = len(segments) - 1
+                    if (
+                        nucleus is not None
+                        and nucleus.definition is not None
+                        and pattern_matches(nucleus.definition, segment)
+                    ):
+                        segment = combine(segment, syllable_buffer)
+                        last_nucleus_index = len(segments)  # index the nucleus gets on append
                         syllable_buffer = FeatureBundle()
                     segments.append(segment)
                     buffer = FeatureBundle()
@@ -57,14 +63,16 @@ def string_to_sequence(raw_string: str, project: Project) -> list[FeatureBundle]
                     if remaining.startswith(diacritic_symbol):
                         diacritic_def = project.diacritics[diacritic_symbol]
                         if diacritic_symbol in project.diacritics.syllable_keys:
-                            segments[last_nucleus_index] = segments[
-                                last_nucleus_index
-                            ].combine_with(
-                                diacritic_def.bundle, form_contours=diacritic_def.contour
+                            segments[last_nucleus_index] = combine(
+                                segments[last_nucleus_index],
+                                diacritic_def.bundle,
+                                form_contours=diacritic_def.contour,
                             )
                         else:
-                            segments[-1] = segments[-1].combine_with(
-                                diacritic_def.bundle, form_contours=diacritic_def.contour
+                            segments[-1] = combine(
+                                segments[-1],
+                                diacritic_def.bundle,
+                                form_contours=diacritic_def.contour,
                             )
                         i += len(diacritic_symbol)
                         break

@@ -74,6 +74,24 @@ def _boundaries(
     return syllabify(form, sonorities, syllable_parts, time, letters)
 
 
+def _display_boundaries(
+    form: list[FeatureBundle],
+    sonorities: SonoritiesInventory | None,
+    syllable_parts: SyllablePartsInventory | None,
+    time: int,
+    letters: LetterInventory,
+) -> frozenset[int]:
+    """Syllable boundaries for the trace — best-effort; an unsyllabifiable form is empty.
+
+    Unlike the matcher's boundaries this is purely for display, so it ignores the
+    ``$``-usage gate and never propagates a ``SyllabificationError``.
+    """
+    try:
+        return _boundaries(form, sonorities, syllable_parts, time, letters)
+    except SyllabificationError:
+        return frozenset()
+
+
 def _uses_boundary(sd: StructuralDescription) -> bool:
     """Whether the rule references the ``$`` syllable-boundary assertion anywhere."""
     sequences = (
@@ -259,18 +277,19 @@ def derive(
                         rule=rule,
                         change=_describe_change(before, after),
                         after=list(after),
+                        before_boundaries=_display_boundaries(
+                            before, sonorities, syllable_parts, rule.time, letters
+                        ),
+                        after_boundaries=_display_boundaries(
+                            after, sonorities, syllable_parts, rule.time, letters
+                        ),
                     )
                 )
                 current = after
 
-    # Surface structure is a display aid, so an unsyllabifiable surface yields no
-    # boundaries rather than aborting the (otherwise complete) derivation.
-    try:
-        surface_boundaries = _boundaries(
-            current, sonorities, syllable_parts, max(rules, default=0), letters
-        )
-    except SyllabificationError:
-        surface_boundaries = frozenset()
+    surface_boundaries = _display_boundaries(
+        current, sonorities, syllable_parts, max(rules, default=0), letters
+    )
     return Derivation(
         word=word,
         input=input_form,

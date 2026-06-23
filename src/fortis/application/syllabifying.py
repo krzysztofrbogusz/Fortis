@@ -31,7 +31,6 @@ interior split where there is a choice; word-edge onsets/codas are forced and no
 checked.
 """
 
-from src.fortis.application.combining import matches_exactly
 from src.fortis.application.matching import full_match, pattern_matches
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.inventories import (
@@ -150,31 +149,3 @@ def syllabify(
         start = _split(cluster_levels, cluster_segs, onset_part, coda_part, letters)
         boundaries.add(left + 1 + start)
     return frozenset(boundaries)
-
-
-def render_syllabified(
-    segments: list[FeatureBundle],
-    boundaries: frozenset[int],
-    letters: LetterInventory,
-) -> str:
-    """Render *segments* as a string with ``.`` at each interior syllable boundary.
-
-    Each segment is shown as the letter whose bundle matches it exactly, or ``?``
-    if none does. This is a minimal syllable-aware view for traces and tests — full
-    IPA rendering (diacritics, partial matches) is the separate rendering milestone.
-    """
-    interior = boundaries - {0, len(segments)}
-    out: list[str] = []
-    for i, segment in enumerate(segments):
-        if i in interior:
-            out.append(".")
-        out.append(_symbol(segment, letters))
-    return "".join(out)
-
-
-def _symbol(segment: FeatureBundle, letters: LetterInventory) -> str:
-    """The letter whose bundle exactly matches *segment*, or ``?`` if none does."""
-    for symbol, letter in letters.items():
-        if matches_exactly(letter.bundle, segment):
-            return symbol
-    return "?"
