@@ -292,6 +292,15 @@ class TestSequenceMatcher:
         assert _spans(find_matches(sd, [same, c, same])) == [(1, 2)]  # identical flanks
         assert find_matches(sd, [other, c, same]) == []  # differing flanks → no locus
 
+    def test_reference_bound_in_right_exception_recalled_to_the_left(self, features):
+        # Scope-based references hold inside the exception too: @1 in the left
+        # exception recalls 1 bound in the right exception, so the rule is blocked
+        # only when the locus is flanked by *identical* nasals.
+        sd = parse_definition("[+cons] -> [+voice] // @1 _ 1=[+nasal]", features).unwrap()
+        same, other, c = _fb(nasal=1, labial=1), _fb(nasal=1, labial=0), _fb(consonantal=1)
+        assert find_matches(sd, [same, c, same]) == []  # exception holds → blocked
+        assert _spans(find_matches(sd, [other, c, same])) == [(1, 2)]  # exception fails → fires
+
 
 class TestBindingOrder:
     """Pin the matcher semantics: alpha is order-independent, references target-first."""
