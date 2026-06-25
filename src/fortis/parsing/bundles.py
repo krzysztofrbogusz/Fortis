@@ -49,6 +49,28 @@ def identify_feature(raw_string: str, features: FeatureInventory) -> Result[tupl
     return Err(f"No feature could be identified from '{raw_string}'")
 
 
+def _scalar_label_requires_colon(
+    feature: str, raw_value: str, had_colon: bool, features: FeatureInventory
+) -> str | None:
+    """A scalar feature's value *label* is only legible after a colon.
+
+    A bare label (`high`, `low`) collides with feature names of the same spelling
+    (the vowel-height features), so for a scalar feature a label must be introduced by
+    a colon — ``tone: high``, not ``high tone``. Numbers (``tone3``) and alpha markers
+    (``α tone``) are unambiguous and need no colon. Returns an error message when the
+    rule is violated, else ``None``. Unary and binary features are unaffected.
+    """
+    if had_colon or features[feature].kind != "scalar":
+        return None
+    labels = set(features[feature].values.values())
+    if any(limb in labels for limb in raw_value.split(">")):
+        return (
+            f"Scalar feature '{feature}': a value label must follow a colon "
+            f"(write '{feature}: {raw_value}', not a bare label)"
+        )
+    return None
+
+
 def split_conditional(raw_spec: str) -> Result[tuple[int, str], str]:
     """Split a conditional-feature wrapper ``<n: F>`` into ``(label, inner)``.
 
@@ -188,6 +210,7 @@ def parse_feature_spec(
         # Strip the matched feature name
         raw_value = raw_spec.replace(matched_string, "", 1)
         raw_value = raw_value.replace(":", "")
+        had_colon = ":" in raw_spec
     else:
         # Feature name provided — validate it exists in the inventory
         if feature not in features:
@@ -196,6 +219,7 @@ def parse_feature_spec(
         raw_value = raw_spec
         if raw_value.startswith(":"):
             raw_value = raw_value[1:]
+        had_colon = True  # feature already identified — no ambiguity to resolve
 
     # Plain feature name – unary defaults to present; non-unary defaults to "any"
     if not raw_value:
@@ -217,6 +241,10 @@ def parse_feature_spec(
     # Contour position
     if "@" in raw_value:
         return Err("Realized feature specifications don't support contour positions")
+
+    label_error = _scalar_label_requires_colon(feature, raw_value, had_colon, features)
+    if label_error is not None:
+        return Err(label_error)
 
     # Contour
     if ">" in raw_value:
@@ -360,6 +388,7 @@ def parse_pattern_spec(raw_spec: str, features: FeatureInventory) -> Result[Patt
     # Stripping the feature name
     raw_value = raw_spec.replace(matched_string, "", 1)
     raw_value = raw_value.replace(":", "")
+    had_colon = ":" in raw_spec
 
     # Negation — a leading '!' negates the whole spec, UNLESS it immediately
     # precedes a Greek letter, where it is the value-level alpha-other marker
@@ -395,6 +424,10 @@ def parse_pattern_spec(raw_spec: str, features: FeatureInventory) -> Result[Patt
                 contour_position = result
                 contour_position_assigned = True
         raw_value = raw_value.split("@")[0]
+
+    label_error = _scalar_label_requires_colon(feature, raw_value, had_colon, features)
+    if label_error is not None:
+        return Err(label_error)
 
     # No '>' means not a contour
     if ">" in raw_value:
@@ -574,6 +607,7 @@ def parse_result_spec(raw_spec: str, features: FeatureInventory) -> Result[Resul
     # Stripping the feature name
     raw_value = raw_spec.replace(matched_string, "", 1)
     raw_value = raw_value.replace(":", "")
+    had_colon = ":" in raw_spec
 
     # Negation — a leading '!' is spec negation, rejected here. A '!' that
     # precedes a Greek letter is the value-level alpha-other marker ('!α');
@@ -587,6 +621,10 @@ def parse_result_spec(raw_spec: str, features: FeatureInventory) -> Result[Resul
     # Contour position
     if "@" in raw_value:
         return Err("Result spec does not support contour position")
+
+    label_error = _scalar_label_requires_colon(feature, raw_value, had_colon, features)
+    if label_error is not None:
+        return Err(label_error)
 
     # Plain feature name – unary defaults to present; others require a value
     if not raw_value:

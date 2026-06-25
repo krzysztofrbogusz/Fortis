@@ -13,7 +13,11 @@ from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.loaders.features import load_feature_inventory, load_short
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.specs import FeatureSpec
-from src.fortis.parsing.bundles import determine_contour_position, parse_feature_spec
+from src.fortis.parsing.bundles import (
+    determine_contour_position,
+    parse_feature_spec,
+    parse_pattern_spec,
+)
 from src.fortis.parsing.notation import parse_definition
 
 
@@ -34,6 +38,22 @@ def test_value_label_matching_a_feature_name(project):
     # value label `high` happens to spell.
     spec = parse_feature_spec("tone: high", project.features)
     assert spec.is_ok() and spec.unwrap().feature == "tone"
+
+
+def test_scalar_value_label_requires_a_colon(project):
+    # A scalar feature's value LABEL must follow a colon (`tone: mid`) — a bare label
+    # collides with a feature name of the same spelling. Numbers and alpha markers are
+    # unambiguous and need no colon; unary/binary features are unaffected.
+    f = project.features
+    assert parse_pattern_spec("tone: mid", f).is_ok()  # label + colon -> ok
+    assert parse_pattern_spec("mid tone", f).is_err()  # bare label -> err
+    assert parse_pattern_spec("tone: 3", f).is_ok()  # number + colon -> ok
+    assert parse_pattern_spec("tone3", f).is_ok()  # number, no colon -> ok
+    assert parse_pattern_spec("α tone", f).is_ok()  # alpha on a scalar, no colon -> ok
+    assert parse_pattern_spec("+nasal", f).is_ok()  # unary, no colon -> ok
+    # Same rule holds in the realized (lexicon) context:
+    assert parse_feature_spec("tone: high", f).is_ok()
+    assert parse_feature_spec("high tone", f).is_err()
 
 
 def test_blank_short_field_defaults_to_feature_name():
