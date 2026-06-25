@@ -6,36 +6,108 @@ from src.fortis.models.tiers import Tier
 
 class TestFeature:
     def test_binary_feature(self):
-        f = Feature(name="voice", tier=Tier.segment, kind=FeatureKind.binary, short_name="vc", values={0: "absent", 1: "present"}, children=None)
+        f = Feature(
+            name="voice",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="vc",
+            values={0: "absent", 1: "present"},
+            children=None,
+        )
         assert f.name == "voice"
         assert f.kind == FeatureKind.binary
         assert f.values[1] == "present"
 
     def test_unary_feature(self):
-        f = Feature(name="manner", tier=Tier.segment, kind=FeatureKind.unary, short_name="man", values={1: "present"}, children=None)
+        f = Feature(
+            name="manner",
+            tier=Tier.segment,
+            kind=FeatureKind.unary,
+            short_name="man",
+            values={1: "present"},
+            children=None,
+        )
         assert f.values == {1: "present"}
 
     def test_scalar_feature(self):
-        f = Feature(name="tone", tier=Tier.syllable, kind=FeatureKind.scalar, short_name="t", values={1: "low", 2: "mid", 3: "high"}, children=None)
+        f = Feature(
+            name="tone",
+            tier=Tier.syllable,
+            kind=FeatureKind.scalar,
+            short_name="t",
+            values={1: "low", 2: "mid", 3: "high"},
+            children=None,
+        )
         assert f.values[2] == "mid"
 
     def test_default_parent(self):
-        f = Feature(name="voice", tier=Tier.segment, kind=FeatureKind.binary, short_name="vc", values={0: "absent", 1: "present"}, children=None)
+        f = Feature(
+            name="voice",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="vc",
+            values={0: "absent", 1: "present"},
+            children=None,
+        )
         assert f.parent is None
 
     def test_with_children(self):
-        f = Feature(name="manner", tier=Tier.segment, kind=FeatureKind.unary, short_name="man", values={1: "present"}, children=("continuant", "sonorant"))
+        f = Feature(
+            name="manner",
+            tier=Tier.segment,
+            kind=FeatureKind.unary,
+            short_name="man",
+            values={1: "present"},
+            children=("continuant", "sonorant"),
+        )
         assert f.children == ("continuant", "sonorant")
 
 
 class TestFeatureInventory:
     def _make_inventory(self) -> FeatureInventory:
         inv = FeatureInventory()
-        voice = Feature(name="voice", tier=Tier.segment, kind=FeatureKind.binary, short_name="vc", values={0: "absent", 1: "present"}, children=None)
-        nasal = Feature(name="nasal", tier=Tier.segment, kind=FeatureKind.binary, short_name="nas", values={0: "absent", 1: "present"}, children=None)
-        manner = Feature(name="manner", tier=Tier.segment, kind=FeatureKind.unary, short_name="man", values={1: "present"}, children=("continuant", "sonorant"))
-        continuant = Feature(name="continuant", tier=Tier.segment, kind=FeatureKind.binary, short_name="cont", values={0: "absent", 1: "present"}, children=None, parent="manner")
-        sonorant = Feature(name="sonorant", tier=Tier.segment, kind=FeatureKind.binary, short_name="son", values={0: "absent", 1: "present"}, children=None, parent="manner")
+        voice = Feature(
+            name="voice",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="vc",
+            values={0: "absent", 1: "present"},
+            children=None,
+        )
+        nasal = Feature(
+            name="nasal",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="nas",
+            values={0: "absent", 1: "present"},
+            children=None,
+        )
+        manner = Feature(
+            name="manner",
+            tier=Tier.segment,
+            kind=FeatureKind.unary,
+            short_name="man",
+            values={1: "present"},
+            children=("continuant", "sonorant"),
+        )
+        continuant = Feature(
+            name="continuant",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="cont",
+            values={0: "absent", 1: "present"},
+            children=None,
+            parent="manner",
+        )
+        sonorant = Feature(
+            name="sonorant",
+            tier=Tier.segment,
+            kind=FeatureKind.binary,
+            short_name="son",
+            values={0: "absent", 1: "present"},
+            children=None,
+            parent="manner",
+        )
 
         inv["voice"] = voice
         inv["nasal"] = nasal

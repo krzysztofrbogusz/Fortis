@@ -1,8 +1,6 @@
 """Tests for the letters loader."""
 
 from src.fortis.loaders.letters import load_letter, load_letter_inventory
-from src.fortis.models.features import FeatureInventory
-from src.fortis.result import Err
 
 
 class TestLoadLetter:

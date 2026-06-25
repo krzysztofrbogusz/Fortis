@@ -1,9 +1,7 @@
 """Tests for rule types."""
 
-from src.fortis.models.bundles import PatternBundle
 from src.fortis.models.elements import LetterRef
 from src.fortis.models.rules import ApplicationMode, Rule, StructuralDescription
-from src.fortis.models.specs import PatternSpec
 
 
 class TestApplicationMode:

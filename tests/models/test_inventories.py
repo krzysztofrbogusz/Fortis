@@ -33,9 +33,30 @@ class TestLetterInventory:
 class TestDiacriticInventory:
     def _make_inventory(self) -> DiacriticInventory:
         inv = DiacriticInventory()
-        inv["ʰ"] = Diacritic(symbol="ʰ", tier=Tier.segment, kind=DiacriticKind.after, bundle=FeatureBundle(), default=False, contour=False)
-        inv["ˈ"] = Diacritic(symbol="ˈ", tier=Tier.syllable, kind=DiacriticKind.before, bundle=FeatureBundle(), default=True, contour=False)
-        inv["̩"] = Diacritic(symbol="̩", tier=Tier.segment, kind=DiacriticKind.combining, bundle=FeatureBundle(), default=False, contour=False)
+        inv["ʰ"] = Diacritic(
+            symbol="ʰ",
+            tier=Tier.segment,
+            kind=DiacriticKind.after,
+            bundle=FeatureBundle(),
+            default=False,
+            contour=False,
+        )
+        inv["ˈ"] = Diacritic(
+            symbol="ˈ",
+            tier=Tier.syllable,
+            kind=DiacriticKind.before,
+            bundle=FeatureBundle(),
+            default=True,
+            contour=False,
+        )
+        inv["̩"] = Diacritic(
+            symbol="̩",
+            tier=Tier.segment,
+            kind=DiacriticKind.combining,
+            bundle=FeatureBundle(),
+            default=False,
+            contour=False,
+        )
         return inv
 
     def test_segment_keys(self):
@@ -67,9 +88,30 @@ class TestDiacriticInventory:
 
     def test_sorted_longest_first(self):
         inv = DiacriticInventory()
-        inv["a"] = Diacritic(symbol="a", tier=Tier.segment, kind=DiacriticKind.after, bundle=FeatureBundle(), default=False, contour=False)
-        inv["abc"] = Diacritic(symbol="abc", tier=Tier.segment, kind=DiacriticKind.after, bundle=FeatureBundle(), default=False, contour=False)
-        inv["ab"] = Diacritic(symbol="ab", tier=Tier.segment, kind=DiacriticKind.after, bundle=FeatureBundle(), default=False, contour=False)
+        inv["a"] = Diacritic(
+            symbol="a",
+            tier=Tier.segment,
+            kind=DiacriticKind.after,
+            bundle=FeatureBundle(),
+            default=False,
+            contour=False,
+        )
+        inv["abc"] = Diacritic(
+            symbol="abc",
+            tier=Tier.segment,
+            kind=DiacriticKind.after,
+            bundle=FeatureBundle(),
+            default=False,
+            contour=False,
+        )
+        inv["ab"] = Diacritic(
+            symbol="ab",
+            tier=Tier.segment,
+            kind=DiacriticKind.after,
+            bundle=FeatureBundle(),
+            default=False,
+            contour=False,
+        )
         assert inv.segment_keys == ["abc", "ab", "a"]
 
 

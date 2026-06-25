@@ -49,7 +49,9 @@ class TestLoadBundle:
 
 class TestLoadSonority:
     def test_valid(self, features):
-        result = load_sonority("vowel", {"level": 7, "bundle": "syllabic: +, consonantal: -"}, features)
+        result = load_sonority(
+            "vowel", {"level": 7, "bundle": "syllabic: +, consonantal: -"}, features
+        )
         assert result.is_ok()
         s = result.unwrap()
         assert s.label == "vowel"
@@ -63,7 +65,10 @@ class TestLoadSonority:
 
 class TestLoadSonoritiesInventory:
     def test_from_file(self, tmp_path, features):
-        toml_content = 'vowel = { level = 7, bundle = "syllabic: +, consonantal: -" }\nstop = { level = 1, bundle = "sonorant: -" }\n'
+        toml_content = (
+            'vowel = { level = 7, bundle = "syllabic: +, consonantal: -" }\n'
+            'stop = { level = 1, bundle = "sonorant: -" }\n'
+        )
         path = tmp_path / "sonorities.toml"
         path.write_text(toml_content)
         result = load_sonorities_inventory(path, features)
@@ -73,7 +78,10 @@ class TestLoadSonoritiesInventory:
         assert inv["vowel"].level == 7
 
     def test_duplicate_levels(self, tmp_path, features):
-        toml_content = 'vowel = { level = 7, bundle = "syllabic: +" }\nglide = { level = 7, bundle = "consonantal: -" }\n'
+        toml_content = (
+            'vowel = { level = 7, bundle = "syllabic: +" }\n'
+            'glide = { level = 7, bundle = "consonantal: -" }\n'
+        )
         path = tmp_path / "sonorities.toml"
         path.write_text(toml_content)
         result = load_sonorities_inventory(path, features)

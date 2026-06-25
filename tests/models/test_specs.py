@@ -30,7 +30,9 @@ class TestPatternSpec:
         assert spec.contour_position == ContourEdge.any
 
     def test_explicit_values(self):
-        spec = PatternSpec(feature="consonantal", value=0, negated=True, contour_position=ContourEdge.initial)
+        spec = PatternSpec(
+            feature="consonantal", value=0, negated=True, contour_position=ContourEdge.initial
+        )
         assert spec.feature == "consonantal"
         assert spec.value == 0
         assert spec.negated is True

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.fortis.models.bundles import PatternBundle
+from src.fortis.models.bundles import PatternBundle, ResultBundle
 from src.fortis.models.elements import (
     Bound,
     BundleElem,
@@ -20,7 +20,6 @@ from src.fortis.models.elements import (
     WordBoundary,
 )
 from src.fortis.models.specs import PatternSpec, ResultSpec
-from src.fortis.models.bundles import ResultBundle
 
 
 class TestLetterRef:

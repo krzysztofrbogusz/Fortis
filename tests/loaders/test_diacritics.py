@@ -8,12 +8,9 @@ from src.fortis.loaders.diacritics import (
     load_diacritic_inventory,
     load_kind,
     load_tier,
-    validate_diacritic_inventory,
 )
-from src.fortis.models.features import FeatureInventory
 from src.fortis.models.inventories import DiacriticKind
 from src.fortis.models.tiers import Tier
-from src.fortis.result import Err
 
 
 class TestLoadTier:
@@ -110,7 +107,9 @@ class TestLoadBundle:
 
 class TestLoadDiacritic:
     def test_valid(self, features):
-        result = load_diacritic("̩", {"tier": "segment", "kind": "combining", "bundle": "+syllabic"}, features)
+        result = load_diacritic(
+            "̩", {"tier": "segment", "kind": "combining", "bundle": "+syllabic"}, features
+        )
         assert result.is_ok(), f"Errors: {result.unwrap_err() if result.is_err() else None}"
         d = result.unwrap()
         assert d.symbol == "̩"
@@ -126,7 +125,7 @@ class TestLoadDiacritic:
 
 class TestLoadDiacriticInventory:
     def test_from_file(self, tmp_path, features):
-        toml_content = '''"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }'''
+        toml_content = """"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }"""
         path = tmp_path / "diacritics.toml"
         path.write_text(toml_content)
         result = load_diacritic_inventory(path, features)
@@ -135,10 +134,13 @@ class TestLoadDiacriticInventory:
         assert "̩" in inv
 
     def test_duplicate_symbol(self, tmp_path, features):
-        toml_content = '''"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }\n"̩" = { tier = "segment", kind = "combining", bundle = "-syll" }'''
+        toml_content = (
+            '"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }\n'
+            '"̩" = { tier = "segment", kind = "combining", bundle = "-syll" }'
+        )
         # TOML doesn't allow duplicate keys, so this would fail at parse level
         # Instead test with a valid file
-        toml_content = '''"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }'''
+        toml_content = """"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }"""
         path = tmp_path / "diacritics.toml"
         path.write_text(toml_content)
         result = load_diacritic_inventory(path, features)

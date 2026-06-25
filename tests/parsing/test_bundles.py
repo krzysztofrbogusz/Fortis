@@ -1,7 +1,5 @@
 """Tests for bundle and value parsing."""
 
-from src.fortis.models.bundles import FeatureBundle, PatternBundle
-from src.fortis.models.features import FeatureInventory
 from src.fortis.models.specs import FeatureSpec, PatternSpec, ResultSpec
 from src.fortis.models.values import AlphaOp, AlphaRef, ContourEdge
 from src.fortis.parsing.bundles import (

@@ -3,7 +3,6 @@
 from src.fortis.loaders.features import (
     load_children,
     load_feature,
-    load_feature_inventory,
     load_kind,
     load_short,
     load_tier,
@@ -11,7 +10,6 @@ from src.fortis.loaders.features import (
 )
 from src.fortis.models.features import FeatureKind
 from src.fortis.models.tiers import Tier
-from src.fortis.result import Err, Ok
 
 
 class TestLoadTier:
@@ -92,7 +90,9 @@ class TestLoadValues:
         assert result.unwrap() == {0: "absent", 1: "present"}
 
     def test_scalar_with_values(self):
-        result = load_values("tone", {"kind": "scalar", "values": {"1": "low", "2": "high"}}, FeatureKind.scalar)
+        result = load_values(
+            "tone", {"kind": "scalar", "values": {"1": "low", "2": "high"}}, FeatureKind.scalar
+        )
         assert result.is_ok()
         values = result.unwrap()
         assert values[1] == "low"
@@ -141,7 +141,15 @@ class TestLoadFeature:
         assert feature.short_name == "vc"
 
     def test_valid_unary_with_children(self):
-        result = load_feature("manner", {"tier": "segment", "kind": "unary", "short": "man", "children": ["continuant", "sonorant"]})
+        result = load_feature(
+            "manner",
+            {
+                "tier": "segment",
+                "kind": "unary",
+                "short": "man",
+                "children": ["continuant", "sonorant"],
+            },
+        )
         assert result.is_ok()
         feature = result.unwrap()
         assert feature.children == ("continuant", "sonorant")

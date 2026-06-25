@@ -1,7 +1,6 @@
 """Tests for the words loader."""
 
 from src.fortis.loaders.words import load_word_inventory
-from src.fortis.result import Err
 
 
 class TestLoadWordInventory:

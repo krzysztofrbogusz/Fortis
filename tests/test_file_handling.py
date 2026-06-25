@@ -1,9 +1,7 @@
 """Tests for file handling utilities."""
 
-import pytest
 
 from src.fortis.general.file_handling import load_csv_file, load_toml_file
-from src.fortis.result import Err, Ok
 
 
 class TestLoadTomlFile:

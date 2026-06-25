@@ -2,7 +2,6 @@
 
 from src.fortis.models.bundles import FeatureBundle, PatternBundle, ResultBundle
 from src.fortis.models.specs import FeatureSpec, PatternSpec, ResultSpec
-from src.fortis.models.values import ContourEdge
 
 
 class TestFeatureBundle:
