@@ -78,6 +78,7 @@ from src.fortis.models.rules import (
     RuleInventory,
     StructuralDescription,
 )
+from src.fortis.models.segment import Segment
 from src.fortis.models.tiers import Tier
 
 
@@ -259,15 +260,15 @@ def _display_boundaries(
 
 def apply_rule(
     rule: Rule,
-    segments: list[FeatureBundle],
+    form: Form,
     letters: LetterInventory,
     features: FeatureInventory,
     sonorities: SonoritiesInventory | None = None,
     syllable_parts: SyllablePartsInventory | None = None,
-) -> list[FeatureBundle]:
-    """Apply *rule* to *segments* once, per its application mode.
+) -> Form:
+    """Apply *rule* to *form* once, per its application mode.
 
-    Returns a new form; *segments* is never mutated. A rule whose loci do not
+    Returns a new form; *form* is never mutated. A rule whose loci do not
     match returns an unchanged copy. The form is re-syllabified for every rule, so
     ``$`` and syllable-tier matching always reflect the current form; an
     unsyllabifiable form (under onset/coda constraints) yields no structure rather
@@ -278,17 +279,17 @@ def apply_rule(
     match rule.application:
         case ApplicationMode.simultaneous:
             boundaries, view = _syllable_context(
-                segments, sonorities, syllable_parts, rule.time, letters, syllable_features
+                form.bundles(), sonorities, syllable_parts, rule.time, letters, syllable_features
             )
-            return _apply_simultaneous(rule.sd, segments, letters, features, boundaries, view)
+            return _apply_simultaneous(rule.sd, form, letters, features, boundaries, view)
         case ApplicationMode.left_to_right:
             return _apply_directional(
-                rule.sd, segments, letters, features, sonorities, syllable_parts, rule.time,
+                rule.sd, form, letters, features, sonorities, syllable_parts, rule.time,
                 syllable_features, False,
             )
         case ApplicationMode.right_to_left:
             return _apply_directional(
-                rule.sd, segments, letters, features, sonorities, syllable_parts, rule.time,
+                rule.sd, form, letters, features, sonorities, syllable_parts, rule.time,
                 syllable_features, True,
             )
 
@@ -306,27 +307,28 @@ def _select_non_overlapping(matches: list[Match]) -> list[Match]:
 
 def _apply_simultaneous(
     sd: StructuralDescription,
-    segments: list[FeatureBundle],
+    form: Form,
     letters: LetterInventory,
     features: FeatureInventory,
     boundaries: frozenset[int],
     syllables: SyllableView | None,
-) -> list[FeatureBundle]:
+) -> Form:
     """Find every locus against the original form, then splice all rewrites at once."""
-    selected = _select_non_overlapping(find_matches(sd, segments, letters, boundaries, syllables))
-    out = list(segments)
-    # Splice right-to-left so each replacement's indices stay valid, and compute
-    # every replacement from the ORIGINAL form (no application sees another's output).
+    bundles = form.bundles()
+    selected = _select_non_overlapping(find_matches(sd, bundles, letters, boundaries, syllables))
+    out = form.copy()
+    # Splice right-to-left so each replacement's indices stay valid, and compute every
+    # replacement from the ORIGINAL form (no application sees another's output). Segments
+    # outside the spliced span keep their identity; the replacement gets fresh ids.
     for match in sorted(selected, key=lambda m: m.start, reverse=True):
-        out[match.start : match.end] = apply_match(
-            sd, match, segments, letters, features, syllables
-        )
+        replacement = apply_match(sd, match, bundles, letters, features, syllables)
+        out.segments[match.start : match.end] = [Segment(b, out.fresh_id()) for b in replacement]
     return out
 
 
 def _apply_directional(
     sd: StructuralDescription,
-    segments: list[FeatureBundle],
+    form: Form,
     letters: LetterInventory,
     features: FeatureInventory,
     sonorities: SonoritiesInventory | None,
@@ -334,21 +336,22 @@ def _apply_directional(
     time: int,
     syllable_features: frozenset[str],
     reverse: bool,
-) -> list[FeatureBundle]:
+) -> Form:
     """Scan and rewrite in place; each output is visible to later loci in the pass.
 
     Because the form mutates as it is rewritten, it is re-syllabified before each
     scan so the ``$`` assertion and syllable-tier matching reflect the current form.
     """
-    form = list(segments)
-    cursor = len(form) if reverse else 0
+    work = form.copy()
+    cursor = len(work.segments) if reverse else 0
     while True:
+        bundles = work.bundles()
         boundaries, view = _syllable_context(
-            form, sonorities, syllable_parts, time, letters, syllable_features
+            bundles, sonorities, syllable_parts, time, letters, syllable_features
         )
         if reverse:
             candidates = [
-                m for m in find_matches(sd, form, letters, boundaries, view) if m.end <= cursor
+                m for m in find_matches(sd, bundles, letters, boundaries, view) if m.end <= cursor
             ]
             if not candidates:
                 break
@@ -357,15 +360,15 @@ def _apply_directional(
             match = max(candidates, key=lambda m: (m.end, -m.start))
         else:
             candidates = [
-                m for m in find_matches(sd, form, letters, boundaries, view) if m.start >= cursor
+                m for m in find_matches(sd, bundles, letters, boundaries, view) if m.start >= cursor
             ]
             if not candidates:
                 break
             # Leftmost; the matcher already made it longest for that start.
             match = min(candidates, key=lambda m: m.start)
 
-        replacement = apply_match(sd, match, form, letters, features, view)
-        form[match.start : match.end] = replacement
+        replacement = apply_match(sd, match, bundles, letters, features, view)
+        work.segments[match.start : match.end] = [Segment(b, work.fresh_id()) for b in replacement]
 
         no_op = match.end == match.start and not replacement
         if reverse:
@@ -375,7 +378,7 @@ def _apply_directional(
             # Advance past the rewritten output; bump only a true no-op (a deletion
             # makes progress by shrinking the form, so it must not bump).
             cursor = match.start + 1 if no_op else match.start + len(replacement)
-    return form
+    return work
 
 
 def _fired(before: list[FeatureBundle], after: list[FeatureBundle]) -> bool:
@@ -424,13 +427,12 @@ def derive(
         for rule in rules[time]:
             before = current  # Form
             before_bundles = current.bundles()
-            after_bundles = apply_rule(
-                rule, before_bundles, letters, features, sonorities, syllable_parts
-            )
+            after = apply_rule(rule, current, letters, features, sonorities, syllable_parts)
+            after_bundles = after.bundles()
             if _fired(before_bundles, after_bundles):
                 # Resyllabify after the rule, keeping each syllable's suprasegmentals
-                # on its (possibly shifted) nucleus. (Phase 1 replaces this with the
-                # tier cleanup pass; the bundle round-trip mints fresh ids meanwhile.)
+                # on its (possibly shifted) nucleus. (Task 3c replaces this with the tier
+                # cleanup pass; the bundle round-trip mints fresh ids meanwhile.)
                 after_bundles = _consolidate(
                     after_bundles, sonorities, syllable_parts, rule.time, letters, syllable_features
                 )

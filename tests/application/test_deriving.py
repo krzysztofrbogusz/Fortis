@@ -46,7 +46,7 @@ class TestApplicationModes:
         # Under simultaneous, only the originally voiced seg0 triggers (seg1).
         segs = [_fb(syllabic=1, voice=1), _fb(consonantal=1, voice=0), _fb(consonantal=1, voice=0)]
         rule = _rule("[+cons] -> [+voice] / [+voice] _", features, ApplicationMode.simultaneous)
-        assert _values(apply_rule(rule, segs, letters, features)) == [
+        assert _values(apply_rule(rule, Form.from_bundles(segs), letters, features).bundles()) == [
             {"syllabic": 1, "voice": 1},
             {"consonantal": 1, "voice": 1},
             {"consonantal": 1, "voice": 0},
@@ -56,7 +56,7 @@ class TestApplicationModes:
         # Same rule + input, but L2R: the newly voiced seg1 feeds seg2 → all voice.
         segs = [_fb(syllabic=1, voice=1), _fb(consonantal=1, voice=0), _fb(consonantal=1, voice=0)]
         rule = _rule("[+cons] -> [+voice] / [+voice] _", features, ApplicationMode.left_to_right)
-        assert _values(apply_rule(rule, segs, letters, features)) == [
+        assert _values(apply_rule(rule, Form.from_bundles(segs), letters, features).bundles()) == [
             {"syllabic": 1, "voice": 1},
             {"consonantal": 1, "voice": 1},
             {"consonantal": 1, "voice": 1},
@@ -66,7 +66,7 @@ class TestApplicationModes:
         # Regressive voicing: voicing spreads leftward from the voiced seg2.
         segs = [_fb(consonantal=1, voice=0), _fb(consonantal=1, voice=0), _fb(syllabic=1, voice=1)]
         rule = _rule("[+cons] -> [+voice] / _ [+voice]", features, ApplicationMode.right_to_left)
-        assert _values(apply_rule(rule, segs, letters, features)) == [
+        assert _values(apply_rule(rule, Form.from_bundles(segs), letters, features).bundles()) == [
             {"consonantal": 1, "voice": 1},
             {"consonantal": 1, "voice": 1},
             {"syllabic": 1, "voice": 1},
@@ -75,7 +75,7 @@ class TestApplicationModes:
     def test_simultaneous_two_independent_loci(self, features, letters):
         segs = [_fb(nasal=1, voice=1), _fb(nasal=1, voice=1)]
         rule = _rule("[+nasal] -> [-voice]", features, ApplicationMode.simultaneous)
-        assert _values(apply_rule(rule, segs, letters, features)) == [
+        assert _values(apply_rule(rule, Form.from_bundles(segs), letters, features).bundles()) == [
             {"nasal": 1, "voice": 0},
             {"nasal": 1, "voice": 0},
         ]
@@ -84,7 +84,7 @@ class TestApplicationModes:
         # A deletion shrinks the form; the narrow progress guard must not strand any.
         rule = _rule("[+cons] -> ∅", features, ApplicationMode.left_to_right)
         segs = [_fb(consonantal=1), _fb(consonantal=1), _fb(consonantal=1)]
-        assert apply_rule(rule, segs, letters, features) == []
+        assert apply_rule(rule, Form.from_bundles(segs), letters, features).bundles() == []
 
     def test_right_to_left_variable_width_picks_longest(self, features, letters):
         # `[+nasal]+ -> x` is a full-replacement result with a variable-width target.
@@ -93,16 +93,16 @@ class TestApplicationModes:
         # off one nasal at a time and leave several x's.
         rule = _rule("[+nasal]+ -> x", features, ApplicationMode.right_to_left)
         form = [_fb(nasal=1), _fb(nasal=1), _fb(syllabic=1)]
-        assert _values(apply_rule(rule, form, letters, features)) == [
+        assert _values(apply_rule(rule, Form.from_bundles(form), letters, features).bundles()) == [
             {"consonantal": 1, "voice": 0},
             {"syllabic": 1},
         ]
 
     def test_apply_rule_does_not_mutate_input(self, features, letters):
-        segs = [_fb(nasal=1, voice=1)]
+        form = Form.from_bundles([_fb(nasal=1, voice=1)])
         rule = _rule("[+nasal] -> [-voice]", features, ApplicationMode.simultaneous)
-        apply_rule(rule, segs, letters, features)
-        assert _values(segs) == [{"nasal": 1, "voice": 1}]
+        apply_rule(rule, form, letters, features)
+        assert _values(form.bundles()) == [{"nasal": 1, "voice": 1}]  # input form unchanged
 
 
 class TestDerive:
