@@ -54,7 +54,7 @@ from src.fortis.models.elements import (
     WordBoundary,
 )
 from src.fortis.models.rules import StructuralDescription
-from src.fortis.models.values import AlphaRef
+from src.fortis.models.values import AlphaRef, AutosegBind, AutosegRecall
 from src.fortis.result import Err, Ok, Result
 
 
@@ -66,12 +66,22 @@ class _Markers:
     recalls: set[int] = field(default_factory=set)
     alphas: set[str] = field(default_factory=set)
     labels: list[int] = field(default_factory=list)
+    autoseg_binds: set[int] = field(default_factory=set)
+    autoseg_recalls: set[int] = field(default_factory=set)
 
 
 def _alphas_in_value(value: object) -> set[str]:
     """Alpha variable names in a spec value — single value or contour limbs."""
     limbs = value if isinstance(value, tuple) else (value,)
     return {limb.var for limb in limbs if isinstance(limb, AlphaRef)}
+
+
+def _autoseg_refs_in_value(value: object) -> tuple[set[int], set[int]]:
+    """The (bind, recall) tier-autosegment reference numbers in a spec value."""
+    limbs = value if isinstance(value, tuple) else (value,)
+    binds = {limb.ref for limb in limbs if isinstance(limb, AutosegBind)}
+    recalls = {limb.ref for limb in limbs if isinstance(limb, AutosegRecall)}
+    return binds, recalls
 
 
 def _collect(elements: tuple[Element, ...], markers: _Markers) -> None:
@@ -81,8 +91,16 @@ def _collect(elements: tuple[Element, ...], markers: _Markers) -> None:
             case BundleElem(bundle) | ResultElem(bundle):
                 for spec in bundle.values():
                     markers.alphas |= _alphas_in_value(spec.value)
+                    binds, recalls = _autoseg_refs_in_value(spec.value)
+                    markers.autoseg_binds |= binds
+                    markers.autoseg_recalls |= recalls
                     if spec.condition_label is not None:
                         markers.labels.append(spec.condition_label)
+            case FloatingAutoseg(pattern):
+                for spec in pattern.values():
+                    binds, recalls = _autoseg_refs_in_value(spec.value)
+                    markers.autoseg_binds |= binds
+                    markers.autoseg_recalls |= recalls
             case Bound(ref, inner):
                 markers.binds.append(ref)
                 _collect((inner,), markers)
@@ -212,6 +230,24 @@ def validate_structural_description(sd: StructuralDescription) -> Result[None, l
         errors.append(f"Binding '{ref}=' is never recalled by '@{ref}'")
     for ref in sorted(set(result.binds)):
         errors.append(f"Binding '{ref}=' is not allowed in result position")
+
+    # §2.12 — tier-autosegment references (~n): every recall needs a bind and every bind a
+    # recall (scope-based, like §2.3); ⟨...⟩ is pattern-only, so a floating autosegment in the
+    # result is undefined.
+    autoseg_bound = (
+        target.autoseg_binds | result.autoseg_binds | left_ctx.autoseg_binds
+        | right_ctx.autoseg_binds | left_exc.autoseg_binds | right_exc.autoseg_binds
+    )
+    autoseg_recalled = (
+        target.autoseg_recalls | result.autoseg_recalls | left_ctx.autoseg_recalls
+        | right_ctx.autoseg_recalls | left_exc.autoseg_recalls | right_exc.autoseg_recalls
+    )
+    for ref in sorted(autoseg_recalled - autoseg_bound):
+        errors.append(f"Tier recall '~{ref}' has no matching binding '~{ref}='")
+    for ref in sorted(autoseg_bound - autoseg_recalled):
+        errors.append(f"Tier binding '~{ref}=' is never recalled by '~{ref}'")
+    if any(isinstance(e, FloatingAutoseg) for e in _walk(sd.result)):
+        errors.append("A floating autosegment '⟨...⟩' is not valid in result position")
 
     # §2.4.1 — every alpha variable must be bound in target or context.
     bound_alphas = target.alphas | left_ctx.alphas | right_ctx.alphas

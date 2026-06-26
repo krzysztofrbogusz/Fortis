@@ -173,3 +173,30 @@ class TestBatch2Invalid:
         # A result label with no condition anywhere (target or context) is an orphan.
         errors = check("a -> [<1:+nasal>] / b _", features).unwrap_err()
         assert any("has no condition" in e for e in errors)
+
+
+class TestTierReferences:
+    # §2.12 — ~n tier references and ⟨...⟩ floating elements (uses the project's tone tier).
+
+    def test_spread_and_dock_validate(self, project):
+        spread = (
+            "[+syllabic, tone: none] -> [+syllabic, tone: ~1] "
+            "/ [+syllabic, tone: ~1=high] [-syllabic]* _"
+        )
+        dock = "⟨tone: ~1=high⟩ [+syllabic, tone: none] -> [+syllabic, tone: ~1]"
+        assert check(spread, project.features).is_ok()
+        assert check(dock, project.features).is_ok()
+
+    def test_unbound_tier_recall(self, project):
+        errors = check(
+            "[+syllabic, tone: none] -> [+syllabic, tone: ~2]", project.features
+        ).unwrap_err()
+        assert any("no matching binding '~2='" in e for e in errors)
+
+    def test_tier_binding_never_recalled(self, project):
+        errors = check("[+syllabic, tone: ~1=high] -> [+syllabic]", project.features).unwrap_err()
+        assert any("never recalled by '~1'" in e for e in errors)
+
+    def test_floating_in_result_rejected(self, project):
+        errors = check("[+syllabic] -> ⟨tone: high⟩", project.features).unwrap_err()
+        assert any("not valid in result position" in e for e in errors)

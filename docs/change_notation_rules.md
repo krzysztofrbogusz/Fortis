@@ -231,3 +231,6 @@ bundle. Four operations manipulate those associations:
    Stability principle). **Metrical** tiers (`melody = false`, e.g. stress) do not follow a deletion — stress
    stays put. A word-initial deletion (no left neighbour) lets the autosegment float, and a still-floating
    autosegment is stray-erased at the surface.
+5. **Validation** — like ordinary references (§2.3), every `~n` recall must have a matching `~n=` binding and
+   every `~n=` binding must be recalled. A floating element `⟨…⟩` is pattern-only: it is valid in target and
+   context positions but a validation error in the result.
