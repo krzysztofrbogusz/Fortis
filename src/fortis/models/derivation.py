@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.fortis.models.bundles import FeatureBundle
+from src.fortis.models.form import Form
 from src.fortis.models.inventories import Word
 from src.fortis.models.rules import Rule
 
@@ -20,9 +20,9 @@ class DerivationStep:
     unsyllabifiable.
     """
 
-    before: list[FeatureBundle]
+    before: Form
     rule: Rule
-    after: list[FeatureBundle]
+    after: Form
     before_boundaries: frozenset[int] = frozenset()
     after_boundaries: frozenset[int] = frozenset()
 
@@ -37,7 +37,7 @@ class Derivation:
     """
 
     word: Word
-    input: list[FeatureBundle]
+    input: Form
     steps: tuple[DerivationStep, ...]  # firing steps only
-    surface: list[FeatureBundle]
+    surface: Form
     surface_boundaries: frozenset[int] = frozenset()

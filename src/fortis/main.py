@@ -66,16 +66,18 @@ def _print_derivation(derivation: Derivation, project: Project) -> None:
 
     previous_base: str | None = None
     for step in derivation.steps:
-        before = render_syllabified(step.before, step.before_boundaries, project)
-        after = render_syllabified(step.after, step.after_boundaries, project)
-        change = describe_change(step.before, step.after, project)
+        before = render_syllabified(step.before.bundles(), step.before_boundaries, project)
+        after = render_syllabified(step.after.bundles(), step.after_boundaries, project)
+        change = describe_change(step.before.bundles(), step.after.bundles(), project)
         base = _SUBRULE_SUFFIX.sub("", step.rule.id)
         if base != previous_base:
             print(f"    {step.rule.time}: {step.rule.name or base}")
             previous_base = base
         print(f"        {before} → {after}   ({change})")
 
-    surface = render_syllabified(derivation.surface, derivation.surface_boundaries, project)
+    surface = render_syllabified(
+        derivation.surface.bundles(), derivation.surface_boundaries, project
+    )
     print(f"    Surface: {surface}")
     print("")
 

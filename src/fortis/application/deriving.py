@@ -64,6 +64,7 @@ from src.fortis.models.elements import (
     Quantified,
 )
 from src.fortis.models.features import FeatureInventory
+from src.fortis.models.form import Form
 from src.fortis.models.inventories import (
     LetterInventory,
     SonoritiesInventory,
@@ -101,7 +102,7 @@ def _resolve_elements(
     for element in elements:
         match element:
             case LetterRef(symbol) if symbol not in project.letters:
-                segments = string_to_sequence(symbol, project)
+                segments = string_to_sequence(symbol, project).bundles()
                 if not segments:
                     raise ValueError(
                         f"rule '{rule_id}': letter reference '{symbol}' resolves to no "
@@ -386,14 +387,14 @@ def _fired(before: list[FeatureBundle], after: list[FeatureBundle]) -> bool:
 
 def derive(
     word: Word,
-    segments: list[FeatureBundle],
+    form: Form,
     rules: RuleInventory,
     letters: LetterInventory,
     features: FeatureInventory,
     sonorities: SonoritiesInventory | None = None,
     syllable_parts: SyllablePartsInventory | None = None,
 ) -> Derivation:
-    """Sweep *segments* through every rule in time order, recording firing steps.
+    """Sweep *form* through every rule in time order, recording firing steps.
 
     Each rule (re)syllabifies the current form for its match pass, so the input is
     syllabified before the first rule and the structure is refreshed after every
@@ -406,7 +407,7 @@ def derive(
 
     Args:
         word: The word being derived (carried into the trace).
-        segments: The starting form (already segmented).
+        form: The starting form (already segmented, from ``string_to_sequence``).
         rules: Rules keyed by time; applied ascending by time, file order within.
             Pre-resolve with ``resolve_rule_letters`` if any rule uses a complex
             symbol or multi-segment run.
@@ -415,42 +416,46 @@ def derive(
         sonorities: Sonority scale for syllabification (optional).
         syllable_parts: Syllable-part constraints supplying the nucleus (optional).
     """
-    input_form = list(segments)
-    current = list(segments)
+    current = form
     steps: list[DerivationStep] = []
     syllable_features = _syllable_features(features)
 
     for time in sorted(rules.keys()):
         for rule in rules[time]:
-            before = list(current)
-            after = apply_rule(rule, current, letters, features, sonorities, syllable_parts)
-            if _fired(before, after):
+            before = current  # Form
+            before_bundles = current.bundles()
+            after_bundles = apply_rule(
+                rule, before_bundles, letters, features, sonorities, syllable_parts
+            )
+            if _fired(before_bundles, after_bundles):
                 # Resyllabify after the rule, keeping each syllable's suprasegmentals
-                # on its (possibly shifted) nucleus.
-                after = _consolidate(
-                    after, sonorities, syllable_parts, rule.time, letters, syllable_features
+                # on its (possibly shifted) nucleus. (Phase 1 replaces this with the
+                # tier cleanup pass; the bundle round-trip mints fresh ids meanwhile.)
+                after_bundles = _consolidate(
+                    after_bundles, sonorities, syllable_parts, rule.time, letters, syllable_features
                 )
+                after = Form.from_bundles(after_bundles)
                 steps.append(
                     DerivationStep(
                         before=before,
                         rule=rule,
-                        after=list(after),
+                        after=after,
                         before_boundaries=_display_boundaries(
-                            before, sonorities, syllable_parts, rule.time, letters
+                            before_bundles, sonorities, syllable_parts, rule.time, letters
                         ),
                         after_boundaries=_display_boundaries(
-                            after, sonorities, syllable_parts, rule.time, letters
+                            after_bundles, sonorities, syllable_parts, rule.time, letters
                         ),
                     )
                 )
                 current = after
 
     surface_boundaries = _display_boundaries(
-        current, sonorities, syllable_parts, max(rules, default=0), letters
+        current.bundles(), sonorities, syllable_parts, max(rules, default=0), letters
     )
     return Derivation(
         word=word,
-        input=input_form,
+        input=form,
         steps=tuple(steps),
         surface=current,
         surface_boundaries=surface_boundaries,

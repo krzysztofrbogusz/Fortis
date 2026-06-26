@@ -21,25 +21,25 @@ class TestRenderSegment:
 
     def test_segment_with_diacritic(self, project):
         # ɣʷ is a labialised ɣ: a base letter plus a combining diacritic.
-        seq = string_to_sequence("ɣʷ", project)
+        seq = string_to_sequence("ɣʷ", project).bundles()
         assert render_segment(seq[0], project) == "ɣʷ"
 
 
 class TestDescribeChange:
     def test_equal_length_shows_changed_segment(self, project):
-        before = string_to_sequence("kʲ", project)
-        after = string_to_sequence("k", project)
+        before = string_to_sequence("kʲ", project).bundles()
+        after = string_to_sequence("k", project).bundles()
         assert describe_change(before, after, project) == "kʲ→k"
 
     def test_length_change_trims_to_differing_region(self, project):
         # km̩tom → kumtom: only the syllabic m → um is shown, prefix/suffix trimmed.
-        before = string_to_sequence("km̩tom", project)
-        after = string_to_sequence("kumtom", project)
+        before = string_to_sequence("km̩tom", project).bundles()
+        after = string_to_sequence("kumtom", project).bundles()
         assert describe_change(before, after, project) == "m̩→um"
 
     def test_deletion_shows_null(self, project):
-        before = string_to_sequence("kat", project)
-        after = string_to_sequence("ka", project)
+        before = string_to_sequence("kat", project).bundles()
+        after = string_to_sequence("ka", project).bundles()
         assert describe_change(before, after, project) == "t→∅"
 
 
@@ -47,7 +47,7 @@ class TestRenderSyllabified:
     def test_dots_at_syllable_boundaries_with_full_rendering(self, project):
         # mexteːr → mex.teːr: the boundary shows as ".", and each segment still goes
         # through the full renderer (the length diacritic on teːr is preserved).
-        seq = string_to_sequence("mexteːr", project)
+        seq = string_to_sequence("mexteːr", project).bundles()
         boundaries = syllabify(
             seq, project.sonorities, project.syllable_parts, project.time, project.letters
         )
@@ -56,7 +56,7 @@ class TestRenderSyllabified:
     def test_boundary_marking_stress_replaces_the_dot(self, project):
         # kaˈta: the stress mark ˈ (marks_boundary) sits at the interior boundary and
         # stands in for the ".", so it is kaˈta, not ka.ˈta.
-        seq = string_to_sequence("kaˈta", project)
+        seq = string_to_sequence("kaˈta", project).bundles()
         boundaries = syllabify(
             seq, project.sonorities, project.syllable_parts, project.time, project.letters
         )
@@ -67,20 +67,21 @@ class TestSequenceToString:
     def test_repositions_stress_to_the_syllable_edge(self, project):
         # The flat re-render syllabifies internally, so stress sits at the syllable
         # onset (koˈta), not before the nucleus (kotˈa).
-        assert sequence_to_string(string_to_sequence("koˈta", project), project) == "koˈta"
+        seq = string_to_sequence("koˈta", project).bundles()
+        assert sequence_to_string(seq, project) == "koˈta"
 
     def test_falls_back_to_flat_when_unsyllabifiable(self, project):
         # A bare cluster has no nucleus, so it renders flat without raising.
-        assert sequence_to_string(string_to_sequence("kt", project), project) == "kt"
+        assert sequence_to_string(string_to_sequence("kt", project).bundles(), project) == "kt"
 
     def test_string_round_trip_for_invertible_words(self, project):
         # Most words round-trip exactly; the one diacritic-ordering case is covered
         # at the feature level in the segmentation tests.
         for word in project.words:
-            rendered = sequence_to_string(string_to_sequence(word, project), project)
+            rendered = sequence_to_string(string_to_sequence(word, project).bundles(), project)
             if rendered != word:
                 # Only legitimate diacritic reorderings are allowed to differ; the
                 # rendered form must still re-segment to the same length.
-                assert len(string_to_sequence(rendered, project)) == len(
-                    string_to_sequence(word, project)
+                assert len(string_to_sequence(rendered, project).bundles()) == len(
+                    string_to_sequence(word, project).bundles()
                 )

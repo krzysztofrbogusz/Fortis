@@ -4,6 +4,7 @@ from src.fortis.application.combining import combine
 from src.fortis.application.matching import pattern_matches
 from src.fortis.config import config
 from src.fortis.models.bundles import FeatureBundle
+from src.fortis.models.form import Form
 from src.fortis.models.project import Project
 
 
@@ -17,11 +18,12 @@ def _is_nucleus(segment: FeatureBundle, project: Project) -> bool:
     )
 
 
-def string_to_sequence(raw_string: str, project: Project) -> list[FeatureBundle]:
-    """Turn IPA strings into lists of segments.
+def string_to_sequence(raw_string: str, project: Project) -> Form:
+    """Turn IPA strings into a ``Form`` (the segmental tier, each segment id-tagged).
 
     Uses greedy longest-first matching so that multi-character symbols
-    (e.g. "t͡s", "ːː") are consumed before their shorter prefixes.
+    (e.g. "t͡s", "ːː") are consumed before their shorter prefixes. This is the
+    construction point where each segment is assigned its stable identity.
 
     Args:
         raw_string: Raw IPA string.
@@ -109,4 +111,4 @@ def string_to_sequence(raw_string: str, project: Project) -> list[FeatureBundle]
                             break
                     else:
                         raise ValueError(f"Unknown character '{raw_string[i]}' at position {i}")
-    return segments
+    return Form.from_bundles(segments)
