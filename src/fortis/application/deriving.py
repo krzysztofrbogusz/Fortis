@@ -205,12 +205,26 @@ def _maintain_tiers(
     return redock_to_nuclei(form, boundaries, nucleus_def)
 
 
-def _floating_autosegs(form: Form) -> tuple[tuple[int, FeatureBundle], ...]:
-    """Every unanchored autosegment (id, bundle) across the tiers — candidates for docking."""
-    floating: list[tuple[int, FeatureBundle]] = []
+def _floating_autosegs(form: Form) -> tuple[tuple[int, FeatureBundle, int | None], ...]:
+    """Every unanchored autosegment (id, bundle, gap) across the tiers — dock candidates.
+
+    *gap* is the float's sequence position from its ``float_hosts`` anchor — the index just
+    before a ``"before"`` host, or just after an ``"after"`` host — so a ``⟨⟩`` element binds
+    it only where it sits. A float with no (or a now-deleted) host has *gap* ``None`` and
+    matches at any position (the position-blind semantics, e.g. a tone stranded by deletion).
+    """
+    position_of = {segment.id: index for index, segment in enumerate(form.segments)}
+    floating: list[tuple[int, FeatureBundle, int | None]] = []
     for tier in form.tiers.values():
         linked = {autoseg_id for (autoseg_id, _anchor) in tier.links}
-        floating.extend((a.id, a.bundle) for a in tier.autosegs if a.id not in linked)
+        for autoseg in tier.autosegs:
+            if autoseg.id in linked:
+                continue
+            gap: int | None = None
+            host = tier.float_hosts.get(autoseg.id)
+            if host is not None and (host_pos := position_of.get(host[0])) is not None:
+                gap = host_pos + 1 if host[1] == "after" else host_pos
+            floating.append((autoseg.id, autoseg.bundle, gap))
     return tuple(floating)
 
 

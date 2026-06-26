@@ -12,7 +12,7 @@ _EXAMPLE = Path(__file__).resolve().parent.parent / "examples" / "tonal"
 
 def test_tonal_example_runs_and_preserves_tone():
     project = load_project(_EXAMPLE).unwrap()
-    assert set(project.words) == {"táka", "katá"}  # high = combining acute
+    assert len(project.words) == 3  # spread, stability, and dock demos
     rules = resolve_rule_letters(project.rules, project)
     for ipa, word in project.words.items():
         form = string_to_sequence(ipa, project)

@@ -46,3 +46,26 @@ def test_no_dock_without_a_floating_tone(project):
     # No floating tone present — the ⟨⟩ matches nothing, so the rule never fires.
     surface = _derive(string_to_sequence("ta", project), project)
     assert not surface.tiers["tone"].links
+
+
+def test_positioned_float_docks_at_its_own_gap(project):
+    # A lexically positioned float (⟨◌́⟩ after the last vowel) docks to the LAST syllable —
+    # not the first toneless one a position-blind ⟨⟩ would take. (The discriminator for #2.)
+    form = string_to_sequence("kata⟨◌́⟩", project)
+    assert form.tiers["tone"].float_hosts  # the float carries a position
+    sd = parse_definition(
+        "[+syllabic, tone: none] ⟨tone: ~1=high⟩ -> [+syllabic, tone: ~1]", project.features
+    ).unwrap()
+    rule = Rule(id="dock", time=0, raw_definition="dock", sd=sd)
+    surface = derive(
+        Word(ipa="kata"),
+        form,
+        RuleInventory({0: (rule,)}),
+        project.letters,
+        project.features,
+        project.sonorities,
+        project.syllable_parts,
+        project.tiers,
+    ).surface
+    tones = [b["tone"].value if "tone" in b else None for b in lower_tiers(surface)]
+    assert tones == [None, None, None, 4]  # high on the last vowel only

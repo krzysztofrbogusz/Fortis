@@ -12,3 +12,9 @@ time        = 100
 name        = "Final vowel loss"
 description = "A word-final vowel is lost; a high tone it bore survives on the preceding syllable (stability)."
 definition  = "[+syllabic] → ∅ / [-syllabic] _ #"
+
+[suffix_dock]
+time        = 50
+name        = "Floating-tone docking"
+description = "A floating high suffix docks leftward onto the final syllable (the float sits after it)."
+definition  = "[+syllabic, tone: none] ⟨tone: ~1=high⟩ → [+syllabic, tone: ~1]"

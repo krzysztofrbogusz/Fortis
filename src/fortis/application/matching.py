@@ -407,12 +407,18 @@ def _floating_matches(pattern: PatternBundle, bundle: FeatureBundle) -> bool:
 
 
 def _bind_floating(
-    pattern: PatternBundle, syllables: SyllableView | None, bindings: Bindings
+    pattern: PatternBundle, syllables: SyllableView | None, bindings: Bindings, position: int
 ) -> bool:
-    """Match a floating autosegment against *pattern*; bind its id under each ``~ref``."""
+    """Match a floating autosegment against *pattern* at *position*; bind its id under ``~ref``.
+
+    A *positioned* float (one with a sequence gap) binds only where it sits; a host-less float
+    (gap ``None``) binds at any position.
+    """
     if syllables is None:
         return False
-    for autoseg_id, bundle in syllables.floating:
+    for autoseg_id, bundle, gap in syllables.floating:
+        if gap is not None and gap != position:
+            continue
         if _floating_matches(pattern, bundle):
             for spec in pattern.values():
                 if isinstance(spec.value, AutosegBind):
@@ -437,7 +443,7 @@ class SyllableView:
 
     nuclei: list[FeatureBundle | None]
     features: frozenset[str]
-    floating: tuple[tuple[int, FeatureBundle], ...] = ()
+    floating: tuple[tuple[int, FeatureBundle, int | None], ...] = ()
 
     def at(self, pos: int) -> FeatureBundle | None:
         """The syllable (nucleus) bundle for position *pos*, if any."""
@@ -509,7 +515,7 @@ def _match_element(
             # Zero-width: a floating autosegment must exist (and is bound for docking),
             # but no segment is consumed.
             branch = _copy(bindings)
-            if _bind_floating(pattern, syllables, branch):
+            if _bind_floating(pattern, syllables, branch, pos):
                 yield pos, branch
 
         case LetterRef(symbol):
