@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from src.fortis.application.combining import combine
 from src.fortis.application.matching import pattern_matches
+from src.fortis.application.tiers import associate_tiers
 from src.fortis.config import config
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.form import Form
@@ -111,4 +112,5 @@ def string_to_sequence(raw_string: str, project: Project) -> Form:
                             break
                     else:
                         raise ValueError(f"Unknown character '{raw_string[i]}' at position {i}")
-    return Form.from_bundles(segments)
+    form = Form.from_bundles(segments)
+    return associate_tiers(form, project.tiers)
