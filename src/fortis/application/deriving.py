@@ -57,6 +57,8 @@ from src.fortis.application.tiers import (
     split_carried,
     write_to_tier,
 )
+from src.fortis.models.autosegment import AutosegmentalTier
+from src.fortis.models.bindings import Bindings
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.derivation import Derivation, DerivationStep
 from src.fortis.models.elements import (
@@ -87,6 +89,7 @@ from src.fortis.models.rules import (
 from src.fortis.models.segment import Segment
 from src.fortis.models.tier_declaration import TierInventory
 from src.fortis.models.tiers import Tier
+from src.fortis.models.values import AutosegRecall
 
 
 def _syllable_features(features: FeatureInventory) -> frozenset[str]:
@@ -310,19 +313,48 @@ def _select_non_overlapping(matches: list[Match]) -> list[Match]:
     return selected
 
 
+def _autoseg_recall(carried: FeatureBundle) -> AutosegRecall | None:
+    """The ``AutosegRecall`` in a carried bundle, if any (a ``~ref`` spread directive)."""
+    for spec in carried.values():
+        if isinstance(spec.value, AutosegRecall):
+            return spec.value
+    return None
+
+
+def _spread_autoseg(
+    out: Form, source: Form, bindings: Bindings, recall: AutosegRecall, tier_name: str, seg_id: int
+) -> None:
+    """Link the autosegment bound under *recall* onto *seg_id* — spread (one autoseg, many anchors).
+
+    The bound autosegment is the one sitting on *source* at the position the matcher recorded;
+    adding a second link to it (rather than minting a copy) is what makes a tone spread.
+    """
+    bound_position = bindings.autoseg_reference.get(recall.ref)
+    source_tier = source.tiers.get(tier_name)
+    if bound_position is None or source_tier is None:
+        return
+    bound_anchor = source.segments[bound_position].id
+    out_tier = out.tiers.setdefault(tier_name, AutosegmentalTier())
+    for autoseg_id, anchor in source_tier.links:
+        if anchor == bound_anchor:
+            out_tier.links.add((autoseg_id, seg_id))
+
+
 def _spliced_segments(
     out: Form,
     replacement: list[tuple[FeatureBundle, int | None]],
     source: Form,
     source_bundles: list[FeatureBundle],
     tiers: TierInventory,
+    bindings: Bindings,
 ) -> list[Segment]:
     """Turn apply_match's (bundle, source-pos) pairs into Segments.
 
     A merged segment carries its id forward from *source* (so its tier links survive); an
-    insertion gets a fresh id. A carried feature is routed onto *out*'s tiers only when the
-    rule *changed* its value (a write associates, a ``none`` delinks); an unchanged carried
-    feature is left on the tier untouched, so its autosegment keeps its identity.
+    insertion gets a fresh id. A carried feature is routed onto *out*'s tiers: a ``~ref``
+    recall spreads the bound autosegment; otherwise a *changed* value writes (associates) or
+    delinks (``none``), while an unchanged carried feature is left untouched so its
+    autosegment keeps its identity.
     """
     new_segments: list[Segment] = []
     for bundle, pos in replacement:
@@ -332,7 +364,10 @@ def _spliced_segments(
         prev = split_carried(source_bundles[pos], tiers)[1] if pos is not None else {}
         for tier_name in set(carried) | set(prev):
             written = carried.get(tier_name, FeatureBundle())
-            if written != prev.get(tier_name, FeatureBundle()):
+            recall = _autoseg_recall(written)
+            if recall is not None:
+                _spread_autoseg(out, source, bindings, recall, tier_name, seg_id)
+            elif written != prev.get(tier_name, FeatureBundle()):
                 write_to_tier(out, seg_id, tier_name, written)
     return new_segments
 
@@ -355,7 +390,7 @@ def _apply_simultaneous(
     for match in sorted(selected, key=lambda m: m.start, reverse=True):
         replacement = apply_match(sd, match, bundles, letters, features, syllables)
         out.segments[match.start : match.end] = _spliced_segments(
-            out, replacement, form, bundles, tiers
+            out, replacement, form, bundles, tiers, match.bindings
         )
     return out
 
@@ -404,7 +439,7 @@ def _apply_directional(
 
         replacement = apply_match(sd, match, bundles, letters, features, view)
         work.segments[match.start : match.end] = _spliced_segments(
-            work, replacement, work, bundles, tiers
+            work, replacement, work, bundles, tiers, match.bindings
         )
 
         no_op = match.end == match.start and not replacement
