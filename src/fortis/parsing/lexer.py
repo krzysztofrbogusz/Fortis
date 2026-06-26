@@ -42,6 +42,7 @@ class Token(Enum):
     EQ = auto()  # =   binds the following element to an index
     AT = auto()  # @   recalls a bound element by index
     BUNDLE = auto()  # [ ... ]  (text = inner, brackets stripped)
+    FLOATING = auto()  # ⟨ ... ⟩  floating autosegment (text = inner, brackets stripped)
     BOUNDARY = auto()  # # or $   (text = the symbol)
     NAME = auto()  # a letter reference
 
@@ -108,11 +109,17 @@ _BOUNDARY: frozenset[str] = frozenset("#$")
 _ARROW_HEAD: str = "→"  # single-character arrow; ``->`` is also accepted
 _BRACKET_OPEN: str = "["
 _BRACKET_CLOSE: str = "]"
+_FLOATING_OPEN: str = "⟨"
+_FLOATING_CLOSE: str = "⟩"
 
 # Characters that cannot appear inside a NAME run. Whitespace is tested
 # separately via ``str.isspace`` so the lexer stays Unicode-correct.
 _STOP: frozenset[str] = (
-    frozenset(_SINGLE) | _BOUNDARY | frozenset({_BRACKET_OPEN, _BRACKET_CLOSE, _ARROW_HEAD, "-"})
+    frozenset(_SINGLE)
+    | _BOUNDARY
+    | frozenset(
+        {_BRACKET_OPEN, _BRACKET_CLOSE, _FLOATING_OPEN, _FLOATING_CLOSE, _ARROW_HEAD, "-"}
+    )
 )
 
 
@@ -167,6 +174,17 @@ def lex(source: str) -> list[TokenInfo]:
 
         if ch == _BRACKET_CLOSE:
             raise LexError("']' with no matching '['", source, i)
+
+        if ch == _FLOATING_OPEN:
+            close = source.find(_FLOATING_CLOSE, i + 1)
+            if close == -1:
+                raise LexError("unterminated floating autosegment", source, i)
+            tokens.append(TokenInfo(Token.FLOATING, source[i + 1 : close], i))
+            i = close + 1
+            continue
+
+        if ch == _FLOATING_CLOSE:
+            raise LexError("'⟩' with no matching '⟨'", source, i)
 
         if ch in _BOUNDARY:
             tokens.append(TokenInfo(Token.BOUNDARY, ch, i))

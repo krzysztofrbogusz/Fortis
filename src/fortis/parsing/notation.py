@@ -59,6 +59,7 @@ from src.fortis.models.elements import (
     BundleElem,
     Disjunction,
     Element,
+    FloatingAutoseg,
     Group,
     LetterRef,
     Negated,
@@ -286,6 +287,9 @@ class _Parser:
                 if tok.text.strip() == "":
                     return Wildcard()
                 return bundle(tok)
+            case Token.FLOATING:
+                self._advance()
+                return self._floating(tok)
             case Token.AT:
                 self._advance()
                 return RecallRef(self._integer())
@@ -355,6 +359,15 @@ class _Parser:
             case Err(errors):
                 self._record(errors, tok)
                 return Wildcard()  # placeholder; the Err path discards the tree
+
+    def _floating(self, tok: TokenInfo) -> Element:
+        """Reduce ``⟨ ... ⟩`` into a ``FloatingAutoseg`` (its inner is a pattern bundle)."""
+        match parse_pattern_bundle(tok.text, self._features):
+            case Ok(bundle):
+                return FloatingAutoseg(bundle)
+            case Err(errors):
+                self._record(errors, tok)
+                return Wildcard()
 
     def _result_bundle(self, tok: TokenInfo) -> Element:
         """Reduce a result-side ``[ ... ]`` into a ``ResultElem``."""

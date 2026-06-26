@@ -48,6 +48,17 @@ class BundleElem:
 
 
 @dataclass(frozen=True)
+class FloatingAutoseg:
+    """A floating autosegment ``⟨...⟩`` — a tier element carrying no association line.
+
+    Matched against an autosegment with no anchor (e.g. a tone stranded by its vowel's
+    deletion); a ``~ref`` bind inside lets a result recall it onto an anchor (docking).
+    """
+
+    pattern: PatternBundle
+
+
+@dataclass(frozen=True)
 class ResultElem:
     """A result bundle in result position."""
 
@@ -125,6 +136,7 @@ type Element = (
     LetterRef
     | LetterBundle
     | BundleElem
+    | FloatingAutoseg
     | ResultElem
     | Wildcard
     | SyllableBoundary
