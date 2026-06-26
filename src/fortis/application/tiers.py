@@ -38,3 +38,48 @@ def associate_tiers(form: Form, tiers: TierInventory) -> Form:
             tier.links.add((autoseg.id, segment.id))
         form.tiers[name] = tier
     return form
+
+
+def cleanup_tiers(form: Form, tiers: TierInventory, *, surface: bool = False) -> Form:
+    """Maintain every tier after a rewrite.
+
+    Prunes links to segments that no longer exist — stranding their autosegments as
+    floating, which is where tonal stability comes from. Then applies the OCP (merging
+    adjacent identical autosegments into one multiply-linked autosegment) and, at the
+    *surface* only, stray-erases any autosegment that never docked. Mutates and returns
+    *form*; a tier with no declaration keeps its links pruned but no policy applied.
+    """
+    live = {segment.id for segment in form.segments}
+    position = {segment.id: index for index, segment in enumerate(form.segments)}
+    for name, tier in form.tiers.items():
+        declaration = tiers.get(name)
+        tier.links = {(autoseg, anchor) for (autoseg, anchor) in tier.links if anchor in live}
+        if declaration is not None and declaration.ocp:
+            _merge_adjacent_identical(tier, position)
+        if surface and declaration is not None and declaration.stray_erase:
+            linked = {autoseg for (autoseg, _anchor) in tier.links}
+            tier.autosegs = [seg for seg in tier.autosegs if seg.id in linked]
+    return form
+
+
+def _merge_adjacent_identical(tier: AutosegmentalTier, position: dict[int, int]) -> None:
+    """Fold each run of identical adjacent autosegments into one (the OCP).
+
+    Adjacency is order on the tier (by leftmost anchor), not on segments; the survivor
+    takes over every merged autosegment's links.
+    """
+
+    def leftmost(autoseg: Autoseg) -> float:
+        anchors = [position[anchor] for (a, anchor) in tier.links if a == autoseg.id]
+        return min(anchors) if anchors else float("inf")
+
+    kept: list[Autoseg] = []
+    for autoseg in sorted(tier.autosegs, key=leftmost):
+        if kept and kept[-1].bundle == autoseg.bundle:
+            survivor = kept[-1].id
+            tier.links = {
+                (survivor if a == autoseg.id else a, anchor) for (a, anchor) in tier.links
+            }
+        else:
+            kept.append(autoseg)
+    tier.autosegs = kept
