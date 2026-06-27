@@ -7,6 +7,7 @@
     writeFile,
     runDerivations,
   } from "./lib/engine.js";
+  import CsvTable from "./lib/CsvTable.svelte";
 
   let ready = $state(false);
   let status = $state("Starting…");
@@ -19,6 +20,7 @@
 
   let mode = $state("diachronic"); // "diachronic" | "synchronic"
   let result = $state(null); // { derivations } | { error }
+  let csvMode = $state("table"); // letters.csv view: "table" | "raw"
 
   let fileInput; // single-file <input>
   let projectInput; // multi-file (folder) <input>
@@ -164,13 +166,33 @@
         {/each}
       </div>
 
-      <textarea
-        class="editor ipa"
-        spellcheck="false"
-        disabled={!ready}
-        bind:value={content}
-        oninput={onEdit}
-      ></textarea>
+      {#if files[active] === "letters.csv"}
+        <div class="view-bar">
+          <span class="view-lbl">View</span>
+          <button
+            class:active={csvMode === "table"}
+            disabled={!ready}
+            onclick={() => (csvMode = "table")}>Table</button
+          >
+          <button
+            class:active={csvMode === "raw"}
+            disabled={!ready}
+            onclick={() => (csvMode = "raw")}>Raw</button
+          >
+        </div>
+      {/if}
+
+      {#if files[active] === "letters.csv" && csvMode === "table"}
+        <CsvTable {content} />
+      {:else}
+        <textarea
+          class="editor ipa"
+          spellcheck="false"
+          disabled={!ready}
+          bind:value={content}
+          oninput={onEdit}
+        ></textarea>
+      {/if}
 
       <input
         bind:this={fileInput}
@@ -382,6 +404,24 @@
     font-family: var(--mono);
     font-size: 12px;
     padding: 3px 8px;
+  }
+
+  .view-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px 8px;
+    flex: none;
+  }
+  .view-lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+  .view-bar button {
+    font-size: 12px;
+    padding: 3px 10px;
   }
 
   .editor {
