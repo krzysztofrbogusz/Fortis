@@ -4,7 +4,7 @@ A small tonal language that exercises the autosegmental tier operations on real 
 the phenomena the curated PIE→Germanic sample (which uses *stress*) doesn't show.
 
 > **See [SHOWCASE.md](SHOWCASE.md)** for a guided walkthrough — stability, floating-tone
-> docking, spread, and displacement — with each example's trace and a one-line *why a flat
+> docking, spread, displacement, and contour formation — each with its trace and a one-line *why a flat
 > (non-autosegmental) model can't do this*.
 
 Run it:

@@ -38,3 +38,12 @@ def test_merges_features_across_tiers(project):
     )
     carried = carried_features(form, 0)
     assert carried["stress"].value == 2 and carried["tone"].value == 4
+
+
+def test_two_autosegs_on_one_anchor_form_a_contour(project):
+    # H then L both linked to one segment → a falling contour, in tier order.
+    form = Form([Segment(_b(syllabic=1), 0)])
+    form.tiers["tone"] = AutosegmentalTier(
+        autosegs=[Autoseg(_b(tone=5), 10), Autoseg(_b(tone=3), 11)], links={(10, 0), (11, 0)}
+    )
+    assert carried_features(form, 0)["tone"].value == (5, 3)

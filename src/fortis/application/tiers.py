@@ -17,6 +17,7 @@ from src.fortis.models.form import Form
 from src.fortis.models.segment import Segment
 from src.fortis.models.specs import FeatureSpec
 from src.fortis.models.tier_declaration import TierInventory
+from src.fortis.models.values import make_value
 
 
 def associate_tiers(form: Form, tiers: TierInventory) -> Form:
@@ -152,16 +153,29 @@ def carried_features(form: Form, segment_id: int) -> FeatureBundle:
     """The carried (tier) features a segment bears, read back as a bundle.
 
     Merges the features of every autosegment linked to *segment_id* — the read side of the
-    tiers, mirroring the bundle lookup the matcher and renderer used before the flip. (One
-    autosegment per anchor in the simple case; contours are deferred.)
+    tiers, mirroring the bundle lookup the matcher and renderer used before the flip. Several
+    autosegments of the same feature on one anchor form a **contour** (e.g. H + L → a falling
+    tone), in tier order. (Tier order is creation/lexical order, so the contour direction is
+    reliable for lexical melodies and tone crowding — not after operations that reorder a tier.)
     """
-    specs: dict[str, FeatureSpec] = {}
+    by_feature: dict[str, list[FeatureSpec]] = {}
     for tier in form.tiers.values():
         linked = {autoseg for (autoseg, anchor) in tier.links if anchor == segment_id}
         for autoseg in tier.autosegs:
             if autoseg.id in linked:
                 for feature, spec in autoseg.bundle.items():
-                    specs[feature] = spec
+                    by_feature.setdefault(feature, []).append(spec)
+    specs: dict[str, FeatureSpec] = {}
+    for feature, feature_specs in by_feature.items():
+        if len(feature_specs) == 1:
+            specs[feature] = feature_specs[0]
+        else:
+            limbs = tuple(
+                limb
+                for spec in feature_specs
+                for limb in (spec.value if isinstance(spec.value, tuple) else (spec.value,))
+            )
+            specs[feature] = FeatureSpec(feature=feature, value=make_value(limbs))
     return FeatureBundle(specs)
 
 
