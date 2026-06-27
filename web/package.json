@@ -1,0 +1,21 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build-engine": "node scripts/build-engine.mjs",
+    "predev": "npm run build-engine",
+    "dev": "vite",
+    "prebuild": "npm run build-engine",
+    "build": "vite build",
+    "preview": "vite preview",
+    "smoke": "node test-engine.mjs"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "pyodide": "314.0.1",
+    "svelte": "^5.56.3",
+    "vite": "^8.1.0"
+  }
+}
