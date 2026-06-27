@@ -33,6 +33,7 @@ from src.fortis.application.deriving import derive, resolve_rule_letters
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.application.rendering import render_syllabified, describe_change
 from src.fortis.application.tiers import lower_tiers
+from src.fortis.application.diagram import render_autosegmental
 _SUB = re.compile(r"#\\d+$")
 INV = "/work/inventories"
 def read_file(name): return (Path(INV)/name).read_text(encoding="utf-8")
@@ -53,7 +54,9 @@ def run_derivations():
             steps.append({"heading":heading,"time":s.rule.time,"name":s.rule.name or base,
                           "before":R(s.before,s.before_boundaries),"after":R(s.after,s.after_boundaries),
                           "change":describe_change(lower_tiers(s.before),lower_tiers(s.after),project)})
-        out.append({"ipa":ipa,"gloss":word.gloss,"surface":R(d.surface,d.surface_boundaries),"steps":steps})
+        out.append({"ipa":ipa,"gloss":word.gloss,"surface":R(d.surface,d.surface_boundaries),"steps":steps,
+                    "diagram_in":render_autosegmental(d.input,project),
+                    "diagram_out":render_autosegmental(d.surface,project)})
     return json.dumps({"derivations": out})
 `;
 

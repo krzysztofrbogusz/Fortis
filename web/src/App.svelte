@@ -212,12 +212,7 @@
       </div>
 
       <div class="results ipa">
-        {#if mode === "synchronic"}
-          <div class="card placeholder">
-            <h3>Synchronic view</h3>
-            <p>Association-line diagrams — phase 2.</p>
-          </div>
-        {:else if !result}
+        {#if !result}
           <p class="muted">No results yet.</p>
         {:else if result.error}
           <div class="card error">
@@ -226,6 +221,27 @@
               <pre>{line}</pre>
             {/each}
           </div>
+        {:else if result.derivations.length === 0}
+          <p class="muted">No words in the project.</p>
+        {:else if mode === "synchronic"}
+          {#each result.derivations as d}
+            <article class="card">
+              <header class="word-head">
+                <span class="word-ipa">{d.ipa}</span>
+                {#if d.gloss}<span class="gloss">‘{d.gloss}’</span>{/if}
+              </header>
+              <div class="diagrams">
+                <div class="diagram-block">
+                  <span class="lbl">Input</span>
+                  <pre class="diagram">{d.diagram_in}</pre>
+                </div>
+                <div class="diagram-block">
+                  <span class="lbl">Surface</span>
+                  <pre class="diagram">{d.diagram_out}</pre>
+                </div>
+              </div>
+            </article>
+          {/each}
         {:else}
           {#each result.derivations as d}
             <article class="card derivation">
@@ -254,9 +270,6 @@
               </div>
             </article>
           {/each}
-          {#if result.derivations.length === 0}
-            <p class="muted">No words in the project.</p>
-          {/if}
         {/if}
       </div>
     </section>
@@ -414,8 +427,37 @@
     background: var(--panel);
     box-shadow: var(--shadow);
   }
-  .card.placeholder {
+  .diagrams {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .diagram-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .diagram-block .lbl {
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--muted);
+  }
+  /* Diagrams must be monospace for the box-drawing association lines to align. */
+  .diagram {
+    margin: 0;
+    padding: 10px 14px;
+    font-family: "DejaVu Sans Mono", "Noto Sans Mono", "JuliaMono", ui-monospace,
+      monospace;
+    font-size: 15px;
+    line-height: 1.35;
+    white-space: pre;
+    color: var(--text-h);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: auto;
   }
   .card h3 {
     margin: 0 0 6px;
