@@ -1,7 +1,13 @@
 # Tonal showcase
 
 A small tonal language that exercises the autosegmental tier operations on real derivations —
-the phenomena the curated PIE→Germanic sample (which uses *stress*) doesn't show. Run it:
+the phenomena the curated PIE→Germanic sample (which uses *stress*) doesn't show.
+
+> **See [SHOWCASE.md](SHOWCASE.md)** for a guided walkthrough — stability, floating-tone
+> docking, spread, and displacement — with each example's trace and a one-line *why a flat
+> (non-autosegmental) model can't do this*.
+
+Run it:
 
 ```
 python -m src.fortis.main --inventories examples/tonal
