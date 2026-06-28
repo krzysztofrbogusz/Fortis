@@ -386,6 +386,14 @@ name = "Loss of intervocalic */h/  (h > ∅ / V_V)"
 description = "*tehun > *teun 'ten'"
 definition = "[-son, +cont, -voice, +back, +high] → ∅ / [+syll] _ [+syll]"
 
+# The velar fricative */x/ becomes a stop before */s/ — the */xs/ of *ahsō surfaces as the
+# /ks/ written ⟨x⟩ in 'axle', 'ox', 'six'.
+[x_to_k_before_s]
+time = 480
+name = "*/x/ > */k/ before */s/"
+description = "*ahsl > *aksl 'axle'"
+definition = "[-son, +cont, -voice, +back, +high] → [-cont] / _ s"
+
 # §17.7.2.1  {i,u} → ∅ / _# (! after a light syllable): final high vowels are lost,
 # and with them the worn-down case endings. (Here, broadened to the nominative *-s
 # and a final unstressed short vowel — the apocope that leaves *full, *wurm.)
@@ -468,6 +476,14 @@ name = "*/hʷ/ > */w/"
 description = "*xʷat > *wat 'what', *xʷeol > *weol 'wheel'"
 definition = "xʷ → w"
 
+# The labiovelar stop */kʷ/ surfaces as the cluster /kw/ — the ⟨qu⟩ of 'quick', 'queen'
+# (and reduces to /k/ word-finally).
+[labiovelar_kw]
+time = 1300
+name = "*/kʷ/ > /kw/"
+description = "*kʷikʷ > *kwik 'quick'"
+definition = ["kʷ → k / _ ([-syll] | #)", "kʷ → k w"]
+
 # A stressed-syllable */d/ fricates to /ð/ before */ə(r)/ — the late change behind
 # 'father', 'mother', 'gather', 'weather' (Old English still had /d/: *fæder).
 [intervocalic_d_to_eth]
@@ -475,6 +491,14 @@ time = 1700
 name = "*/d/ > */ð/ before */ər/"
 description = "*fadər > *faðər 'father', *moːdər > *moːðər 'mother'"
 definition = "d → ð̠ / [+syll, stress: primary] _ ə"
+
+# §17.7.2.1.4  a → æ (else): the short low front vowel that escaped earlier backing
+# fronts to the Modern English TRAP vowel — *appl > *æppl 'apple'.
+[trap_fronting]
+time = 1750
+name = "*/a/ > */æ/"
+description = "Short */a/ > */æ/ — *appl > *æppl 'apple'"
+definition = "[+syll, +low, +front, length: short] → [ATR, RTR: none]"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Leveling and sporadic changes — word-scoped, one word at a time.
@@ -502,3 +526,10 @@ words = ["that"]
 name = "Voicing of initial */θ̠/ in 'that'"
 description = "Sporadic: the unstressed demonstrative voices its initial fricative — *θæt > ðæt"
 definition = "θ̠ → ð̠ / # _"
+
+[is_final_t_loss]
+time = 1300
+words = ["is"]
+name = "Loss of final */t/ in 'is'"
+description = "Sporadic: the high-frequency copula sheds its final */t/ — *ist > is"
+definition = "t → ∅ / _ #"
