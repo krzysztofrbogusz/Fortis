@@ -297,7 +297,7 @@ definition = [
     "[-son, +cont, +voice, +anterior, !+strident] → [-cont] / [+syll] _",  # ð̠ > d (not strident z)
     "β → b / # _",
     "ɣ → g / # _",
-    "ɸ → f",
+    "[-son, +cont, -voice, +labial, !+back] → f",                          # ɸ > f (not labiovelar xʷ)
     "β → v",
     "ɣ → w / [+syll] _",
 ]
@@ -347,8 +347,8 @@ definition = "1=[-syll, !+trill] → @1 @1 / _ j"
 [a_mutation]
 time = 300
 name = "a-mutation */i u/ > */e o/"
-description = "*/i u/ lower to */e o/ before a non-high back vowel in the next syllable"
-definition = "[+syll, +high] → [aperture: none, high: none] / _ [-syll]* [+syll, !high, +back]"
+description = "*/i u/ lower to */e o/ before a non-high back vowel in the next syllable, but not before a geminate (so *fullaz keeps its /u/ — Modern 'full')"
+definition = "[+syll, +high] → [aperture: none, high: none] / _ [-syll]* [+syll, !high, +back] // _ 1=[-syll] @1"
 
 # §17.7.2  oː → uː / _#: word-final */oː/ raises to */uː/.
 [final_long_o_raising]
@@ -356,6 +356,14 @@ time = 300
 name = "Word-final */oː/ > */uː/"
 description = "*/oː/ > */uː/ / _#"
 definition = "[+syll, +back, +rounded, ATR, !high, length: long] → [aperture, high] / _ #"
+
+# The */j/ that triggered West Germanic gemination is itself lost after the geminate it
+# made — *bidjan > *biddjan > *biddan 'bid', *midjaz > *middjaz > *midd 'middle'.
+[post_geminate_j_loss]
+time = 350
+name = "Loss of */j/ after a geminate"
+description = "*/j/ > ∅ after a doubled consonant"
+definition = "j → ∅ / 1=[-syll] @1 _"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # West Germanic → Anglo-Frisian → Old English  (Index Diachronica §17.7.2.1, §17.7.2.1.1)
@@ -375,6 +383,14 @@ time = 500
 name = "Apocope of final unstressed short vowels"
 description = "A word-final unstressed short vowel is lost after another syllable — *fulla > *full, *wurmi > *wurm, *toːθu > *toːθ"
 definition = "[+syll, stress: none, length: short] → ∅ / [+syll] [-syll]* _ #"
+
+# */m/ > */n/ before a dental stop — completing in Old English an assimilation begun in
+# Proto-Germanic (cf. the earlier *m > *n before *t/*d).
+[m_to_n_before_dental]
+time = 550
+name = "*/m/ > */n/ before a dental"
+description = "*samd > *sand 'sand'"
+definition = "m → n / _ [+cons, +anterior, -son, -cont]"
 
 # Anglo-Frisian brightening: the short low vowel fronts to */æ/, except when a
 # back vowel follows in the next syllable (which keeps it back — a-restoration).
@@ -426,6 +442,22 @@ definition = [
     "ə j → a j",                                                                    # əɪ → aɪ
     "ə w → a w",                                                                    # əʊ → aʊ
 ]
+
+# Old English *hw (< Proto-Germanic *xʷ) > /w/ in most words — 'what', 'wheel' (only
+# 'who/whose/whom' keep /h/, before /uː/).
+[hw_to_w]
+time = 1550
+name = "*/hʷ/ > */w/"
+description = "*xʷat > *wat 'what', *xʷeol > *weol 'wheel'"
+definition = "xʷ → w"
+
+# A stressed-syllable */d/ fricates to /ð/ before */ə(r)/ — the late change behind
+# 'father', 'mother', 'gather', 'weather' (Old English still had /d/: *fæder).
+[intervocalic_d_to_eth]
+time = 1700
+name = "*/d/ > */ð/ before */ər/"
+description = "*fadər > *faðər 'father', *moːdər > *moːðər 'mother'"
+definition = "d → ð̠ / [+syll, stress: primary] _ ə"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Leveling and sporadic changes — word-scoped, one word at a time.
