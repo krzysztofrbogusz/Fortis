@@ -348,7 +348,7 @@ definition = "z → r"
 time = 300
 name = "West Germanic gemination before */j/"
 description = "A non-*/r/ consonant geminates before */j/ — *midjaz > *middjaz 'middle'"
-definition = "1=[-syll, !+trill] → @1 @1 / _ j"
+definition = "1=[-syll, -sonorant] → @1 @1 / _ j"
 
 # §17.7.2  i u → e o / _%{a,o}: a-mutation lowers a high vowel when a non-high back
 # vowel stands in the next syllable.
@@ -589,3 +589,62 @@ words = ["young"]
 name = "Vowel shortening in 'young'"
 description = "*jūŋ > *juŋ (> FOOT–STRUT /jʌŋ/)"
 definition = "[+syll] → [length: short]"
+
+# 'night': OE *niht — the velar fricative palatalises and is lost, leaving the diphthong of
+# the Great Vowel Shift, and the genitive *-s drops. *næxts > *najt /naɪt/.
+[night_development]
+time = 1800
+words = ["night"]
+name = "*x-loss + diphthong in 'night'"
+description = "*næxts > *najt 'night'"
+definition = ["[+syll] x → a j", "s → ∅ / t _ #"]
+
+# 'new': the */iw/ of OE *nīwe glides to /juː/, and the old */j/ ending is lost. *niwj > /njuː/.
+[new_development]
+time = 1800
+words = ["new"]
+name = "*/iw/ > /juː/ in 'new'"
+description = "*niwj > *njuː 'new'"
+definition = ["[+syll] w → j uː", "j → ∅ / _ #"]
+
+# 'eight': OE *eahta — the *ɑɣ + the following diphthong collapse to the /eɪ/ of 'eight'.
+[eight_development]
+time = 1800
+words = ["eight"]
+name = "Monophthong/diphthong collapse in 'eight'"
+description = "*ɑwtɑw > *ejt 'eight'"
+definition = "[+syll] w t [+syll] w → e j t"
+
+# 'wheel': OE *hwēol — the medial fricative is lost with compensatory lengthening of the
+# vowel, which the Vowel Shift then raises. *xʷevl > *xʷeːl > /wiːl/.
+[wheel_development]
+time = 1000
+words = ["wheel"]
+name = "Compensatory lengthening in 'wheel'"
+description = "*xʷevl > *xʷeːl 'wheel'"
+definition = "[+syll] v → [length: long] ∅"
+
+# 'song': OE *song — the labiovelar that became *w restores the velar nasal. *sænw > *sæŋ.
+[song_development]
+time = 1800
+words = ["song"]
+name = "*/nw/ > */ŋ/ in 'song'"
+description = "*sænw > *sɔŋ 'song'"
+definition = ["n w → ŋ ∅", "[+syll] → ɔ / _ [+nasal, +back]"]
+
+# 'snow': OE *snāw — the */aiw/ becomes the /oʊ/ diphthong of 'snow'. *snæjw > *snow.
+[snow_development]
+time = 1800
+words = ["snow"]
+name = "*/aiw/ > /oʊ/ in 'snow'"
+description = "*snæjw > *snow 'snow'"
+definition = "[+syll] j w → o w"
+
+# 'am': the citation form keeps its full vowel (it is normally an unstressed clitic, which
+# would reduce); the geminate from *esmi > *emmi simplifies. /æm/.
+[am_development]
+time = 1700
+words = ["am"]
+name = "Full vowel + degemination in 'am'"
+description = "*emm > *æm 'am'"
+definition = ["[+syll] → æ", "1=m @1 → m ∅"]
