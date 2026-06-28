@@ -232,11 +232,22 @@ def _change_glyph(sid: int, before_anchors: set[int], after_anchors: set[int]) -
 
 
 def _place_label(bundle) -> str | None:
-    """The major place of articulation as a node label, or None if undefined."""
+    """The segment's oral place, named by its real geometry features (not an invented label).
+
+    Faithful to the feature inventory's own nodes — ``labial``, ``dental``, ``lingual`` with
+    its ``front``/``back`` daughter — rather than the idealized Labial/Coronal/Dorsal. The
+    front/back split keeps two lingual places (coronal vs velar) distinct for change detection.
+    """
     if "labial" in bundle:
-        return "Labial"
+        return "labial"
     if "lingual" in bundle:
-        return "Dorsal" if "back" in bundle else "Coronal"
+        if "front" in bundle:
+            return "lingual·front"
+        if "back" in bundle:
+            return "lingual·back"
+        return "lingual"
+    if "dental" in bundle:
+        return "dental"
     return None
 
 
@@ -246,11 +257,11 @@ def _is_consonant(bundle) -> bool:
 
 
 def render_place_change(nasal_before, nasal_after, trigger, project: Project) -> str:
-    """Place assimilation as an autosegmental Place-tier diagram.
+    """Place assimilation as an autosegmental diagram over the real ``oral`` node.
 
-    The trigger's place node forks to both segments with the assimilating segment's link
-    **dashed** (the spread, a new link), while that segment's old place is **delinked**
-    (``╪``) below — the tone-change notation applied to the Place node.
+    The trigger's ``oral`` (place) node forks to both segments with the assimilating
+    segment's link **dashed** (the spread, a new link), while that segment's old place is
+    **delinked** (``╪``) below — the tone-change notation applied to the oral node.
     """
     new_place = _place_label(nasal_after) or "?"
     old_place = _place_label(nasal_before) or "?"
@@ -267,7 +278,7 @@ def render_place_change(nasal_before, nasal_after, trigger, project: Project) ->
     rows[2][nasal_col], rows[2][trigger_col] = "╎", "│"  # nasal link dashed (new); trigger solid
     rows[3][nasal_col], rows[3][trigger_col] = nasal_sym, trigger_sym
     rows[4][nasal_col] = "╪"  # the old place, delinked
-    _put(rows[5], nasal_col - _dwidth(old_place) // 2, old_place)
+    _put(rows[5], max(0, nasal_col - _dwidth(old_place) // 2), old_place)
     return "\n".join("".join(row).rstrip() for row in rows)
 
 

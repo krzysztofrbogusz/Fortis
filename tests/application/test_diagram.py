@@ -90,5 +90,5 @@ def test_place_change_shows_spread_and_delink(project):
     m = string_to_sequence("m", project).segments[0].bundle  # its labial outcome
     p = string_to_sequence("p", project).segments[0].bundle  # the labial trigger
     out = render_place_change(n, m, p, project)
-    assert "Labial" in out and "Coronal" in out  # the new (shared) place and the old one
+    assert "labial" in out and "lingual" in out  # new (shared) + old place, by their real nodes
     assert "╎" in out and "╪" in out  # the spread (dashed link) and the delink bar
