@@ -61,6 +61,20 @@ def test_change_added_association_is_dashed(project):
     assert "˦" in out and "╎" in out  # dashed = added
 
 
+def test_spread_change_renders_as_a_fork(project):
+    # A tone spreading to a second vowel renders as a fork, so it reads as one autosegment
+    # on both anchors — the kept link solid (│), the new one dashed (╎).
+    before = string_to_sequence("taka", project)
+    t = before.fresh_id()
+    before.tiers["tone"].autosegs.append(_tone(4, t))
+    before.tiers["tone"].links.add((t, 1))  # H on the first vowel
+    after = before.copy()
+    after.tiers["tone"].links.add((t, 3))  # spreads to the second vowel
+    out = render_autosegmental_change(before, after, project)
+    assert "┌" in out and "┐" in out  # the fork ties the one tone to both anchors
+    assert "│" in out and "╎" in out  # first link kept (solid), the new one dashed
+
+
 def test_change_removed_association_is_delinked(project):
     # A removed association renders with the delink bar.
     before = string_to_sequence("taka", project)

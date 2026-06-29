@@ -210,11 +210,16 @@ def _change_tier_band(before_tier, after_tier, name: str, center, seg_ids, total
     if not spreads and not singles:
         return []
 
-    for label, cols_glyphs in spreads:  # one autoseg, many anchors — label centred over them
+    for label, cols_glyphs in spreads:  # one autoseg, several anchors — draw the fork explicitly
         cols = sorted(col for col, _ in cols_glyphs)
         mid = (cols[0] + cols[-1]) // 2
-        _put(label_row, mid - (_dwidth(label) - 1) // 2, label)
-        for col, glyph in cols_glyphs:
+        for x in range(cols[0], cols[-1] + 1):  # the branch line spanning the anchors
+            label_row[x] = "─"
+        for c in cols:
+            label_row[c] = "┬"
+        label_row[cols[0]], label_row[cols[-1]] = "┌", "┐"
+        _put(label_row, mid - (_dwidth(label) - 1) // 2, label)  # autoseg at the branch point
+        for col, glyph in cols_glyphs:  # styled descender per anchor: │ kept · ╎ added · ╪ delinked
             conn_row[col] = glyph
     for col, items in singles.items():  # one anchor; several autosegs here ⇒ a contour, fanned out
         spread_out = range(-(len(items) - 1), len(items), 2)  # 1→[0], 2→[-1,1], 3→[-2,0,2], …
