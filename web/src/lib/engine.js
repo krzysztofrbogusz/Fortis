@@ -52,7 +52,8 @@ def run_derivations():
         frames = [{"label":"Input","diagram":render_autosegmental(d.input,project)}]
         for s in d.steps:
             base = _SUB.sub("", s.rule.id); heading = (s.rule.name or base) if base!=prev else None; prev = base
-            steps.append({"heading":heading,"time":s.rule.time,"name":s.rule.name or base,
+            steps.append({"heading":heading,"definition":s.rule.raw_definition,
+                          "time":s.rule.time,"name":s.rule.name or base,
                           "before":R(s.before,s.before_boundaries),"after":R(s.after,s.after_boundaries),
                           "change":describe_change(lower_tiers(s.before),lower_tiers(s.after),project)})
             lbl = (str(s.rule.time)+": " if s.rule.time is not None else "")+(s.rule.name or base)

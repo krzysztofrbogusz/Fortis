@@ -288,6 +288,7 @@
                   {#if s.heading}
                     <div class="rule-heading">
                       {#if s.time !== null}<span class="time">{s.time}</span>: {/if}{s.heading}
+                      {#if s.definition}<span class="def">{s.definition}</span>{/if}
                     </div>
                   {/if}
                   <div class="step">
@@ -579,11 +580,17 @@
     margin: 10px 0 2px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--text-h);
   }
   .rule-heading .time {
     font-family: var(--mono);
     font-weight: 500;
+  }
+  .rule-heading .def {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-weight: 400;
+    color: var(--muted);
   }
   .step {
     display: flex;
