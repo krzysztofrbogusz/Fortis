@@ -565,7 +565,7 @@
     border-bottom: 1px dashed var(--border);
   }
   .word-ipa {
-    font-size: 18px;
+    font-size: 20px;
     color: var(--text-h);
   }
   .gloss {
@@ -580,7 +580,7 @@
   }
   .rule-heading {
     margin: 10px 0 2px;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-h);
   }
@@ -592,8 +592,10 @@
     color: var(--text-h);
   }
   .rule-heading .def {
-    margin-left: 8px;
+    display: block;
+    margin-top: 2px;
     font-family: var(--mono);
+    font-size: 12px;
     font-weight: 400;
     color: var(--muted);
   }
@@ -603,7 +605,7 @@
     flex-wrap: wrap;
     gap: 8px;
     padding-left: 16px;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-h);
   }
   .arrow {
@@ -622,7 +624,7 @@
     margin-top: 12px;
     padding-top: 8px;
     border-top: 1px solid var(--border);
-    font-size: 15px;
+    font-size: 20px;
   }
   .surface .lbl {
     font-family: var(--sans);
