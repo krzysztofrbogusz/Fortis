@@ -302,10 +302,10 @@ time = 200
 name = "West Germanic hardening / labiodentalisation of the fricatives"
 description = "*/ð/ > */d/ after a vowel; initial */β ɣ/ > */b ɡ/, medial > */v w/; */ɸ/ > */f/"
 definition = [
-    "[-son, +cont, +voice, +anterior, !+strident] → [-cont] / [+son] _",  # ð̠ > d after a sonorant (not strident z)
+    "ð̠ → d / [+son] _",   # letter identity: matches ð̠ only, no longer the strident z
     "β → b / # _",
     "ɣ → g / # _",
-    "[-son, +cont, -voice, +labial, !+back] → f",                          # ɸ > f (not labiovelar xʷ)
+    "ɸ → f",               # letter identity: matches ɸ only, no longer the labiovelar xʷ
     "β → v",
     "ɣ → w / [+syll] _",
 ]
@@ -444,7 +444,7 @@ definition = "[+syll, +low, length: short] → [front, ATR, back: none, RTR: non
 time = 1100
 name = "Reduction of unstressed vowels to */ə/"
 description = "Every unstressed vowel reduces to */ə/ — *fadeːr > *fadər 'father'"
-definition = "[+syll, stress: none] → [front: none, back: none, aperture: none, high: none, low: none, rounded: none, labial: none, ATR: none, RTR: none, nasal: none, length: short]"
+definition = "[+syll, stress: none] → [front: none, back: none, aperture: none, labial: none, advancement: none, nasal: none, length: short]"
 
 # A schwa in hiatus — directly after the stressed vowel — is absorbed: *teən > *ten 'ten'.
 [hiatus_schwa_loss]
@@ -520,18 +520,15 @@ definition = "[+syll, +low, +front, length: short] → [ATR, RTR: none]"
 [r_colouring]
 time = 1900
 name = "Unstressed */ər/ > /ɚ/"
-description = "*faðer > *faðɚ 'father'"
-definition = "[+syll, stress: none] r → ɚ ∅"
+description = "*faðer > *faðɚ 'father' — the unstressed vowel takes the r-colouring (retroflex), the */r/ dropping"
+definition = "[+syll, stress: none] r → [+retroflex] ∅"
 
 # The Proto-Germanic apico-dental fricatives surface as the plain dental */θ ð/ of English.
 [dental_fricatives_plain]
 time = 1950
 name = "*/θ̠ ð̠/ > */θ ð/"
 description = "The dental fricatives lose their retraction — *tuːθ̠ > tuːθ, *fɑð̠ɚ > fɑðɚ"
-definition = [
-    "[-son, +cont, +voice, +anterior, !+strident] → ð",  # ð̠ > ð (not strident z)
-    "[-son, +cont, -voice, +anterior, !+strident] → θ",  # θ̠ > θ (not strident s)
-]
+definition = ["ð̠ → ð", "θ̠ → θ"]  # letters now match by identity, so these no longer catch z/s
 
 # A nasal before a velar fricative assimilates to */ŋ/, the fricative dropping — *juŋɣ > *juŋ.
 [velar_nasal]
@@ -615,7 +612,7 @@ time = 1800
 words = ["night"]
 name = "*x-loss + diphthong in 'night'"
 description = "*næxts > *najt 'night'"
-definition = ["[+syll] x → a j", "s → ∅ / t _ #"]
+definition = ["[+syll] [-son, +cont, +back, +high] → a j", "s → ∅ / t _ #"]
 
 # 'new': the */iw/ of OE *nīwe glides to /juː/, and the old */j/ ending is lost. *niwj > /njuː/.
 [new_development]
@@ -639,8 +636,8 @@ definition = "[+syll] w t [+syll] w → e j t"
 time = 1000
 words = ["wheel"]
 name = "Compensatory lengthening in 'wheel'"
-description = "*xʷevl > *xʷeːl 'wheel'"
-definition = "[+syll] v → [length: long] ∅"
+description = "*xʷeɣʷl > *xʷeːl 'wheel'"
+definition = "[+syll] [-son, +cont, +back, +high] → [length: long] ∅"
 
 # 'song': OE *song — the labiovelar that became *w restores the velar nasal. *sænw > *sæŋ.
 [song_development]

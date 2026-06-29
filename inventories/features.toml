@@ -18,12 +18,12 @@ oral = { kind = "unary", children = ["labial", "dental", "lingual"] }
         rounded = { kind = "unary", short = "rnd"}
         compressed = { kind = "unary", short = "cmpr"}
     dental = { kind = "unary", short = "dnt"}
-    lingual = { kind = "unary", short = "ling", children = ["front", "back", "aperture", "advancement"] }
-        front = { kind = "unary", short = "fr", children = ["anterior", "posterior", "apical", "retroflex"] }
+    lingual = { kind = "unary", short = "ling", children = ["apical", "retroflex", "front", "back", "aperture", "advancement"] }
+        apical = { kind = "unary", short = "api"}
+        retroflex = { kind = "unary", short = "rflx"}
+        front = { kind = "unary", short = "fr", children = ["anterior", "posterior"] }
             anterior = { kind = "unary", short = "ant"}
             posterior = { kind = "unary", short = "post"}
-            apical = { kind = "unary", short = "api"}
-            retroflex = { kind = "unary", short = "rflx"}
         back = { kind = "unary", short = "bk" }
         aperture = { kind = "unary", short = "aper", children = ["high", "low"]}
             high = { kind = "unary", short = "hi"}

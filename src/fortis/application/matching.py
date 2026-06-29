@@ -499,9 +499,20 @@ def _copy(bindings: Bindings) -> Bindings:
     )
 
 
-def _letter_matches(letter: FeatureBundle, segment: FeatureBundle) -> bool:
-    """Whether a letter's features are all present in *segment* with equal values."""
-    return all(f in segment and segment[f].value == spec.value for f, spec in letter.items())
+def _letter_matches(
+    letter: FeatureBundle, segment: FeatureBundle, syllable_features: frozenset[str] = frozenset()
+) -> bool:
+    """Whether *segment* IS this letter — its segmental features are exactly the letter's.
+
+    Identity, not subset: the letter must account for every segmental feature the segment
+    carries, so the dental-fricative letter ``ð̠`` no longer also matches the strident ``z``
+    (whose bundle merely adds ``strident``). Syllable-tier features (tone, stress) a lowered
+    vowel may carry are excluded — they live on the nucleus, not in a letter's identity.
+    """
+    seg = {f for f in segment.data if f not in syllable_features}
+    return seg == set(letter.data) and all(
+        segment[f].value == spec.value for f, spec in letter.items()
+    )
 
 
 def _match_element(
@@ -542,12 +553,15 @@ def _match_element(
 
         case LetterRef(symbol):
             if pos < len(segments) and symbol in letters:
-                if _letter_matches(letters[symbol].bundle, segments[pos]):
+                feats = syllables.features if syllables else frozenset()
+                if _letter_matches(letters[symbol].bundle, segments[pos], feats):
                     yield pos + 1, bindings
 
         case LetterBundle(bundle):
-            if pos < len(segments) and _letter_matches(bundle, segments[pos]):
-                yield pos + 1, bindings
+            if pos < len(segments):
+                feats = syllables.features if syllables else frozenset()
+                if _letter_matches(bundle, segments[pos], feats):
+                    yield pos + 1, bindings
 
         case Wildcard():
             if pos < len(segments):
