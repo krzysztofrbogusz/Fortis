@@ -109,8 +109,17 @@ time       = 300
 name       = "Hiatus coalescence"
 definition = "[+syllabic] [+syllabic] -> [length: long] ∅"
 
-[vowel_harmony]                     # Turkish-style backness harmony: vowels agree with the stem
+# Turkish vowel harmony, in two parts. Backness: every vowel agrees in backness with the
+# preceding vowel (across any consonants). Rounding: a *high* vowel additionally agrees in
+# rounding. So in *otine*, both /i e/ back to /ɯ ɤ/, and the high /ɯ/ then rounds to /u/.
+[backness_harmony]
 words       = ["vowel harmony"]
 name        = "Backness harmony"
 definition  = "[+syllabic] -> [α front, β back] / [+syllabic, α front, β back] [-syllabic]* _"
+application = "left_to_right"
+
+[rounding_harmony]
+words       = ["vowel harmony"]
+name        = "Rounding harmony"
+definition  = "[+syllabic, +high] -> [α rounded, β labial] / [+syllabic, α rounded, β labial] [-syllabic]* _"
 application = "left_to_right"
