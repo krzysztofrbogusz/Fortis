@@ -7,6 +7,7 @@ from src.fortis.application.diagram import (
     render_autosegmental_change,
     render_change,
     render_geometry_tree,
+    render_harmony_changes,
     render_place_changes,
 )
 from src.fortis.application.segmentation import string_to_sequence
@@ -127,6 +128,21 @@ def test_place_change_shows_spread_and_delink(project):
     out = diagrams[0]
     assert "labial" in out and "lingual" in out  # new (shared) + old place, by their real nodes
     assert "╎" in out and "╪" in out  # the spread (dashed link) and the delink bar
+
+
+def test_harmony_change_renders_backness_as_a_fork(project):
+    # Vowel harmony: a vowel taking the preceding vowel's backness renders as one [back]
+    # autosegment fanning from the source (│) to the harmonised vowel (╎) — the autosegmental
+    # reading of the harmony, the vowel analogue of place assimilation's node spread.
+    before = string_to_sequence("uti", project)  # u (back) · t · i (front)
+    back_i = string_to_sequence("ɯ", project).segments[0].bundle  # i's backness-harmonised form
+    after = before.copy()
+    after.segments[2] = replace(after.segments[2], bundle=back_i)  # i → ɯ (keeps its id)
+    diagrams = render_harmony_changes(before, after, project)
+    assert len(diagrams) == 1  # one fork: the backness spread
+    out = diagrams[0]
+    assert "back" in out  # labelled by the harmonic feature
+    assert "│" in out and "╎" in out  # source kept solid, harmonised vowel dashed
 
 
 def test_geometry_tree_nests_real_nodes_for_one_segment(project):

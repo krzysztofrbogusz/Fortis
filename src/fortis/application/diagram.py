@@ -303,6 +303,43 @@ def _is_consonant(bundle) -> bool:
     return spec is not None and spec.value == 1
 
 
+def _is_vowel(bundle) -> bool:
+    spec = bundle.get("syllabic")
+    return spec is not None and spec.value == 1
+
+
+# Vowel-harmony features that spread vowel-to-vowel, each → a fork labelled by its name.
+_HARMONY_FEATURES = (("back", "back"), ("front", "front"), ("rounded", "round"))
+
+
+def _harmony_spreads(before: Form, after: Form, project: Project) -> list[_Spread]:
+    """Vowel harmony as ``_Spread``s — one fork per harmonic feature that spread across vowels.
+
+    For each feature (backness, rounding), the vowels carrying it in *after* are the fork's
+    anchors; those that newly gained it are the spread targets (``╎``), the rest the source(s)
+    that already had it (``│``). So one ``[back]`` autosegment fans from the trigger vowel to the
+    vowels that harmonised to it — the autosegmental reading of either harmony rule's output.
+    """
+    _ = project  # rendering happens in _draw; detection needs only the bundles
+    before_by_id = {segment.id: segment.bundle for segment in before.segments}
+    segments = after.segments
+    spreads: list[_Spread] = []
+    for feature, label in _HARMONY_FEATURES:
+        carriers, gained = [], []
+        for i, segment in enumerate(segments):
+            if not _is_vowel(segment.bundle) or feature not in segment.bundle:
+                continue
+            carriers.append(i)
+            old = before_by_id.get(segment.id)
+            if old is not None and feature not in old:
+                gained.append(i)
+        # A spread needs ≥1 newly-harmonised anchor and ≥1 source that already carried it.
+        if gained and len(carriers) > len(gained):
+            links = tuple((i, "╎" if i in gained else "│") for i in carriers)
+            spreads.append(_Spread(label, links))
+    return spreads
+
+
 def _node_spreads(before: Form, after: Form, project: Project) -> list[_Spread]:
     """Place assimilations as ``_Spread``s over the real ``oral`` node — one per assimilated seg.
 
@@ -377,17 +414,24 @@ def render_place_changes(before: Form, after: Form, project: Project) -> list[st
     return [_draw(after.segments, [s], project) for s in _node_spreads(before, after, project)]
 
 
+def render_harmony_changes(before: Form, after: Form, project: Project) -> list[str]:
+    """A fork diagram for each vowel-harmony feature (backness, rounding) that spread."""
+    return [_draw(after.segments, [s], project) for s in _harmony_spreads(before, after, project)]
+
+
 def render_change(before: Form, after: Form, project: Project) -> list[str]:
     """Every autosegmental change for one rule, as fork diagrams — the single renderer to call.
 
-    One entry point for both kinds of spread, which share the label/fork/descender notation
+    One entry point for every kind of spread, which share the label/fork/descender notation
     (``│`` kept · ``╎`` added · ``╪`` delinked): a *tier* autosegment (tone, stress) whose links
     changed yields one diagram (all tiers together); each *segmental-node* (place) assimilation
-    yields its own. Returns them in display order — tier change first, then place assimilations.
+    yields its own; and each *vowel-harmony* feature (backness, rounding) that spread across the
+    vowels yields a fork. Returned in display order — tier change, then place, then harmony.
     """
     diagrams: list[str] = []
     tier = render_autosegmental_change(before, after, project)
     if "╎" in tier or "╪" in tier:  # the tier diagram is meaningful only when a link changed
         diagrams.append(tier)
     diagrams.extend(render_place_changes(before, after, project))
+    diagrams.extend(render_harmony_changes(before, after, project))
     return diagrams
