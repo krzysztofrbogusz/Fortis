@@ -47,7 +47,7 @@ class Rule:
     """
 
     id: str
-    time: int
+    time: int | None  # None = untimed: applied after every timed rule, shown without a prefix
     raw_definition: str
     sd: StructuralDescription
     application: ApplicationMode = ApplicationMode.simultaneous
@@ -56,8 +56,9 @@ class Rule:
     words: tuple[str, ...] = ()
 
 
-class RuleInventory(UserDict[int, tuple[Rule, ...]]):
-    """Rules keyed by time, with rules at each time in file order.
+class RuleInventory(UserDict["int | None", tuple[Rule, ...]]):
+    """Rules keyed by time, in file order at each time.
 
-    Access ``inventory[-2000]`` to get all rules that apply at time −2000.
+    The ``None`` key holds the untimed rules, applied after every timed one. Access
+    ``inventory[-2000]`` to get all rules that apply at time −2000.
     """

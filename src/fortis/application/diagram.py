@@ -210,8 +210,8 @@ def _change_tier_band(before_tier, after_tier, name: str, center, seg_ids, total
     if not spreads and not singles:
         return []
 
-    fork_row = [" "] * total  # the branch row, between the label and the descenders (as in render_place_change)
-    for label, cols_glyphs in spreads:  # one autoseg, several anchors — label, fork, styled descenders
+    fork_row = [" "] * total  # the branch row (label above, descenders below)
+    for label, cols_glyphs in spreads:  # one autoseg, several anchors
         cols = sorted(col for col, _ in cols_glyphs)
         mid = (cols[0] + cols[-1]) // 2
         _put(label_row, mid - (_dwidth(label) - 1) // 2, label)  # the autoseg label, above the fork

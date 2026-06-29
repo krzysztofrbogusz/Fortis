@@ -189,7 +189,7 @@ def _maintain_tiers(
     form: Form,
     sonorities: SonoritiesInventory | None,
     syllable_parts: SyllablePartsInventory | None,
-    time: int,
+    time: int | None,
     letters: LetterInventory,
     tiers: TierInventory,
 ) -> Form:
@@ -239,7 +239,7 @@ def _syllable_context(
     form: list[FeatureBundle],
     sonorities: SonoritiesInventory | None,
     syllable_parts: SyllablePartsInventory | None,
-    time: int,
+    time: int | None,
     letters: LetterInventory,
     syllable_features: frozenset[str],
     node_descendants: dict[str, frozenset[str]],
@@ -271,7 +271,7 @@ def _boundaries(
     form: list[FeatureBundle],
     sonorities: SonoritiesInventory | None,
     syllable_parts: SyllablePartsInventory | None,
-    time: int,
+    time: int | None,
     letters: LetterInventory,
 ) -> frozenset[int]:
     """Syllable boundaries of *form* at *time*, or none if syllabification is unconfigured."""
@@ -284,7 +284,7 @@ def _display_boundaries(
     form: list[FeatureBundle],
     sonorities: SonoritiesInventory | None,
     syllable_parts: SyllablePartsInventory | None,
-    time: int,
+    time: int | None,
     letters: LetterInventory,
 ) -> frozenset[int]:
     """Syllable boundaries for the trace — best-effort; an unsyllabifiable form is empty.
@@ -524,7 +524,7 @@ def _apply_directional(
     features: FeatureInventory,
     sonorities: SonoritiesInventory | None,
     syllable_parts: SyllablePartsInventory | None,
-    time: int,
+    time: int | None,
     syllable_features: frozenset[str],
     tiers: TierInventory,
     reverse: bool,
@@ -623,7 +623,7 @@ def derive(
     current = form
     steps: list[DerivationStep] = []
 
-    for time in sorted(rules.keys()):
+    for time in sorted(rules.keys(), key=lambda t: (t is None, t)):  # untimed (None) rules last
         for rule in rules[time]:
             if rule.words and word.ipa not in rule.words and word.gloss not in rule.words:
                 continue  # a word-scoped rule that does not list this word
@@ -651,8 +651,9 @@ def derive(
                 current = after
 
     current = cleanup_tiers(current, tiers, surface=True)  # stray-erase floating autosegs
+    latest = max((t for t in rules if t is not None), default=0)  # surface uses the latest parts
     surface_boundaries = _display_boundaries(
-        current.bundles(), sonorities, syllable_parts, max(rules, default=0), letters
+        current.bundles(), sonorities, syllable_parts, latest, letters
     )
     return Derivation(
         word=word,

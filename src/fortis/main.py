@@ -150,7 +150,9 @@ def _print_derivation(derivation: Derivation, project: Project) -> None:
         change = describe_change(lower_tiers(step.before), lower_tiers(step.after), project)
         base = _SUBRULE_SUFFIX.sub("", step.rule.id)
         if base != previous_base:
-            print(f"    {step.rule.time}: {step.rule.name or base}")
+            label = step.rule.name or base
+            head = f"{step.rule.time}: {label}" if step.rule.time is not None else label
+            print(f"    {head}")
             previous_base = base
         print(f"        {before} → {after}   ({change})")
 
@@ -196,7 +198,9 @@ def _render_derivation_md(derivation: Derivation, project: Project) -> list[str]
         change = describe_change(lower_tiers(step.before), lower_tiers(step.after), project)
         base = _SUBRULE_SUFFIX.sub("", step.rule.id)
         if base != previous_base:
-            trace.append(f"{step.rule.time}: {step.rule.name or base}")
+            label = step.rule.name or base
+            head = f"{step.rule.time}: {label}" if step.rule.time is not None else label
+            trace.append(head)
             previous_base = base
         trace.append(f"    {before} → {after}   ({change})")
     if trace:

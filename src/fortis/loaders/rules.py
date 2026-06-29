@@ -13,8 +13,11 @@ from src.fortis.result import Err, Ok, Result
 # ---- Per-field helpers ----------------------------------------------------------------
 
 
-def load_time(rule_id: str, rule_def: dict[str, Any]) -> Result[int, str]:
-    """Parse the optional 'time' field (defaults to 0).
+def load_time(rule_id: str, rule_def: dict[str, Any]) -> Result[int | None, str]:
+    """Parse the optional 'time' field.
+
+    An untimed rule has time ``None`` and is applied *after* every timed rule (in file order),
+    and is shown without a time prefix.
 
     Args:
         rule_id: Rule slug (for error messages).
@@ -22,7 +25,7 @@ def load_time(rule_id: str, rule_def: dict[str, Any]) -> Result[int, str]:
     """
     value = rule_def.get("time")
     if value is None:
-        return Ok(0)  # time is optional; an untimed rule sorts at 0
+        return Ok(None)  # untimed: applied after all timed rules
     if not isinstance(value, int):
         return Err(f"Rule '{rule_id}' has non-integer 'time' value: {value!r}")
     return Ok(value)
@@ -199,7 +202,7 @@ def load_rule_inventory(path: Path, features: FeatureInventory) -> Result[RuleIn
             data = result
 
     # Collect rules, preserving file order
-    rules_by_time: dict[int, list[Rule]] = {}
+    rules_by_time: dict[int | None, list[Rule]] = {}
     for rule_id, rule_def in data.items():
         rule_id = rule_id.strip()
         match load_rule(rule_id, rule_def, features):

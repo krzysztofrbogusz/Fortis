@@ -160,8 +160,9 @@ def load_project(
     _warn_unknown_scoped_words(rules, words)
 
     # The derivation starts at the earliest time defined by any time-keyed
-    # inventory (rules, syllable parts). Falls back to 0 if none define a time.
-    time = min((*rules.keys(), *syllable_parts.keys()), default=0)
+    # inventory (rules, syllable parts). Untimed (None) rules are ignored here — they apply
+    # last, not first. Falls back to 0 if nothing defines a time.
+    time = min((t for t in (*rules.keys(), *syllable_parts.keys()) if t is not None), default=0)
 
     return Ok(
         Project(

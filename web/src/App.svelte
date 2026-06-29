@@ -287,7 +287,7 @@
                 {#each d.steps as s}
                   {#if s.heading}
                     <div class="rule-heading">
-                      <span class="time">{s.time}</span>: {s.heading}
+                      {#if s.time !== null}<span class="time">{s.time}</span>: {/if}{s.heading}
                     </div>
                   {/if}
                   <div class="step">

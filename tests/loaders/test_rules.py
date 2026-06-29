@@ -21,10 +21,10 @@ class TestLoadTime:
         assert result.is_ok()
         assert result.unwrap() == 0
 
-    def test_missing_defaults_to_zero(self):
-        # time is optional; an untimed rule sorts at 0
+    def test_missing_defaults_to_none(self):
+        # time is optional; an untimed rule has time None (applied after every timed rule)
         result = load_time("test_rule", {})
-        assert result.unwrap() == 0
+        assert result.unwrap() is None
 
     def test_non_integer(self):
         result = load_time("test_rule", {"time": "not_a_number"})
@@ -121,9 +121,9 @@ class TestLoadRule:
         result = load_rule("bad", {"time": 0, "definition": ["a → b", "→ → →"]}, features)
         assert result.is_err()
 
-    def test_missing_time_defaults_to_zero(self, features):
+    def test_missing_time_defaults_to_none(self, features):
         result = load_rule("untimed", {"definition": "a → b"}, features)
-        assert result.unwrap()[0].time == 0
+        assert result.unwrap()[0].time is None
 
     def test_words_restricts_the_rule(self, features):
         # a 'words' list (string or list) scopes the rule to those words by ipa or gloss

@@ -117,7 +117,7 @@ def syllabify(
     segments: list[FeatureBundle],
     sonorities: SonoritiesInventory,
     syllable_parts: SyllablePartsInventory,
-    time: int,
+    time: int | None,
     letters: LetterInventory | None = None,
 ) -> frozenset[int]:
     """Return the syllable-boundary positions of *segments* at *time*.
