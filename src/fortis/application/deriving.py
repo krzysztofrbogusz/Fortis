@@ -98,9 +98,15 @@ def _syllable_features(features: FeatureInventory) -> frozenset[str]:
 
 
 def _node_descendants(features: FeatureInventory) -> dict[str, frozenset[str]]:
-    """Each segmental node → its descendant feature names, for node-spread capture (`oral: ~n`)."""
+    """Each segmental feature → its descendant names, for node-spread capture (`oral: ~n`).
+
+    Every segmental feature is included, not only those with children: a childless leaf like
+    ``back`` maps to an empty set, so ``[back: ~n]`` spreads the feature itself (vowel harmony).
+    """
     return {
-        name: frozenset(features.descendants(name)) for name in features if features.is_node(name)
+        name: frozenset(features.descendants(name))
+        for name in features
+        if features.is_segmental(name)
     }
 
 

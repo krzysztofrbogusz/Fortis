@@ -96,10 +96,15 @@ def _collect(
                 for feature, spec in bundle.items():
                     markers.alphas |= _alphas_in_value(spec.value)
                     binds, recalls = _autoseg_refs_in_value(spec.value)
-                    if features is not None and feature in features and features.is_node(feature):
-                        # A `~n` on a segmental node is a node-spread reference (positional
-                        # bind in target/context, recall in result) — not a tier autosegment,
-                        # so it is exempt from the tier `~n=`/`~n` reconciliation below.
+                    if (
+                        features is not None
+                        and feature in features
+                        and features.is_segmental(feature)
+                    ):
+                        # A `~n` on a segmental feature is a node-spread reference (positional
+                        # bind in target/context, recall in result) — not a tier autosegment, so
+                        # it is exempt from the tier `~n=`/`~n` reconciliation below. This holds
+                        # for childless leaves (back, rounded) as well as nodes (oral).
                         markers.node_refs |= binds | recalls
                     else:
                         markers.autoseg_binds |= binds

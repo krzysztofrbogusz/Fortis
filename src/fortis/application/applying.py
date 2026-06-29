@@ -261,7 +261,11 @@ def _render_result_element(
             node_recalls = {
                 f: s.value.ref
                 for f, s in bundle.items()
-                if isinstance(s.value, AutosegRecall) and features.is_node(f)
+                if isinstance(s.value, AutosegRecall)
+                and features.is_segmental(f)
+                # A conditional node-recall (`<n: F: ~m>`) spreads only when its condition held;
+                # when false it falls to the bundle below, where _resolve_result_bundle skips it.
+                and (s.condition_label is None or bindings.conditions.get(s.condition_label, False))
             }
             for node, ref in node_recalls.items():
                 cleared = FeatureBundle({node: FeatureSpec(feature=node, value=None)})

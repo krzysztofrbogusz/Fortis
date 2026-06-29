@@ -109,11 +109,22 @@ time       = 300
 name       = "Hiatus coalescence"
 definition = "[+syllabic] [+syllabic] -> [length: long] ∅"
 
-# Turkish vowel harmony in one rule. Every vowel agrees in backness (α/β) with the preceding
-# vowel; rounding (γ/δ) is gated by the conditional <1: +high> on the target, so it spreads only
-# onto a high vowel. In *otine*, both /i e/ back to /ɯ ɤ/, and the high one also rounds: ɯ > u.
+# Turkish vowel harmony, shown two equivalent ways on otine/utine (both → -unɤ).
+#
+# (1) By feature AGREEMENT: every vowel agrees in backness (α/β) with the preceding vowel;
+# rounding (γ/δ) is gated by the conditional <1: +high>, so it reaches only a high vowel.
 [vowel_harmony]
-words       = ["vowel harmony"]
-name        = "Vowel harmony"
+words       = ["vowel harmony (agreement)"]
+name        = "Vowel harmony (agreement)"
 definition  = "[+syllabic, <1: +high>] -> [α front, β back, <1: γ rounded>, <1: δ labial>] / [+syllabic, α front, β back, γ rounded, δ labial] [-syllabic]* _"
+application = "left_to_right"
+
+# (2) By autosegmental SPREADING: each harmonic feature is copied from the preceding vowel by
+# node-spread (~n). Backness copies the `back` node (clearing `front`); rounding, gated by the
+# same <1: +high>, copies `rounded`/`labial`. A node-spread binds nodes the source must carry,
+# so this fires from a back, round vowel — the same outcome as (1) by a different mechanism.
+[vowel_harmony_spread]
+words       = ["vowel harmony (spreading)"]
+name        = "Vowel harmony (spreading)"
+definition  = "[+syllabic, <1: +high>] -> [back: ~1, front: none, <1: rounded: ~2>, <1: labial: ~3>] / [+syllabic, back: ~1, rounded: ~2, labial: ~3] [-syllabic]* _"
 application = "left_to_right"

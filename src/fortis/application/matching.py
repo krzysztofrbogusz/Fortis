@@ -496,6 +496,7 @@ def _copy(bindings: Bindings) -> Bindings:
         conditions=dict(bindings.conditions),
         disjunction_choices=bindings.disjunction_choices,
         pending_other=list(bindings.pending_other),
+        node_reference=dict(bindings.node_reference),
     )
 
 

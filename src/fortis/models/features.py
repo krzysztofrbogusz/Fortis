@@ -52,6 +52,14 @@ class FeatureInventory(UserDict[str, Feature]):
         """Does this feature have children?"""
         return bool(self.data[feature].children)
 
+    def is_segmental(self, feature: str) -> bool:
+        """Whether the feature lives on the segment (vs a suprasegmental tier like tone/stress).
+
+        A ``~n`` on a segmental feature is a node-spread (copy the feature and its children,
+        even a childless leaf like ``back``); a ``~n`` on a tier feature is an autosegment link.
+        """
+        return self.data[feature].tier == Tier.segment
+
     def children(self, feature: str) -> tuple[str, ...]:
         """Immediate children of the feature."""
         return tuple(self.data[feature].children or ())
