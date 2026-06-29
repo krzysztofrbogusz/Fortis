@@ -515,6 +515,14 @@ name = "*/a/ > */æ/"
 description = "Short */a/ > */æ/ — *appl > *æppl 'apple'"
 definition = "[+syll, +low, +front, length: short] → [ATR, RTR: none]"
 
+# A short low vowel after /w/ backs — the "wa" of what, want, wash, swan. Here to the
+# unrounded /ʌ/. *wæt > *wʌt 'what'.
+[w_backing]
+time = 1760
+name = "*/a/ > */ʌ/ after /w/"
+description = "*wæt > *wʌt 'what'"
+definition = "[+syll, +low] → [back, RTR, front: none, ATR: none, low: none, aperture: none] / w _"
+
 # §17.7.2.1.5  In a rhotic (e.g. General American) accent, an unstressed */ə/ + */r/
 # coalesces into the r-coloured vowel */ɚ/ — *faðər > *faðɚ ('father', 'mother', 'over').
 # §17.7.2.1.4  A stressed vowel before */r/ + a consonant (or word-end) loses its quality
