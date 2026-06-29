@@ -40,3 +40,44 @@ application = "left_to_right"
 words      = ["place assimilation"]
 name       = "Place assimilation"
 definition = "[+nasal] -> [oral: ~1] / _ [+consonantal, oral: ~1]"
+
+[tone_stability]                    # autosegmental: a tone outlives its deleted vowel and re-docks
+words      = ["tone stability"]
+name       = "Tone stability"
+definition = "[+syllabic] -> ∅ / [+syllabic] [-syllabic]* _ #"
+
+[tone_delinking]                    # autosegmental: remove an association (tone: none)
+words      = ["tone delinking"]
+name       = "Tone delinking"
+definition = "[+syllabic, tone: high] -> [tone: none] / _ #"
+
+[contour_tone]                      # autosegmental: a level tone becomes a contour (a > b)
+words      = ["contour tone"]
+name       = "Contour tone"
+definition = "[+syllabic, tone: high] -> [tone: 5>3] / _ #"
+
+[stress]                            # the metrical tier: assign primary stress to the first vowel
+words      = ["stress"]
+name       = "Stress assignment"
+definition = "[+syllabic] -> [stress: primary] / # [-syllabic]* _"
+
+[disjunction]                       # a disjunctive context (X | Y)
+words      = ["disjunction"]
+name       = "Disjunction"
+definition = "a -> e / _ (i | j)"
+
+[gemination]                        # a binding + recall: the consonant before /j/ doubles (1= … @1)
+words      = ["gemination"]
+name       = "Gemination"
+definition = "1=[+consonantal] -> @1 @1 / _ j"
+
+[exception]                         # an exception environment (// …): blocked before a high vowel
+words      = ["exception"]
+name       = "Exception"
+definition = "s -> z / [+syllabic] _ [+syllabic] // _ [+syllabic, +high]"
+
+[regressive_raising]                # right-to-left iteration: raising cascades leftward across Cs
+words       = ["right-to-left"]
+name        = "Right-to-left raising"
+definition  = "[+syllabic, +front, !+high, !+low] -> [aperture, high] / _ [-syllabic]* [+syllabic, +high]"
+application = "right_to_left"
