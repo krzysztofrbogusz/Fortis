@@ -207,8 +207,9 @@ def _render_derivation_md(derivation: Derivation, project: Project) -> list[str]
         lines += ["```", *trace, "```", ""]
 
     for step in derivation.steps:
-        for diagram in render_change(step.before, step.after, step.rule, project):  # tier + spreads
-            label = step.rule.name or _SUBRULE_SUFFIX.sub("", step.rule.id)
+        base = step.rule.name or _SUBRULE_SUFFIX.sub("", step.rule.id)
+        for sublabel, diagram in render_change(step.before, step.after, step.rule, project):
+            label = f"{base} · {sublabel}" if sublabel else base
             lines += [f"{label} — association change", "", "```", diagram, "```", ""]
     return lines
 

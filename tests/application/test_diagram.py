@@ -93,7 +93,9 @@ def test_render_change_is_the_unified_entry_point(project):
     after.tiers["tone"].links.add((t, 3))  # the tone spreads
     diagrams = render_change(before, after, None, project)
     assert len(diagrams) == 1
-    assert "└" in diagrams[0] and "╎" in diagrams[0]  # the spread fork, dashed new link
+    sublabel, diagram = diagrams[0]
+    assert sublabel == ""  # a tier change carries no spread-node sublabel
+    assert "└" in diagram and "╎" in diagram  # the spread fork, dashed new link
 
 
 def test_change_removed_association_is_delinked(project):
@@ -128,9 +130,9 @@ def _change_diagrams(project, ipa):
         project.sonorities, project.syllable_parts, project.tiers,
     )
     return [
-        d
+        diagram
         for step in derivation.steps
-        for d in render_change(step.before, step.after, step.rule, project)
+        for _sublabel, diagram in render_change(step.before, step.after, step.rule, project)
     ]
 
 

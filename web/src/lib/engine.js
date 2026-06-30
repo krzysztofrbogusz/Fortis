@@ -61,8 +61,8 @@ def run_derivations():
                           "before":R(s.before,s.before_boundaries),"after":R(s.after,s.after_boundaries),
                           "change":describe_change(lower_tiers(s.before),lower_tiers(s.after),project)})
             lbl = (str(s.rule.time)+": " if s.rule.time is not None else "")+(s.rule.name or base)
-            for diagram in render_change(s.before, s.after, s.rule, project):  # tier + segmental spreads
-                frames.append({"label":lbl,"diagram":diagram})
+            for sublabel, diagram in render_change(s.before, s.after, s.rule, project):  # tier + spreads
+                frames.append({"label": lbl + (" · " + sublabel if sublabel else ""), "diagram":diagram})
         # The change diagrams already show before→after, so separate Input/Surface melody snapshots
         # are redundant. Keep an Input melody only for a tier word with no change (else it'd be blank).
         if not frames and has_tiers:

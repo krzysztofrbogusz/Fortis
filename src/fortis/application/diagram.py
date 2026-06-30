@@ -516,23 +516,30 @@ def _feature_label(feature: str, bundle: FeatureBundle, project: Project) -> str
 
 def render_segmental_spreads(
     before: Form, after: Form, rule: Rule | None, project: Project
-) -> list[str]:
-    """A fork diagram for each segmental spread *rule* performed (place, harmony, any ``~n``)."""
+) -> list[tuple[str, str]]:
+    """The spread node label + a fork diagram for each segmental spread (place, harmony, ``~n``).
+
+    Vowel harmony spreads several nodes at once (``back`` and ``labial``), so the node label
+    distinguishes the otherwise same-named forks.
+    """
     spreads = _rule_spreads(before, after, rule, project)
-    return [_draw(after.segments, [s], project) for s in spreads]
+    return [(s.label, _draw(after.segments, [s], project)) for s in spreads]
 
 
-def render_change(before: Form, after: Form, rule: Rule | None, project: Project) -> list[str]:
-    """Every autosegmental change for one rule, as fork diagrams — the single renderer to call.
+def render_change(
+    before: Form, after: Form, rule: Rule | None, project: Project
+) -> list[tuple[str, str]]:
+    """Every autosegmental change for one rule, as ``(sublabel, diagram)`` — the single renderer.
 
     A *tier* change (tone, stress) yields a *before* → *after* pair of per-syllable diagrams (all
-    tiers together); each *segmental* spread the rule performed via ``~n`` — place assimilation,
-    vowel harmony, or any other — yields a fork, detected from the rule's operations rather than
-    guessed from which features changed. Returned in display order: tier change, then the
-    segmental spreads. All share the ``│`` kept · ``╎`` added · ``╪`` delinked notation.
+    tiers together) with an empty sublabel; each *segmental* spread the rule performed via ``~n`` —
+    place assimilation, vowel harmony, or any other — yields a fork sublabelled by its spread node
+    (``back``, ``labial``, ``oral``), detected from the rule's operations not guessed from which
+    features changed. Display order: tier change, then the segmental spreads. All share the
+    ``│`` kept · ``╎`` added · ``╪`` delinked notation.
     """
-    diagrams: list[str] = []
+    diagrams: list[tuple[str, str]] = []
     if _tier_changed(before, after):
-        diagrams.append(render_autosegmental_change(before, after, project))
+        diagrams.append(("", render_autosegmental_change(before, after, project)))
     diagrams.extend(render_segmental_spreads(before, after, rule, project))
     return diagrams
