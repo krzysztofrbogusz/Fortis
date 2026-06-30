@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 from src.fortis.application.combining import differing, matches_exactly
-from src.fortis.application.syllabifying import SyllabificationError, syllabify
+from src.fortis.application.syllabifying import SyllabificationError, syllabify, syllables
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.inventories import Diacritic, DiacriticKind
 from src.fortis.models.project import Project
@@ -108,28 +108,27 @@ def render_syllabified(
         name for name, feature in inventories.features.items() if feature.tier == Tier.syllable
     )
     all_diacritics = inventories.diacritics
+    nucleus_part = inventories.syllable_parts.get_nucleus(inventories.time)
+    nucleus = nucleus_part.definition if nucleus_part is not None else None
     interior = boundaries - {0, len(sequence)}
-    edges = sorted(boundaries | {0, len(sequence)})
     parts: list[str] = []
-    for left, right in zip(edges, edges[1:], strict=False):
-        # The syllable's suprasegmentals live on its nucleus — the segment in the
-        # span carrying syllable-tier features. Split its marks by attachment kind.
+    for syllable in syllables(sequence, boundaries, nucleus):
+        # The syllable's suprasegmentals live on its nucleus; split its marks by attachment kind.
         before: list[str] = []
         combining: list[str] = []
         after: list[str] = []
-        carrier: int | None = None
-        for i in range(left, right):
-            present = {f for f in sequence[i] if f in syllable_features}
+        carrier = syllable.nucleus
+        if carrier is not None:
+            present = {f for f in sequence[carrier] if f in syllable_features}
             if present:
-                _find_diacritics(sequence[i], present, all_diacritics, before, combining, after)
-                carrier = i
-                break
+                bundle = sequence[carrier]
+                _find_diacritics(bundle, present, all_diacritics, before, combining, after)
         # A boundary-marking before-mark stands in for the "." at an interior edge.
         marks_boundary = any(inventories.diacritics[s].marks_boundary for s in before)
-        if dots and left in interior and not marks_boundary:
+        if dots and syllable.start in interior and not marks_boundary:
             parts.append(".")
         parts.append("".join(before))  # syllable-initial marks (e.g. stress)
-        for i in range(left, right):
+        for i in range(syllable.start, syllable.end):
             parts.append(render_segment(sequence[i], inventories, syllable_features))
             if i == carrier:
                 parts.append("".join(combining))  # combining marks sit on the nucleus
