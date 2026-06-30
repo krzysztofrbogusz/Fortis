@@ -97,6 +97,38 @@ def test_stress_survives_a_nucleus_replacement(project):
     assert any(autoseg == s_id for (autoseg, _anchor) in surface.tiers["stress"].links)
 
 
+def test_rewrite_anchors_tone_to_the_new_nucleus_not_the_neighbour(project):
+    # The discriminator for "suprasegmental re-anchoring runs BEFORE melody re-docking". A nucleus
+    # REWRITE (a→e) carrying a tone, with stability="right" so the melody fallback would land on a
+    # DIFFERENT syllable (the last vowel, index 3). Correct: supra puts the tone on the new nucleus
+    # (the e at index 1); melody must not then carry it right. If the ordering broke, it'd be [3].
+    form = string_to_sequence("taka", project)  # t a k a, nuclei at 1 and 3
+    h_id = form.fresh_id()
+    form.tiers["tone"].autosegs.append(_autoseg("tone", 4, h_id))
+    form.tiers["tone"].links.add((h_id, 1))  # H on the first vowel
+    tiers = TierInventory()
+    tiers["tone"] = replace(project.tiers["tone"], stability="right")
+    tiers["stress"] = project.tiers["stress"]
+    rule = Rule(
+        id="rep",
+        time=0,
+        raw_definition="rep",
+        sd=parse_definition("a → e / # [-syllabic] _", project.features).unwrap(),
+    )
+    surface = derive(
+        Word(ipa="taka"),
+        form,
+        RuleInventory({0: (rule,)}),
+        project.letters,
+        project.features,
+        project.sonorities,
+        project.syllable_parts,
+        tiers,
+    ).surface
+    toned = [i for i, b in enumerate(lower_tiers(surface)) if "tone" in b]
+    assert toned == [1]  # the new nucleus, not carried right to the last vowel
+
+
 def test_stability_direction_is_per_tier(project):
     # stability="right" carries a stranded tone to the RIGHT syllable; left (default) to the
     # left. takata, deleting the middle vowel: left lands on vowel 1, right on the last vowel.

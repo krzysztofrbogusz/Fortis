@@ -1,6 +1,6 @@
 """Tests for the tier read helper (application/tiers.carried_features)."""
 
-from src.fortis.application.tiers import carried_features
+from src.fortis.application.tiers import carried_features, lower_tiers
 from src.fortis.models.autosegment import Autoseg, AutosegmentalTier
 from src.fortis.models.bundles import FeatureBundle
 from src.fortis.models.form import Form
@@ -47,3 +47,31 @@ def test_two_autosegs_on_one_anchor_form_a_contour(project):
         autosegs=[Autoseg(_b(tone=5), 10), Autoseg(_b(tone=3), 11)], links={(10, 0), (11, 0)}
     )
     assert carried_features(form, 0)["tone"].value == (5, 3)
+
+
+def _two_contours() -> Form:
+    """Two syllables: a falling contour (5>3) on segment 0, a rising one (2>4) on segment 1."""
+    form = Form([Segment(_b(syllabic=1), 0), Segment(_b(syllabic=1), 1)])
+    form.tiers["tone"] = AutosegmentalTier(
+        autosegs=[
+            Autoseg(_b(tone=5), 10),
+            Autoseg(_b(tone=3), 11),  # falling on segment 0
+            Autoseg(_b(tone=2), 12),
+            Autoseg(_b(tone=4), 13),  # rising on segment 1
+        ],
+        links={(10, 0), (11, 0), (12, 1), (13, 1)},
+    )
+    return form
+
+
+def test_contours_on_two_anchors_keep_per_anchor_order(project):
+    # Each anchor keeps ITS limbs in tier order — no cross-anchor mixing when many autosegs exist.
+    form = _two_contours()
+    assert carried_features(form, 0)["tone"].value == (5, 3)  # falling
+    assert carried_features(form, 1)["tone"].value == (2, 4)  # rising
+
+
+def test_lower_tiers_preserves_contour_direction_per_segment(project):
+    # The whole-form lower must keep each segment's contour direction (the reindex invariant).
+    lowered = lower_tiers(_two_contours())
+    assert lowered[0]["tone"].value == (5, 3) and lowered[1]["tone"].value == (2, 4)

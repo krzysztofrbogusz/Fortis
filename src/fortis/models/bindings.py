@@ -53,3 +53,22 @@ class Bindings:
     conditions: dict[int, bool] = field(default_factory=dict)
     disjunction_choices: tuple[int, ...] = ()
     pending_other: list[tuple[str, object]] = field(default_factory=list)
+
+    def copy(self) -> Bindings:
+        """A shallow copy safe to mutate down one backtrack branch.
+
+        Every mutable container is duplicated so a branch's edits never leak to its siblings —
+        the matcher depends on this. **Any new mutable field must be copied here**;
+        ``test_copy_isolates_every_mutable_field`` fails if one is forgotten.
+        """
+        return Bindings(
+            alpha=dict(self.alpha),
+            reference=dict(self.reference),
+            autoseg_reference=dict(self.autoseg_reference),
+            floating_reference=dict(self.floating_reference),
+            node_reference=dict(self.node_reference),
+            permissive_alpha=self.permissive_alpha,
+            conditions=dict(self.conditions),
+            disjunction_choices=self.disjunction_choices,
+            pending_other=list(self.pending_other),
+        )

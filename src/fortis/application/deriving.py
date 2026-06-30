@@ -425,9 +425,13 @@ def _spliced_segments(
 
 
 def _carry_stranded_melody(
-    out: Form, source: Form, start: int, end: int, new_segments: list[Segment], tiers: TierInventory
+    out: Form, source: Form, start: int, end: int, stranded: set[int], tiers: TierInventory
 ) -> None:
     """Carry a deleted segment's melody-tier autosegments onto a surviving neighbour.
+
+    **Runs after** ``_carry_stranded_suprasegmentals`` and reads the live (already re-anchored)
+    links, so it only re-docks what a pure deletion left on a stranded anchor — the supra→melody
+    fallthrough is enforced by that call order.
 
     Tonal stability: a tone outlives its anchor instead of floating away. Each melody tier
     carries to the neighbour named by its ``stability`` direction (``"left"`` default, or
@@ -437,10 +441,6 @@ def _carry_stranded_melody(
     No neighbour on the chosen side ⇒ the tone floats (and is stray-erased). ``redock_to_nuclei``
     then moves a carried tone onto the neighbour's nucleus.
     """
-    kept = {segment.id for segment in new_segments}
-    stranded = {seg.id for seg in source.segments[start:end] if seg.id not in kept}
-    if not stranded:
-        return
     left = source.segments[start - 1].id if start > 0 else None
     right = source.segments[end].id if end < len(source.segments) else None
     for name, declaration in tiers.items():
@@ -456,28 +456,31 @@ def _carry_stranded_melody(
         }
 
 
+def _stranded_ids(source: Form, start: int, end: int, new_segments: list[Segment]) -> set[int]:
+    """Ids of the segments in ``[start, end)`` the rewrite deleted (absent from *new_segments*)."""
+    kept = {segment.id for segment in new_segments}
+    return {seg.id for seg in source.segments[start:end] if seg.id not in kept}
+
+
 def _carry_stranded_suprasegmentals(
     out: Form,
-    source: Form,
-    start: int,
-    end: int,
+    stranded: set[int],
     new_segments: list[Segment],
     tiers: TierInventory,
     syllable_features: frozenset[str],
 ) -> None:
     """Re-anchor a replaced nucleus's suprasegmentals onto the new nucleus.
 
+    **Runs first**, before ``_carry_stranded_melody`` — a tone re-anchored to a new nucleus here is
+    then off the stranded set, so melody only re-docks what a pure deletion leaves behind.
+
     Suprasegmental tiers (tone, stress) are stable across a nucleus *rewrite*, not only a
     feature-merge: when a span is replaced by new segments that include a valid anchor (a
     new nucleus), the stranded suprasegmental links move onto it — so a plain letter swap
     (``a → u``, ``ʐi → ʐ̩``) keeps its tone and stress, no feature-merge required. A pure
     deletion, with no new anchor in the replacement, falls through to the melody re-docking
-    below (re-dock to a neighbour). A merge strands nothing, so this is a no-op there.
+    (re-dock to a neighbour). A merge strands nothing, so this is a no-op there.
     """
-    kept = {segment.id for segment in new_segments}
-    stranded = {seg.id for seg in source.segments[start:end] if seg.id not in kept}
-    if not stranded:
-        return
     for name, declaration in tiers.items():
         # Only suprasegmental tiers (those carrying a syllable-tier feature) are exempt; a
         # segment tier is not re-anchored to the nucleus.
@@ -517,10 +520,10 @@ def _apply_simultaneous(
     for match in sorted(selected, key=lambda m: m.start, reverse=True):
         replacement = apply_match(sd, match, bundles, letters, features, syllables)
         new_segments = _spliced_segments(out, replacement, form, bundles, tiers, match.bindings)
-        _carry_stranded_suprasegmentals(
-            out, form, match.start, match.end, new_segments, tiers, syllable_features
-        )
-        _carry_stranded_melody(out, form, match.start, match.end, new_segments, tiers)
+        stranded = _stranded_ids(form, match.start, match.end, new_segments)
+        if stranded:  # supra re-anchoring first, then melody re-docking — order is load-bearing
+            _carry_stranded_suprasegmentals(out, stranded, new_segments, tiers, syllable_features)
+            _carry_stranded_melody(out, form, match.start, match.end, stranded, tiers)
         out.segments[match.start : match.end] = new_segments
     return out
 
@@ -571,10 +574,10 @@ def _apply_directional(
 
         replacement = apply_match(sd, match, bundles, letters, features, view)
         new_segments = _spliced_segments(work, replacement, work, bundles, tiers, match.bindings)
-        _carry_stranded_suprasegmentals(
-            work, work, match.start, match.end, new_segments, tiers, syllable_features
-        )
-        _carry_stranded_melody(work, work, match.start, match.end, new_segments, tiers)
+        stranded = _stranded_ids(work, match.start, match.end, new_segments)
+        if stranded:  # supra re-anchoring first, then melody re-docking — order is load-bearing
+            _carry_stranded_suprasegmentals(work, stranded, new_segments, tiers, syllable_features)
+            _carry_stranded_melody(work, work, match.start, match.end, stranded, tiers)
         work.segments[match.start : match.end] = new_segments
 
         no_op = match.end == match.start and not replacement

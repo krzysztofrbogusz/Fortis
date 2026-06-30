@@ -475,21 +475,6 @@ class Match:
     target_choices: tuple[int, ...] = ()
 
 
-def _copy(bindings: Bindings) -> Bindings:
-    """A shallow copy of a bindings env, safe to mutate down one backtrack branch."""
-    return Bindings(
-        alpha=dict(bindings.alpha),
-        reference=dict(bindings.reference),
-        autoseg_reference=dict(bindings.autoseg_reference),
-        floating_reference=dict(bindings.floating_reference),
-        permissive_alpha=bindings.permissive_alpha,
-        conditions=dict(bindings.conditions),
-        disjunction_choices=bindings.disjunction_choices,
-        pending_other=list(bindings.pending_other),
-        node_reference=dict(bindings.node_reference),
-    )
-
-
 def _letter_matches(
     letter: FeatureBundle, segment: FeatureBundle, syllable_features: frozenset[str] = frozenset()
 ) -> bool:
@@ -525,7 +510,7 @@ def _match_element(
     match element:
         case BundleElem(bundle):
             if pos < len(segments):
-                branch = _copy(bindings)
+                branch = bindings.copy()
                 syllable = syllables.at(pos) if syllables else None
                 feats = syllables.features if syllables else frozenset()
                 nodes = syllables.node_descendants if syllables else _NO_NODES
@@ -538,7 +523,7 @@ def _match_element(
         case FloatingAutoseg(pattern):
             # Zero-width: a floating autosegment must exist (and is bound for docking),
             # but no segment is consumed.
-            branch = _copy(bindings)
+            branch = bindings.copy()
             if _bind_floating(pattern, syllables, branch, pos):
                 yield pos, branch
 
@@ -581,7 +566,7 @@ def _match_element(
             # Record which branch matched so the applier can select the paired
             # result branch; only a branch that yields carries its index forward.
             for index, branch in enumerate(branches):
-                chosen = _copy(bindings)
+                chosen = bindings.copy()
                 chosen.disjunction_choices = bindings.disjunction_choices + (index,)
                 yield from _match_sequence(
                     branch, segments, pos, chosen, letters, boundaries, syllables
@@ -601,7 +586,7 @@ def _match_element(
                 matched = any(
                     end == pos + 1
                     for end, _ in _match_element(
-                        inner, segments, pos, _copy(bindings), letters, boundaries, syllables
+                        inner, segments, pos, bindings.copy(), letters, boundaries, syllables
                     )
                 )
                 if not matched:
@@ -617,7 +602,7 @@ def _match_element(
             for end, branch in _match_element(
                 inner, segments, pos, bindings, letters, boundaries, syllables
             ):
-                captured = _copy(branch)
+                captured = branch.copy()
                 # Capture the whole matched span — one segment for `1=[X]`, several
                 # for a group `1=([X][Y])` (a multi-segment binding).
                 captured.reference[ref] = tuple(segments[pos:end])
@@ -1105,14 +1090,14 @@ def _seed_right_references(
     """
     if not right_elements:
         return seed
-    blind = _copy(seed)
+    blind = seed.copy()
     blind.permissive_alpha = True
     for captured in _match_starting_at(
         right_elements, segments, at, blind, letters, boundaries, syllables
     ):
         if captured.reference == seed.reference:
             return seed  # binds no new references
-        enriched = _copy(seed)
+        enriched = seed.copy()
         enriched.reference.update(captured.reference)
         return enriched
     return seed

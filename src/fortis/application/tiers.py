@@ -62,12 +62,35 @@ def lower_tiers(form: Form) -> list[FeatureBundle]:
     """Merge each segment's carried features back into its bundle (the inverse of associate).
 
     Lets the matcher and renderer read suprasegmentals from bundles as before the flip,
-    without threading the tiers into them.
+    without threading the tiers into them. The carried features are indexed by anchor in one
+    pass (rather than re-scanning every tier per segment), so this is O(autosegs), not quadratic.
     """
+    carried = _carried_by_anchor(form)
+    empty = FeatureBundle()
     return [
-        FeatureBundle({**segment.bundle, **carried_features(form, segment.id)})
+        FeatureBundle({**segment.bundle, **carried.get(segment.id, empty)})
         for segment in form.segments
     ]
+
+
+def _carried_by_anchor(form: Form) -> dict[int, FeatureBundle]:
+    """Every anchor's carried features, built in a single pass over the tiers.
+
+    Visits each tier then its autosegs in list order, routing each linked autoseg's specs to its
+    anchor(s); so per-anchor limb order — hence contour direction — is identical to a per-segment
+    ``carried_features`` scan, but without re-walking every tier for every segment.
+    """
+    by_feature: dict[int, dict[str, list[FeatureSpec]]] = {}
+    for tier in form.tiers.values():
+        anchors_of: dict[int, list[int]] = {}
+        for autoseg_id, anchor in tier.links:
+            anchors_of.setdefault(autoseg_id, []).append(anchor)
+        for autoseg in tier.autosegs:  # tier-autoseg order ⇒ correct contour direction per anchor
+            for anchor in anchors_of.get(autoseg.id, ()):
+                anchor_features = by_feature.setdefault(anchor, {})
+                for feature, spec in autoseg.bundle.items():
+                    anchor_features.setdefault(feature, []).append(spec)
+    return {anchor: _collapse_carried(feats) for anchor, feats in by_feature.items()}
 
 
 def cleanup_tiers(form: Form, tiers: TierInventory, *, surface: bool = False) -> Form:
@@ -167,6 +190,11 @@ def carried_features(form: Form, segment_id: int) -> FeatureBundle:
             if autoseg.id in linked:
                 for feature, spec in autoseg.bundle.items():
                     by_feature.setdefault(feature, []).append(spec)
+    return _collapse_carried(by_feature)
+
+
+def _collapse_carried(by_feature: dict[str, list[FeatureSpec]]) -> FeatureBundle:
+    """Collapse per-feature spec lists to a bundle: a lone spec, or several limbs as a contour."""
     specs: dict[str, FeatureSpec] = {}
     for feature, feature_specs in by_feature.items():
         if len(feature_specs) == 1:
