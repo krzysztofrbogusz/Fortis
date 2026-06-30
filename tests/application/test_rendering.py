@@ -138,6 +138,9 @@ class TestTierGlyph:
     def test_primary_stress_is_its_mark(self, project):
         assert tier_glyph("stress", 2, project.diacritics) == "ˈ"
 
+    def test_secondary_stress_is_its_mark(self, project):
+        assert tier_glyph("stress", 1, project.diacritics) == "ˌ"
+
     def test_undefined_value_is_none(self, project):
-        # The shipped inventory has no secondary-stress glyph, so it falls back (None).
-        assert tier_glyph("stress", 1, project.diacritics) is None
+        # A value the inventory defines no diacritic for falls back (None); there is no tone 9.
+        assert tier_glyph("tone", 9, project.diacritics) is None
