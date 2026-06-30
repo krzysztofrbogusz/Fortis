@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import cast
 
 from src.fortis.application.matching import pattern_matches
+from src.fortis.application.syllabifying import syllables
 from src.fortis.models.autosegment import Autoseg, AutosegmentalTier
 from src.fortis.models.bundles import FeatureBundle, PatternBundle
 from src.fortis.models.form import Form
@@ -220,17 +221,13 @@ def redock_to_nuclei(form: Form, boundaries: frozenset[int], nucleus: PatternBun
     """
     if nucleus is None:
         return form
-    edges = sorted(set(boundaries) | {0, len(form.segments)})
     nucleus_id_for: dict[int, int] = {}
-    for left, right in zip(edges, edges[1:], strict=False):
-        nucleus_pos = next(
-            (i for i in range(left, right) if pattern_matches(nucleus, form.segments[i].bundle)),
-            None,
-        )
-        if nucleus_pos is None:
+    for syllable in syllables(form.bundles(), boundaries, nucleus):
+        if syllable.nucleus is None:
             continue
-        for position in range(left, right):
-            nucleus_id_for[position] = form.segments[nucleus_pos].id
+        nucleus_id = form.segments[syllable.nucleus].id
+        for position in range(syllable.start, syllable.end):
+            nucleus_id_for[position] = nucleus_id
     position_of = {segment.id: index for index, segment in enumerate(form.segments)}
     for tier in form.tiers.values():
         tier.links = {

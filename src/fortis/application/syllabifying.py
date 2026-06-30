@@ -41,10 +41,32 @@ from src.fortis.models.inventories import (
     SyllablePartsInventory,
 )
 from src.fortis.models.specs import FeatureSpec
+from src.fortis.models.syllable import Syllable
 
 
 class SyllabificationError(Exception):
     """No legal syllable division exists for a cluster under the onset/coda constraints."""
+
+
+def syllables(
+    segments: list[FeatureBundle], boundaries: frozenset[int], nucleus: PatternBundle | None
+) -> list[Syllable]:
+    """The syllables of *segments* under *boundaries* — the one place this grouping lives.
+
+    Consecutive boundaries (plus the word edges 0 and ``len``) delimit each syllable; its nucleus
+    is the first segment matching *nucleus* (the project's nucleus pattern, e.g. ``+syllabic``), or
+    ``None`` when the span has no nucleus (or no pattern is given).
+    """
+    edges = sorted(set(boundaries) | {0, len(segments)})
+    out: list[Syllable] = []
+    for left, right in zip(edges, edges[1:], strict=False):
+        nuc = None
+        if nucleus is not None:
+            nuc = next(
+                (i for i in range(left, right) if pattern_matches(nucleus, segments[i])), None
+            )
+        out.append(Syllable(left, right, nuc))
+    return out
 
 
 def _sonority(segment: FeatureBundle, sonorities: SonoritiesInventory) -> int:
@@ -168,16 +190,10 @@ def nuclei_by_position(
     ``None`` (no syllable-tier info).
     """
     nuclei: list[FeatureBundle | None] = [None] * len(segments)
-    edges = sorted(set(boundaries) | {0, len(segments)})
-    for left, right in zip(edges, edges[1:], strict=False):
-        nucleus: FeatureBundle | None = None
-        for i in range(left, right):
-            if pattern_matches(nucleus_definition, segments[i]):
-                nucleus = segments[i]
-                break
-        if nucleus is not None:
-            for i in range(left, right):
-                nuclei[i] = nucleus
+    for syllable in syllables(segments, boundaries, nucleus_definition):
+        if syllable.nucleus is not None:
+            for i in range(syllable.start, syllable.end):
+                nuclei[i] = segments[syllable.nucleus]
     return nuclei
 
 
@@ -205,24 +221,20 @@ def consolidate_suprasegmentals(
     if not syllable_features:
         return segments
     out = list(segments)
-    edges = sorted(boundaries | {0, len(segments)})
-    for left, right in zip(edges, edges[1:], strict=False):
-        nucleus_pos: int | None = None
-        for i in range(left, right):
-            if pattern_matches(nucleus_definition, segments[i]):
-                nucleus_pos = i
-                break
+    for syllable in syllables(segments, boundaries, nucleus_definition):
+        nucleus_pos = syllable.nucleus
         if nucleus_pos is None:
             continue
+        span = range(syllable.start, syllable.end)
         # Pool the span's syllable-tier features (the nucleus's own values win).
         pooled: dict[str, FeatureSpec] = {}
-        for i in range(left, right):
+        for i in span:
             if i == nucleus_pos:
                 continue
             pooled.update({f: s for f, s in segments[i].items() if f in syllable_features})
         pooled.update({f: s for f, s in segments[nucleus_pos].items() if f in syllable_features})
         # Rebuild: nucleus = segmental + pooled suprasegmentals; others drop theirs.
-        for i in range(left, right):
+        for i in span:
             segmental = {f: s for f, s in out[i].items() if f not in syllable_features}
             if i == nucleus_pos:
                 out[i] = FeatureBundle({**segmental, **pooled})

@@ -14,7 +14,7 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 
 from src.fortis.application.rendering import render_segment, render_syllabified
-from src.fortis.application.syllabifying import SyllabificationError, syllabify
+from src.fortis.application.syllabifying import SyllabificationError, syllabify, syllables
 from src.fortis.application.tiers import lower_tiers
 from src.fortis.general.presenting import present_value
 from src.fortis.general.utils import is_combining
@@ -94,17 +94,11 @@ def _segment_row(rendered: list[str], slot: int, step: int, margin: int, total: 
     return row
 
 
-def _is_nucleus(bundle: FeatureBundle) -> bool:
-    """A syllabic segment — the tone-bearing unit's head."""
-    spec = bundle.get("syllabic")
-    return spec is not None and spec.value == 1
-
-
 def _syllables(form: Form, project: Project) -> list[tuple[str, int | None]]:
     """One entry per syllable (the tone-bearing units): rendered surface text and nucleus id.
 
-    The tier anchors a ``+syllabic`` segment and each syllable has exactly one nucleus, so a
-    syllable column and its nucleus anchor are the same TBU — the column is a display grouping.
+    Each syllable has exactly one nucleus, so a syllable column and its nucleus anchor are the
+    same TBU — the column is a display grouping over the ``syllables`` lens.
     """
     lowered = lower_tiers(form)
     try:
@@ -113,17 +107,15 @@ def _syllables(form: Form, project: Project) -> list[tuple[str, int | None]]:
         )
     except SyllabificationError:
         boundaries = frozenset()
-    edges = sorted({0, len(form.segments)} | set(boundaries))
+    nucleus_part = project.syllable_parts.get_nucleus(project.time)
+    nucleus = nucleus_part.definition if nucleus_part is not None else None
     columns: list[tuple[str, int | None]] = []
-    for left, right in zip(edges, edges[1:], strict=False):
-        chunk = lowered[left:right]
+    for syllable in syllables(lowered, boundaries, nucleus):
+        chunk = lowered[syllable.start : syllable.end]
         # render the whole syllable so an after-mark (tone letter) lands at its edge: kat˦, not ka˦t
         text = render_syllabified(chunk, frozenset({0, len(chunk)}), project, dots=False) or "∅"
-        nucleus = next(
-            (s.id for s in form.segments[left:right] if _is_nucleus(s.bundle)),
-            None,
-        )
-        columns.append((text, nucleus))
+        nucleus_id = form.segments[syllable.nucleus].id if syllable.nucleus is not None else None
+        columns.append((text, nucleus_id))
     return columns
 
 
