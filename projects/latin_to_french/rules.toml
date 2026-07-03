@@ -121,6 +121,12 @@ name = "i-prosthesis before word-initial s + consonant"
 description = "Pope s361 — Western Romance, attested 2nd century"
 definition = "∅ → ˌɪ / # _ s [+consonantal]"
 
+[cl_i_prosthesis_stress]
+time = -100
+name = "the prosthetic vowel carries secondary stress"
+description = "DiaSim inserts ˌɪ and the secondary stress rides through, protecting the vowel from the unstressed reduction e→ə→∅ (scutarium ˌesk… > écuyer /ekɥije/, stamen > étaim /et̪ɛ̃/, sponsum > époux /epu/). Insertion via ∅→ˌɪ does not realize the stress on the new syllable in Fortis, so set it explicitly on the word-initial prosthetic vowel."
+definition = "[+syllabic, stress: none] → [stress: secondary] / # _ s [+consonantal]"
+
 [cl_stress_shift_antepenult_1]
 time = -100
 name = "stress moves to the penult when the antepenult has an adjacent short vowel (type 1)"
@@ -444,6 +450,12 @@ definition = "[-continuant, aperture: high, +voice, nasal: none] → [+continuan
 time = 300
 name = "yod absorbed into a preceding palatalized consonant"
 definition = "ʝ → ∅ / [-continuant, aperture: high, +front, nasal: none] _"
+
+[ll_yod_absorption_affricate]
+time = 300
+name = "yod absorbed into a preceding palatalized affricate"
+description = "DiaSim source line 382: ʝ > ∅ / [-cont,+hi,+front] __. DiaSim treats an affricate onset as [-cont], but Fortis affricates carry a contour continuant (->+), so the [-continuant] rule above misses them. This companion catches the palatalized strident affricates t͡sʲ/d͡zʲ (latia > laize: the -ia yod is absorbed, leaving a plain dental affricate that depalatalizes to jz > z, not a second palatal d͡ʒ)."
+definition = "ʝ → ∅ / [+strident, +front, aperture: high, -sonorant, nasal: none] _"
 
 [ll_mnj_to_mmj]
 time = 300
@@ -1080,7 +1092,8 @@ definition = "m m → m / [+consonantal] _"
 [egr_w_loss_after_nonback_consonant]
 time = 500
 name = "w lost after a non-back consonant"
-definition = "w → ∅ / [+consonantal, back: none] _"
+description = "DiaSim source 935: w > ∅ / [+cons,-back] __ (tuum > t̪ũ > ton /t̪ɔ̃/; but kw is kept, k being +back). Match the labiovelar glide by bundle, not the literal w — a glide derived by glide-formation carries advancement:atr and so is not identical to the letter w."
+definition = "[+consonantal, +back, +rounded, aperture: high, syllabic: -] → ∅ / [+consonantal, back: none] _"
 
 [egr_x_fronting_before_coronal]
 time = 500
@@ -1311,6 +1324,12 @@ name = "a yod is absorbed by a preceding palatal lateral (ʎj > ʎ)"
 description = "l + yod gives the palatal ʎ, which absorbs the triggering yod — medalia > maille /mɑj/, not *mɑjʒ. Must precede yod-hardening, or the stray yod hardens to ɟ > d͡ʒ > ʒ."
 definition = "(j|ʝ) → ∅ / ʎ _"
 
+[mgr_yod_hardening_initial]
+time = 600
+name = "yod hardens to ɟ word-initially before a vowel"
+description = "Pope s203, s636 (DiaCLEF source line 1128: [+hi,-syl,+cont] > [-delrel] / # __ [+syl]). A word-initial yod closes to the palatal stop ɟ, feeding ɟ > d͡ʒ > ʒ (juin, januarius > janvier). Distinct from the medial hardening below and from the source's excluded # [+cons] __ context."
+definition = "(j|ʝ) → ɟ / # _ [+syllabic]"
+
 [mgr_yod_hardening_medial]
 time = 600
 name = "yod hardens to ɟ word-medially after one or more consonants, before a vowel"
@@ -1375,7 +1394,8 @@ definition = "[stress: none, aperture: !low, +syllabic] → ə / _ ([-syllabic])
 [mgr_aarj_metathesis]
 time = 600
 name = "aːrʲ metathesizes to jɛːr"
-definition = "ˈɑː rʲ → j ˈɛː r / [+syllabic] ([-syllabic])* _ [+syllabic] #"
+description = "DiaSim source line 1188: ˈaː rʲ > j ˈɛː r (the -aria yod metathesizes before the vowel: saltuarium t̪aːrʲ > t̪jɛːr > sautier /sot̪je/; also première, écuyer, janvier). The nucleus is FRONT aː here — the low-vowel fronting (t=500) already applied — so match aː, not ɑː; otherwise the j-insertion before rʲ wins and the yod surfaces as a spurious offglide (t̪aj)."
+definition = "ˈaː rʲ → j ˈɛː r / [+syllabic] ([-syllabic])* _ [+syllabic] #"
 
 [mgr_unstressed_nonlow_reduction_before_boundary]
 time = 600
@@ -2603,8 +2623,8 @@ definition = "ə → e / _ [+front, +sonorant, aperture: high, -syllabic]"
 [eof_e_to_i_before_palatal]
 time = 1000
 name = "intertonic e raises to i before a palatal consonant (ɲ, ʎ)"
-description = "Pope s422. Source context `[+hi,+son,+front,+cons]` picks out the sonorant palatals ɲ/ʎ — but NOT the glide j, which DiaSim treats as -sonorant. Fortis's j IS +sonorant, so the featural context over-matched it and wrongly raised the e of every ei diphthong (avoir/trois eir → *ir instead of the ei→oi→wa chain). Match ɲ/ʎ literally."
-definition = "e → i / _ (ɲ|ʎ)"
+description = "Pope s422. Source context `[+hi,+son,+front,+cons]` picks out the sonorant palatals ɲ/ʎ — but NOT the glide j, which DiaSim treats as -sonorant. Fortis's j IS +sonorant, so the featural context over-matched it and wrongly raised the e of every ei diphthong (avoir/trois eir → *ir); match ɲ/ʎ literally. Also: the source's bare `e` is UNSTRESSED (DiaSim bare-vowel convention), so the rule is intertonic-only — without the stress guard it wrongly raised the TONIC e before a -cul- ʎ (vermeil meʎ → *miʎ instead of staying e → ɛ → mɛj)."
+definition = "[+syllabic, +front, aperture: mid, advancement: atr, rounded: none, stress: none] → [aperture: high] / _ (ɲ|ʎ)"
 
 [eof_ll_degemination_intervocalic]
 time = 1000
@@ -2688,6 +2708,12 @@ name = "word-final ɲ ejects a nasalized j after a tense vowel"
 description = "Pope s405-406, called \"Early Old French\" by Pope (s406)"
 definition = "∅ → j̃ / [advancement: atr, +syllabic] _ ɲ #"
 
+[eof_nasal_uj_to_wi]
+time = 1000
+name = "the nasal diphthong ũj̃ becomes wĩ (syllabicity swap before a nasal)"
+description = "Pope s670 (DiaCLEF source line 2648: {ũ j̃} > {w ĩ}), plus the front-round counterpart via the general yj→ɥi swap (rule 617) applied to the nasal ỹj̃ (juin ỹj̃ > ɥĩ > ɥɛ̃). The high rounded nucleus desyllabifies (back→w, front→ɥ) and the nasal yod becomes the nucleus ĩ, later lowered to ɛ̃. Must precede the ũj̃/ỹj̃ monophthongization."
+definition = ["[+back, +rounded, aperture: high, +syllabic] j̃ → w [+syllabic]", "[+front, +rounded, aperture: high, +syllabic] j̃ → ɥ [+syllabic]"]
+
 [eof_glide_before_intervocalic_ny]
 time = 1000
 name = "a glide develops between a stressed mid front vowel and intervocalic ɲ"
@@ -2727,6 +2753,12 @@ definition = "ˈu → ˈy / _ e̯ j"
 time = 1000
 name = "the e-glide deletes after a stressed high front tense vowel, before a high non-round glide"
 definition = "e̯ → ∅ / [aperture: high, +front, advancement: atr, stress: primary, +syllabic] _ [-syllabic, -consonantal, aperture: high, rounded: none]"
+
+[eof_e_glide_loss_before_cons_yod]
+time = 1000
+name = "the e-glide deletes after a stressed high front tense vowel, before a +cons yod + consonant"
+description = "Companion to the rule above for DiaSim source line 2174. When the following yod is Fortis's +cons glide j (rather than a -cons offglide), the original -consonantal context misses it. Restricting to a +ROUNDED high front nucleus (y, from the ue̯>ye̯ path of corium) with the +cons j itself before a consonant (cuir kye̯jr → kyjr → kɥir) matches cuir without touching the unrounded-nucleus diphthongs (cieux sie̯…) where the e̯ must survive."
+definition = "e̯ → ∅ / [aperture: high, +front, +rounded, advancement: atr, stress: primary, +syllabic] _ [+consonantal, aperture: high, +front, rounded: none] [+consonantal]"
 
 [eof_glide_loss_after_stressed_i_bare]
 time = 1000
@@ -3120,6 +3152,18 @@ time = 1000
 name = "diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)"
 description = "Pope s544, s508-510, s470-472, s538, s555-556 — 12th century; the leveling started in the south and west"
 definition = ["ˈi e̯ → j ˈe", "ˌɛ a̯ → e̯ ˌa", "ˈɛ a̯ → e̯ ˈa", "ˈy ø̯ → ɥ ˈø"]
+
+[ofi_glide_delabializes_before_front_round]
+time = 1000
+name = "ɥ delabializes to j before a front rounded mid vowel (ɥø > jø)"
+description = "Pope s555-556 (DiaCLEF source line 2694: ɥ > j / __ [+front,+round,-hi])."
+definition = "ɥ → j / _ [+front, +rounded, aperture: !high, +syllabic]"
+
+[ofi_yod_lost_after_affricate_before_front_round]
+time = 1000
+name = "the yod is lost after d͡ʒ before a front rounded mid vowel"
+description = "Pope (DiaCLEF source line 2700: j > ∅ / d͡ʒ __ [+front,+round,-hi]). jeudi d͡ʒɥø > d͡ʒjø > d͡ʒø > ʒø: the delabialized yod is redundant after the affricate."
+definition = "j → ∅ / d͡ʒ _ [+front, +rounded, aperture: !high, +syllabic]"
 
 [ofi_countertonic_e_to_a_after_labial_before_r]
 time = 1000
@@ -3528,6 +3572,13 @@ description = "aurum > or /ɔʁ/: the au monophthong is back open-o; the general
 words = ["or"]
 definition = "[+front, +rounded, aperture: mid, +syllabic] → [+back, front: none, advancement: rtr]"
 
+[mf_outil_silent_l_lexical]
+time = 1500
+name = "outil has a silent final l (no yod), unlike fille"
+description = "outil /uti/ and fille /fij/ are both -iʎ but split lexically: outil's -l is silent (an irregular reflex; DiaSim itself derives *utij and misses it), while fille keeps the /ij/. No phonological environment separates them, so outil's final yod is dropped lexically."
+words = ["outil"]
+definition = "j → ∅ / [aperture: high, +front, +syllabic] _ #"
+
 [mf_six_final_s_lexical]
 time = 1500
 name = "six keeps its final s (numeral, pronounced in isolation)"
@@ -3753,23 +3804,23 @@ name = "the uvular trill ʀ becomes a fricative ʁ"
 description = "CORRECTION"
 definition = "ʀ → ʁ"
 
+[mf_yod_absorbed_after_high_front]
+time = 1400
+name = "a yod is absorbed after a high front vowel (word-finally or before a consonant)"
+description = "The palatal glide left by e.g. ct-palatalization (lectum > lejt > lit /li/, outil, six) is redundant after a high front i and is lost. This must run BEFORE ʎ→j (DiaSim's j-after-i deletion, rule 471, is early): it catches the diphthong-derived yod but NOT the word-final /ij/ ending that ʎ→j creates just afterward (fille /fij/, not *fi)."
+definition = "j → ∅ / [aperture: high, +front, +syllabic] _ ([+consonantal]|#)"
+
 [mf_palatal_l_to_yod]
 time = 1400
 name = "ʎ becomes j"
-description = "Pope s381 ~ s687 — \"in the course of Modern French\""
+description = "Pope s381 ~ s687 — \"in the course of Modern French\". Ordered AFTER the yod-absorption above so the /ij/ ending it produces (fille) survives."
 definition = "ʎ → j"
 
 [mf_high_front_absorbed_into_yod]
 time = 1400
 name = "a high front vowel after another vowel is absorbed into a following j"
-description = "CORRECTION — j and i after other vowels absorbed into j"
+description = "CORRECTION — j and i after other vowels absorbed into j (DiaSim rule 744, runs after ʎ→j: rouille ʁuiʎ > ʁuij > ʁuj)."
 definition = "[aperture: high, +front, rounded: none] → ∅ / [+syllabic] _ j"
-
-[mf_yod_absorbed_after_high_front]
-time = 1400
-name = "a yod is absorbed after a high front vowel word-finally or before a consonant"
-description = "The palatal glide left by e.g. ct-palatalization (lectum > lejt > lit) is redundant after a high front i and is lost — French /li/, not /lij/. Restricted to _ (C|#) so a pre-vocalic yod (which forms a real onset) is untouched."
-definition = "j → ∅ / [aperture: high, +front, +syllabic] _ ([+consonantal]|#)"
 
 [mf_schwa_deletion]
 time = 1400

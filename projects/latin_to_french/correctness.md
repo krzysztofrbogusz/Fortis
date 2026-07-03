@@ -1,6 +1,6 @@
 # Correctness — projects/latin_to_french
 
-Engine vs attested Modern French IPA. **106/140** match.
+Engine vs attested Modern French IPA. **159/195** match.
 
 | gloss     | engine      | attested    |     |
 | --------- | ----------- | ----------- | --- |
@@ -30,11 +30,11 @@ Engine vs attested Modern French IPA. **106/140** match.
 | chou | `ʃɔl` | `/ʃu/` | ✗ |
 | cieux | `sjø` | `/sjø/` | ✓ |
 | clair | `klɛʁ` | `/klɛʁ/` | ✓ |
-| coin | `kɔn̪` | `/kwɛ̃/` | ✗ |
+| coin | `kwɛ̃` | `/kwɛ̃/` | ✓ |
 | compagne | `kɔ̃.paɲ` | `/kɔ̃paɲ/` | ✓ |
-| coups | `kɥœs` | `/ku/` | ✗ |
+| coups | `kys` | `/ku/` | ✗ |
 | crus | `kʁy` | `/kʁy/` | ✓ |
-| cuir | `kœjʁ` | `/kɥiʁ/` | ✗ |
+| cuir | `kɥiʁ` | `/kɥiʁ/` | ✓ |
 | culs | `ky` | `/ky/` | ✓ |
 | dieu | `d̪jø` | `/d̪jø/` | ✓ |
 | doit | `d̪ø` | `/d̪wa/` | ✗ |
@@ -50,9 +50,9 @@ Engine vs attested Modern French IPA. **106/140** match.
 | ive | `ɛjɥ` | `/iv/` | ✗ |
 | joie | `ʒɔʒ` | `/ʒwɑ/` | ✗ |
 | joue | `ʒut̪` | `/ʒu/` | ✗ |
-| juin | `jœn̪` | `/ʒɥɛ̃/` | ✗ |
+| juin | `ʒɥɛ̃` | `/ʒɥɛ̃/` | ✓ |
 | lacs | `la` | `/la/` | ✓ |
-| laize | `lɛʒ` | `/lɛz/` | ✗ |
+| laize | `lɛz` | `/lɛz/` | ✓ |
 | lettre | `lɛt̪ʁ` | `/lɛt̪ʁ/` | ✓ |
 | lien | `le.jɛ̃` | `/ljɛ̃/` | ✗ |
 | lit | `li` | `/li/` | ✓ |
@@ -68,7 +68,7 @@ Engine vs attested Modern French IPA. **106/140** match.
 | nacelle | `n̪wa.sɛl` | `/n̪asɛl/` | ✗ |
 | nombre | `n̪ɔ̃bʁ` | `/n̪ɔ̃bʁ/` | ✓ |
 | noue | `n̪ɔʒ` | `/n̪u/` | ✗ |
-| nouer | `n̪u̯e` | `/n̪we/` | ✗ |
+| nouer | `n̪u̯e` | `/n̪we/` | ✓ |
 | or | `ɔʁ` | `/ɔʁ/` | ✓ |
 | orge | `ɔʁʒ` | `/ɔʁʒ/` | ✓ |
 | ornement | `ɔ.ʁn̪ə.mɑ̃` | `/ɔʁn̪əmɑ̃/` | ✓ |
@@ -80,8 +80,8 @@ Engine vs attested Modern French IPA. **106/140** match.
 | piège | `pjɛʒ` | `/pjɛʒ/` | ✓ |
 | place | `plas` | `/plas/` | ✓ |
 | plaisir | `ple.ziʁ` | `/pleziʁ/` | ✓ |
-| pointure | `pɔ̃.t̪yʁ` | `/pwɛ̃t̪yʁ/` | ✗ |
-| première | `pʁə.mɛʁ` | `/pʁəmjɛʁ/` | ✗ |
+| pointure | `pwɛ̃.t̪yʁ` | `/pwɛ̃t̪yʁ/` | ✓ |
+| première | `pʁɑ̃.bjɛʁ` | `/pʁəmjɛʁ/` | ✗ |
 | prêter | `pʁɛ.t̪e` | `/pʁɛt̪e/` | ✓ |
 | puce | `pys` | `/pys/` | ✓ |
 | pucelle | `py.lwa.zɛl` | `/pysɛl/` | ✗ |
@@ -89,11 +89,11 @@ Engine vs attested Modern French IPA. **106/140** match.
 | quant | `kɑ̃` | `/kɑ̃/` | ✓ |
 | quintaine | `kɛ̃.t̪ɛn̪` | `/kɛ̃t̪ɛn̪/` | ✓ |
 | raine | `ʁɛn̪` | `/ʁɛn̪/` | ✓ |
-| rouille | `ʁu.vi` | `/ʁuj/` | ✗ |
+| rouille | `ʁu.vij` | `/ʁuj/` | ✗ |
 | sade | `sad̪` | `/sad̪/` | ✓ |
 | salut | `sa.ly` | `/saly/` | ✓ |
 | sanglier | `sɑ̃.gle` | `/sɑ̃ɡlie/` | ✗ |
-| saunier | `sa.lə.n̪ɛʁ` | `/son̪je/` | ✗ |
+| saunier | `sa.lə̃.je` | `/son̪je/` | ✗ |
 | six | `sis` | `/sis/` | ✓ |
 | soie | `swa` | `/swa/` | ✓ |
 | somme | `sɔm` | `/sɔm/` | ✓ |
@@ -110,9 +110,9 @@ Engine vs attested Modern French IPA. **106/140** match.
 | vanneau | `va.n̪o` | `/van̪o/` | ✓ |
 | vautre | `vid̪ʁ` | `/vot̪ʁ/` | ✗ |
 | verge | `vɛʁʒ` | `/vɛʁʒ/` | ✓ |
-| vermeil | `vɛ.ʁmi` | `/vɛʁmɛj/` | ✗ |
+| vermeil | `vɛ.ʁmɛj` | `/vɛʁmɛj/` | ✓ |
 | vieux | `vi` | `/vjø/` | ✗ |
-| époux | `spu` | `/epu/` | ✗ |
+| époux | `e.pu` | `/epu/` | ✓ |
 | aime | `ɛm` | `/ɛm/` | ✓ |
 | ami | `a.mi` | `/ami/` | ✓ |
 | ample | `ɑ̃pl` | `/ɑ̃pl/` | ✓ |
@@ -144,3 +144,58 @@ Engine vs attested Modern French IPA. **106/140** match.
 | tempête | `t̪ɑ̃.pɛt̪` | `/t̪ɑ̃pɛt̪/` | ✓ |
 | toute | `t̪ut̪` | `/t̪ut̪/` | ✓ |
 | ville | `vil` | `/vil/` | ✓ |
+| avancer | `a.vɑ̃.se` | `/avɑ̃se/` | ✓ |
+| agneaux | `a.ɲo` | `/aɲo/` | ✓ |
+| amis | `a.mi` | `/ami/` | ✓ |
+| armure | `a.ʁmyʁ` | `/aʁmyʁ/` | ✓ |
+| baiser | `bɛ.ze` | `/bɛze/` | ✓ |
+| blancs | `blɑ̃` | `/blɑ̃/` | ✓ |
+| bouger | `bu.ʒe` | `/buʒe/` | ✓ |
+| doigt | `d̪wat̪` | `/d̪wa/` | ✗ |
+| dures | `d̪yʁ` | `/d̪yʁ/` | ✓ |
+| fausse | `fos` | `/fos/` | ✓ |
+| fille | `fij` | `/fij/` | ✓ |
+| forêt | `fɔ.ʁɛ` | `/fɔʁɛ/` | ✓ |
+| fonds | `fɔ̃` | `/fɔ̃/` | ✓ |
+| gros | `gʁo` | `/gʁo/` | ✓ |
+| janvier | `ʒə̃.je` | `/ʒɑ̃vje/` | ✗ |
+| jeudi | `ʒø.d̪i` | `/ʒød̪i/` | ✓ |
+| chamois | `ʃə̃.wa` | `/ʃamwa/` | ✗ |
+| chère | `ʃɛʁ` | `/ʃɛʁ/` | ✓ |
+| sangle | `sɑ̃gl` | `/sɑ̃gl/` | ✓ |
+| coq | `kɔk` | `/kɔk/` | ✓ |
+| graisse | `gʁɛs` | `/gʁɛs/` | ✓ |
+| coffin | `kubl` | `/kubl/` | ✓ |
+| lai | `laj` | `/lɛ/` | ✗ |
+| loche | `lɔʒ` | `/lɔʃ/` | ✗ |
+| ligne | `liɲ` | `/liɲ/` | ✓ |
+| maie | `mɛ` | `/mɛ/` | ✓ |
+| mari | `ma.ʁi` | `/maʁi/` | ✓ |
+| moyenne | `me.jɛn̪` | `/mwajɛn̪/` | ✗ |
+| mèche | `mɛʃ` | `/mɛʃ/` | ✓ |
+| mordre | `mɔʁd̪ʁ` | `/mɔʁd̪ʁ/` | ✓ |
+| nef | `n̪ɛf` | `/n̪ɛf/` | ✓ |
+| nouvelle | `n̪u.vɛl` | `/n̪uvɛl/` | ✓ |
+| œuf | `œf` | `/œf/` | ✓ |
+| part | `paʁ` | `/paʁ/` | ✓ |
+| poêle | `pwaz` | `/pwal/` | ✗ |
+| poix | `pwa` | `/pwa/` | ✓ |
+| plats | `pla` | `/pla/` | ✓ |
+| porcs | `pɔʁ` | `/pɔʁ/` | ✓ |
+| priser | `pʁi.ze` | `/pʁize/` | ✓ |
+| poinçon | `pwɛ̃.sɔ̃` | `/pwɛ̃sɔ̃/` | ✓ |
+| rez | `ʁe` | `/ʁe/` | ✓ |
+| rumeur | `ʁy.muʁ` | `/ʁymœʁ/` | ✗ |
+| sautier | `so.p̪e` | `/sot̪je/` | ✗ |
+| saison | `sɛ.zɔ̃` | `/sɛzɔ̃/` | ✓ |
+| serpent | `sɛʁ.pɑ̃` | `/sɛʁpɑ̃/` | ✓ |
+| écuyer | `e.kɥi.je` | `/ekɥije/` | ✓ |
+| étaim | `e.t̪ɛ̃` | `/et̪ɛ̃/` | ✓ |
+| sourde | `suʁd̪` | `/suʁd̪/` | ✓ |
+| tarde | `t̪aʁd̪` | `/t̪aʁd̪/` | ✓ |
+| timon | `t̪i.mɔ̃` | `/t̪imɔ̃/` | ✓ |
+| trou | `t̪ʁo` | `/t̪ʁu/` | ✗ |
+| ton | `t̪ɔ̃` | `/t̪ɔ̃/` | ✓ |
+| vanter | `vɑ̃.t̪e` | `/vɑ̃t̪e/` | ✓ |
+| vergogne | `vɛʁ.gɔɲ` | `/vɛʁgɔɲ/` | ✓ |
+| vendange | `vɑ̃.d̪ɑ̃ʒ` | `/vɑ̃d̪ɑ̃ʒ/` | ✓ |

@@ -1758,7 +1758,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## jeune
 
-`ˈjuwen̪em` → `ju.və̃`
+`ˈjuwen̪em` → `ʒu.və̃`
 
 ```
 -100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
@@ -1775,34 +1775,38 @@ firing-rule trace (only the rules that changed the form).
     ˈʝo.βʷɛ.n̪ɛ → ˈʝoː.βʷɛ.n̪ɛ   (ˈo→ˈoː)
 500: labialized bilabial fricatives delabialize
     ˈʝoː.βʷɛ.n̪ɛ → ˈʝoː.βɛ.n̪ɛ   (βʷ→β)
+600: yod hardens to ɟ word-initially before a vowel
+    ˈʝoː.βɛ.n̪ɛ → ˈɟoː.βɛ.n̪ɛ   (ʝ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈɟoː.βɛ.n̪ɛ → ˈd͡ʒoː.βɛ.n̪ɛ   (ɟ→d͡ʒ)
 600: an unstressed non-low vowel reduces to schwa before consonants + vowel + optional consonants + word end
-    ˈʝoː.βɛ.n̪ɛ → ˈʝoː.βə.n̪ɛ   (ɛ→ə)
+    ˈd͡ʒoː.βɛ.n̪ɛ → ˈd͡ʒoː.βə.n̪ɛ   (ɛ→ə)
 600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
-    ˈʝoː.βə.n̪ɛ → ˈʝoː.βə.n̪ə   (ɛ→ə)
+    ˈd͡ʒoː.βə.n̪ɛ → ˈd͡ʒoː.βə.n̪ə   (ɛ→ə)
 600: schwa becomes non-syllabic
-    ˈʝoː.βə.n̪ə → ˈʝoːβə̯n̪ə̯   (ə→ə̯, ə→ə̯)
+    ˈd͡ʒoː.βə.n̪ə → ˈd͡ʒoːβə̯n̪ə̯   (ə→ə̯, ə→ə̯)
 600: non-syllabic schwa restores before a front sonorant consonant
-    ˈʝoːβə̯n̪ə̯ → ˈʝoː.βən̪ə̯   (ə̯→ə)
+    ˈd͡ʒoːβə̯n̪ə̯ → ˈd͡ʒoː.βən̪ə̯   (ə̯→ə)
 600: non-syllabic schwa is lost elsewhere
-    ˈʝoː.βən̪ə̯ → ˈʝoː.βən̪   (ə̯→∅)
-600: ʝ weakens to j unconditionally
-    ˈʝoː.βən̪ → ˈjoː.βən̪   (ʝ→j)
+    ˈd͡ʒoː.βən̪ə̯ → ˈd͡ʒoː.βən̪   (ə̯→∅)
 600: long stressed vowels diphthongize
-    ˈjoː.βən̪ → ˈjow.βən̪   (ˈoː→ˈow)
+    ˈd͡ʒoː.βən̪ → ˈd͡ʒow.βən̪   (ˈoː→ˈow)
 600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
-    ˈjow.βən̪ → ˈjo.βən̪   (w→∅)
+    ˈd͡ʒow.βən̪ → ˈd͡ʒo.βən̪   (w→∅)
 600: the remaining bilabial fricative becomes v
-    ˈjo.βən̪ → ˈjo.vən̪   (β→v)
+    ˈd͡ʒo.βən̪ → ˈd͡ʒo.vən̪   (β→v)
 1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
-    ˈjo.vən̪ → ˈjo.və̃n̪   (ə→ə̃)
+    ˈd͡ʒo.vən̪ → ˈd͡ʒo.və̃n̪   (ə→ə̃)
 1000: round tense back vowels raise to u (o > u, oi > ui)
-    ˈjo.və̃n̪ → ˈju.və̃n̪   (ˈo→ˈu)
+    ˈd͡ʒo.və̃n̪ → ˈd͡ʒu.və̃n̪   (ˈo→ˈu)
+1000: all affricates become sibilants (deaffrication)
+    ˈd͡ʒu.və̃n̪ → ˈʒu.və̃n̪   (d͡ʒ→ʒ)
 1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
-    ˈju.və̃n̪ → ˈju.və̃ː   (ə̃n̪→ə̃ː)
+    ˈʒu.və̃n̪ → ˈʒu.və̃ː   (ə̃n̪→ə̃ː)
 1400: stress is leveled — no longer distinctive for vowels
-    ˈju.və̃ː → ju.və̃ː   (ˈu→u)
+    ˈʒu.və̃ː → ʒu.və̃ː   (ˈu→u)
 1400: distinctive vowel length is lost entirely
-    ju.və̃ː → ju.və̃   (ə̃ː→ə̃)
+    ʒu.və̃ː → ʒu.və̃   (ə̃ː→ə̃)
 ```
 
 ## cieux
@@ -2207,7 +2211,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## coups
 
-`kˈolpoːs` → `kɥœs`
+`kˈolpoːs` → `kys`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -2240,22 +2244,18 @@ firing-rule trace (only the rules that changed the form).
     ˈkʉo̯ɫ.sə → ˈkyo̯ɫ.sə   (ˈʉ→ˈy)
 1000: the diphthong uo becomes ue
     ˈkyo̯ɫ.sə → ˈkye̯ɫ.sə   (o̯→e̯)
-1000: the e-glide rounds to ø before a back sonorant (or ɫ)
-    ˈkye̯ɫ.sə → ˈkyø̯ɫ.sə   (e̯→ø̯)
+1000: the e-glide deletes after a stressed high front tense vowel, before a +cons yod + consonant
+    ˈkye̯ɫ.sə → ˈkyɫ.sə   (e̯→∅)
 1000: back dark-l variants vocalize to w
-    ˈkyø̯ɫ.sə → ˈkyø̯w.sə   (ɫ→w)
-1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
-    ˈkyø̯w.sə → ˈkɥøw.sə   (ˈy→ɥ, ø̯→ˈø)
-1000: øw becomes ø (the back-round glide is absorbed after ø)
-    ˈkɥøw.sə → ˈkɥø.sə   (w→∅)
+    ˈkyɫ.sə → ˈkyw.sə   (ɫ→w)
+1000: w deletes immediately after a high round vowel (u or y)
+    ˈkyw.sə → ˈky.sə   (w→∅)
 1400: final ə becomes a non-syllabic off-glide
-    ˈkɥø.sə → ˈkɥøsə̯   (ə→ə̯)
+    ˈky.sə → ˈkysə̯   (ə→ə̯)
 1400: the final off-glide schwa is deleted elsewhere
-    ˈkɥøsə̯ → ˈkɥøs   (ə̯→∅)
-1400: front round ø opens to œ before a coda consonant in the final syllable
-    ˈkɥøs → ˈkɥœs   (ˈø→ˈœ)
+    ˈkysə̯ → ˈkys   (ə̯→∅)
 1400: stress is leveled — no longer distinctive for vowels
-    ˈkɥœs → kɥœs   (ˈœ→œ)
+    ˈkys → kys   (ˈy→y)
 ```
 
 ## compagne
@@ -2303,7 +2303,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## cuir
 
-`kˈorium` → `kœjʁ`
+`kˈorium` → `kɥiʁ`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -2338,16 +2338,20 @@ firing-rule trace (only the rules that changed the form).
     ˈkʉo̯jr → ˈkyo̯jr   (ˈʉ→ˈy)
 1000: the diphthong uo becomes ue
     ˈkyo̯jr → ˈkye̯jr   (o̯→e̯)
-1000: the stressed diphthong ye̯ (from ue̯) monophthongizes to ø
-    ˈkye̯jr → ˈkøjr   (ˈye̯→ˈø)
-1400: front round ø opens to œ before a coda consonant in the final syllable
-    ˈkøjr → ˈkœjr   (ˈø→ˈœ)
+1000: the e-glide deletes after a stressed high front tense vowel, before a +cons yod + consonant
+    ˈkye̯jr → ˈkyjr   (e̯→∅)
+1200: yj becomes ɥi (the y desyllabifies, the yod becomes the nucleus)
+    ˈkyjr → ˈkɥir   (ˈy→ɥ, j→ˈi)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈkɥir → ˈkɥiɹ   (r→ɹ)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈkɥiɹ → ˈkɥir   (ɹ→r)
 1400: r becomes uvular ʀ
-    ˈkœjr → ˈkœjʀ   (r→ʀ)
+    ˈkɥir → ˈkɥiʀ   (r→ʀ)
 1400: stress is leveled — no longer distinctive for vowels
-    ˈkœjʀ → kœjʀ   (ˈœ→œ)
+    ˈkɥiʀ → kɥiʀ   (ˈi→i)
 1400: the uvular trill ʀ becomes a fricative ʁ
-    kœjʀ → kœjʁ   (ʀ→ʁ)
+    kɥiʀ → kɥiʁ   (ʀ→ʁ)
 ```
 
 ## graal
@@ -2436,7 +2440,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## coin
 
-`kˈun̪eum` → `kɔn̪`
+`kˈun̪eum` → `kwɛ̃`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -2465,18 +2469,18 @@ firing-rule trace (only the rules that changed the form).
     ˈkũːɲ → ˈkũɲ   (ˈũː→ˈũ)
 1000: word-final ɲ ejects a nasalized j after a tense vowel
     ˈkũɲ → ˈkũj̃ɲ   (∅→j̃)
+1000: the nasal diphthong ũj̃ becomes wĩ (syllabicity swap before a nasal)
+    ˈkũj̃ɲ → kwj̩̃ɲ   (ˈũ→w, j̃→j̩̃)
 1200: final ɲ becomes n
-    ˈkũj̃ɲ → ˈkũj̃n̪   (ɲ→n̪)
+    kwj̩̃ɲ → kwj̩̃n̪   (ɲ→n̪)
+1200: nasalized ĩ lowers after w
+    kwj̩̃n̪ → kwj̩̃n̪   (j̩̃→j̩̃)
+1200: a front unrounded non-low vowel laxes and lowers after w
+    kwj̩̃n̪ → kwɛ̃n̪   (j̩̃→ɛ̃)
 1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
-    ˈkũj̃n̪ → ˈkũːn̪   (ˈũj̃→ˈũː)
-1400: stress is leveled — no longer distinctive for vowels
-    ˈkũːn̪ → kũːn̪   (ˈũː→ũː)
+    kwɛ̃n̪ → kwɛ̃ː   (ɛ̃n̪→ɛ̃ː)
 1400: distinctive vowel length is lost entirely
-    kũːn̪ → kũn̪   (ũː→ũ)
-1400: nasal ũ opens to ɔ̃
-    kũn̪ → kɔ̃n̪   (ũ→ɔ̃)
-1400: a nasal vowel denasalizes before a surviving nasal consonant
-    kɔ̃n̪ → kɔn̪   (ɔ̃→ɔ)
+    kwɛ̃ː → kwɛ̃   (ɛ̃ː→ɛ̃)
 ```
 
 ## quant
@@ -2632,7 +2636,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## laize
 
-`lˈɑt̪iɑm` → `lɛʒ`
+`lˈɑt̪iɑm` → `lɛz`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -2645,32 +2649,32 @@ firing-rule trace (only the rules that changed the form).
     ˈlɑ.t̪ʝɑm → ˈlɑ.t̪ʝɑ   (m→∅)
 -100: t/d palatalize before yod (t → tsʲ, d → ɟ)
     ˈlɑ.t̪ʝɑ → ˈlɑt͡sʲ.ʝɑ   (t̪→t͡sʲ)
-500: a voiceless fricative voices before yod + a non-consonantal segment
-    ˈlɑt͡sʲ.ʝɑ → ˈlɑd͡zʲ.ʝɑ   (t͡sʲ→d͡zʲ)
+300: yod absorbed into a preceding palatalized affricate
+    ˈlɑt͡sʲ.ʝɑ → ˈlɑ.t͡sʲɑ   (ʝ→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈlɑ.t͡sʲɑ → ˈlɑː.t͡sʲɑ   (ˈɑ→ˈɑː)
+500: a voiceless fricative voices intervocalically
+    ˈlɑː.t͡sʲɑ → ˈlɑː.d͡zʲɑ   (t͡sʲ→d͡zʲ)
 500: the low vowel fronts by default
-    ˈlɑd͡zʲ.ʝɑ → ˈlad͡zʲ.ʝa   (ˈɑ→ˈa, ɑ→a)
-600: yod hardens to ɟ word-medially after one or more consonants, before a vowel
-    ˈlad͡zʲ.ʝa → ˈlad͡zʲ.ɟa   (ʝ→ɟ)
-600: a palatal stop affricates to a postalveolar affricate
-    ˈlad͡zʲ.ɟa → ˈlad͡zʲ.d͡ʒa   (ɟ→d͡ʒ)
+    ˈlɑː.d͡zʲɑ → ˈlaː.d͡zʲa   (ˈɑː→ˈaː, ɑ→a)
 600: a palatalized consonant moves its palatalization onto a preceding j
-    ˈlad͡zʲ.d͡ʒa → ˈlajd͡z.d͡ʒa   (d͡zʲ→jd͡z)
+    ˈlaː.d͡zʲa → ˈlaːj.d͡za   (d͡zʲ→jd͡z)
+600: a vowel shortens before a consonant cluster ending in an obstruent (recurrence)
+    ˈlaːj.d͡za → ˈlaj.d͡za   (ˈaː→ˈa)
 750: an unstressed a reduces to schwa, word-medially or finally
-    ˈlajd͡z.d͡ʒa → ˈlajd͡z.d͡ʒə   (a→ə)
-750: a medial consonant/glide is lost between two consonants, before an obstruent (not l/r)
-    ˈlajd͡z.d͡ʒə → ˈlaj.d͡ʒə   (d͡z→∅)
+    ˈlaj.d͡za → ˈlaj.d͡zə   (a→ə)
 1000: all affricates become sibilants (deaffrication)
-    ˈlaj.d͡ʒə → ˈlaj.ʒə   (d͡ʒ→ʒ)
+    ˈlaj.d͡zə → ˈlaj.zə   (d͡z→z)
 1200: final ajə (and aj before a consonant) becomes long ɛː
-    ˈlaj.ʒə → ˈlɛː.ʒə   (ˈaj→ˈɛː)
+    ˈlaj.zə → ˈlɛː.zə   (ˈaj→ˈɛː)
 1400: final ə becomes a non-syllabic off-glide
-    ˈlɛː.ʒə → ˈlɛːʒə̯   (ə→ə̯)
+    ˈlɛː.zə → ˈlɛːzə̯   (ə→ə̯)
 1400: the final off-glide schwa is deleted elsewhere
-    ˈlɛːʒə̯ → ˈlɛːʒ   (ə̯→∅)
+    ˈlɛːzə̯ → ˈlɛːz   (ə̯→∅)
 1400: stress is leveled — no longer distinctive for vowels
-    ˈlɛːʒ → lɛːʒ   (ˈɛː→ɛː)
+    ˈlɛːz → lɛːz   (ˈɛː→ɛː)
 1400: distinctive vowel length is lost entirely
-    lɛːʒ → lɛʒ   (ɛː→ɛ)
+    lɛːz → lɛz   (ɛː→ɛ)
 ```
 
 ## lit
@@ -2714,7 +2718,7 @@ firing-rule trace (only the rules that changed the form).
     ˈlijt̪ → ˈlij   (t̪→∅)
 1400: stress is leveled — no longer distinctive for vowels
     ˈlij → lij   (ˈi→i)
-1400: a yod is absorbed after a high front vowel word-finally or before a consonant
+1400: a yod is absorbed after a high front vowel (word-finally or before a consonant)
     lij → li   (j→∅)
 ```
 
@@ -4013,7 +4017,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## première
 
-`prˌimˈɑːriɑm` → `pʁə.mɛʁ`
+`prˌimˈɑːriɑm` → `pʁɑ̃.bjɛʁ`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -4034,36 +4038,42 @@ firing-rule trace (only the rules that changed the form).
     ˌpreˈmɑ.rʲɑ → ˌpreˈma.rʲa   (ˈɑ→ˈa, ɑ→a)
 500: a stressed vowel lengthens before an optional consonant + vowel (recurrence)
     ˌpreˈma.rʲa → ˌpreˈmaː.rʲa   (ˈa→ˈaː)
-600: j epenthesized after a non-consonantal segment directly before palatalized r
-    ˌpreˈmaː.rʲa → ˌpreˈmaːj.rʲa   (∅→j)
-600: palatalized r depalatalizes
-    ˌpreˈmaːj.rʲa → ˌpreˈmaːj.ra   (rʲ→r)
-600: long stressed vowels diphthongize
-    ˌpreˈmaːj.ra → ˌpreˈmae̯j.ra   (ˈaː→ˈae̯)
-600: the e-glide is lost after stressed a before a front sonorant glide
-    ˌpreˈmae̯j.ra → ˌpreˈmaj.ra   (e̯→∅)
+600: aːrʲ metathesizes to jɛːr
+    ˌpreˈmaː.rʲa → ˌpreˈmjɛː.ra   (ˈaːrʲ→ˈjɛːr)
+600: b epenthesized between m and a coronal non-nasal sonorant glide (recurrence)
+    ˌpreˈmjɛː.ra → ˌpremˈbjɛː.ra   (∅→b)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌpremˈbjɛː.ra → ˌpremˈbjie̯.ra   (ˈɛː→ˈie̯)
+600: j lost after a consonant before a high front unrounded sonorant + e-glide
+    ˌpremˈbjie̯.ra → ˌpremˈbie̯.ra   (j→∅)
 750: an unstressed a reduces to schwa, word-medially or finally
-    ˌpreˈmaj.ra → ˌpreˈmaj.rə   (a→ə)
-1000: secondary-stressed e reduces to schwa in an open syllable
-    ˌpreˈmaj.rə → ˌprəˈmaj.rə   (ˌe→ˌə)
-1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
-    ˌprəˈmaj.rə → ˌprə̃ˈmaj.rə   (ˌə→ˌə̃)
-1200: final ajə (and aj before a consonant) becomes long ɛː
-    ˌprə̃ˈmaj.rə → ˌprə̃ˈmɛː.rə   (ˈaj→ˈɛː)
+    ˌpremˈbie̯.ra → ˌpremˈbie̯.rə   (a→ə)
+1000: a mid front vowel nasalizes before a nasal (second nasalization)
+    ˌpremˈbie̯.rə → ˌprẽmˈbie̯.rə   (ˌe→ˌẽ)
+1000: nasalized front mid vowels begin to lower
+    ˌprẽmˈbie̯.rə → ˌprɛ̃mˈbie̯.rə   (ˌẽ→ˌɛ̃)
+1000: nasalized front mid vowels become nasalized a
+    ˌprɛ̃mˈbie̯.rə → ˌprãmˈbie̯.rə   (ˌɛ̃→ˌã)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌprãmˈbie̯.rə → ˌprãmˈbje.rə   (ˈi→j, e̯→ˈe)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌprãmˈbje.rə → ˌprãːˈbje.rə   (ˌãm→ˌãː)
+1400: long e:/je: lower to ɛ:/jɛ: before a single consonant + coda (or ə)
+    ˌprãːˈbje.rə → ˌprãːˈbjɛ.rə   (ˈe→ˈɛ)
 1400: final ə becomes a non-syllabic off-glide
-    ˌprə̃ˈmɛː.rə → ˌprə̃ˈmɛːrə̯   (ə→ə̯)
+    ˌprãːˈbjɛ.rə → ˌprãːˈbjɛrə̯   (ə→ə̯)
+1400: long a becomes back ɑː
+    ˌprãːˈbjɛrə̯ → ˌprɑ̃ːˈbjɛrə̯   (ˌãː→ˌɑ̃ː)
 1400: the final off-glide schwa is deleted elsewhere
-    ˌprə̃ˈmɛːrə̯ → ˌprə̃ˈmɛːr   (ə̯→∅)
+    ˌprɑ̃ːˈbjɛrə̯ → ˌprɑ̃ːˈbjɛr   (ə̯→∅)
 1400: r becomes uvular ʀ
-    ˌprə̃ˈmɛːr → ˌpʀə̃ˈmɛːʀ   (r→ʀ, r→ʀ)
+    ˌprɑ̃ːˈbjɛr → ˌpʀɑ̃ːˈbjɛʀ   (r→ʀ, r→ʀ)
 1400: stress is leveled — no longer distinctive for vowels
-    ˌpʀə̃ˈmɛːʀ → pʀə̃.mɛːʀ   (ˌə̃→ə̃, ˈɛː→ɛː)
+    ˌpʀɑ̃ːˈbjɛʀ → pʀɑ̃ː.bjɛʀ   (ˌɑ̃ː→ɑ̃ː, ˈɛ→ɛ)
 1400: distinctive vowel length is lost entirely
-    pʀə̃.mɛːʀ → pʀə̃.mɛʀ   (ɛː→ɛ)
-1400: a nasal vowel denasalizes before a surviving nasal consonant
-    pʀə̃.mɛʀ → pʀə.mɛʀ   (ə̃→ə)
+    pʀɑ̃ː.bjɛʀ → pʀɑ̃.bjɛʀ   (ɑ̃ː→ɑ̃)
 1400: the uvular trill ʀ becomes a fricative ʁ
-    pʀə.mɛʀ → pʁə.mɛʁ   (ʀ→ʁ, ʀ→ʁ)
+    pʀɑ̃.bjɛʀ → pʁɑ̃.bjɛʁ   (ʀ→ʁ, ʀ→ʁ)
 ```
 
 ## pucelle
@@ -4133,7 +4143,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## pointure
 
-`pˌun̪kt̪ˈuːrɑm` → `pɔ̃.t̪yʁ`
+`pˌun̪kt̪ˈuːrɑm` → `pwɛ̃.t̪yʁ`
 
 ```
 -100: n assimilates to a following velar stop
@@ -4174,22 +4184,22 @@ firing-rule trace (only the rules that changed the form).
     ˌpũj̃n̪ˈt̪ʉ.rə → ˌpũj̃ˈt̪ʉ.rə   (n̪→∅)
 1000: high round back vowels front (completion of u-fronting)
     ˌpũj̃ˈt̪ʉ.rə → ˌpũj̃ˈt̪y.rə   (ˈʉ→ˈy)
-1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
-    ˌpũj̃ˈt̪y.rə → ˌpũːˈt̪y.rə   (ˌũj̃→ˌũː)
+1000: the nasal diphthong ũj̃ becomes wĩ (syllabicity swap before a nasal)
+    ˌpũj̃ˈt̪y.rə → pwj̩̃ˈt̪y.rə   (ˌũ→w, j̃→j̩̃)
+1200: nasalized ĩ lowers after w
+    pwj̩̃ˈt̪y.rə → pwj̩̃ˈt̪y.rə   (j̩̃→j̩̃)
+1200: a front unrounded non-low vowel laxes and lowers after w
+    pwj̩̃ˈt̪y.rə → pwɛ̃ˈt̪y.rə   (j̩̃→ɛ̃)
 1400: final ə becomes a non-syllabic off-glide
-    ˌpũːˈt̪y.rə → ˌpũːˈt̪yrə̯   (ə→ə̯)
+    pwɛ̃ˈt̪y.rə → pwɛ̃ˈt̪yrə̯   (ə→ə̯)
 1400: the final off-glide schwa is deleted elsewhere
-    ˌpũːˈt̪yrə̯ → ˌpũːˈt̪yr   (ə̯→∅)
+    pwɛ̃ˈt̪yrə̯ → pwɛ̃ˈt̪yr   (ə̯→∅)
 1400: r becomes uvular ʀ
-    ˌpũːˈt̪yr → ˌpũːˈt̪yʀ   (r→ʀ)
+    pwɛ̃ˈt̪yr → pwɛ̃ˈt̪yʀ   (r→ʀ)
 1400: stress is leveled — no longer distinctive for vowels
-    ˌpũːˈt̪yʀ → pũː.t̪yʀ   (ˌũː→ũː, ˈy→y)
-1400: distinctive vowel length is lost entirely
-    pũː.t̪yʀ → pũ.t̪yʀ   (ũː→ũ)
-1400: nasal ũ opens to ɔ̃
-    pũ.t̪yʀ → pɔ̃.t̪yʀ   (ũ→ɔ̃)
+    pwɛ̃ˈt̪yʀ → pwɛ̃.t̪yʀ   (ˈy→y)
 1400: the uvular trill ʀ becomes a fricative ʁ
-    pɔ̃.t̪yʀ → pɔ̃.t̪yʁ   (ʀ→ʁ)
+    pwɛ̃.t̪yʀ → pwɛ̃.t̪yʁ   (ʀ→ʁ)
 ```
 
 ## raine
@@ -4280,7 +4290,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## rouille
 
-`rˌoːbˈiːkulɑm` → `ʁu.vi`
+`rˌoːbˈiːkulɑm` → `ʁu.vij`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -4329,8 +4339,6 @@ firing-rule trace (only the rules that changed the form).
     ʀu.viʎ → ʁu.viʎ   (ʀ→ʁ)
 1400: ʎ becomes j
     ʁu.viʎ → ʁu.vij   (ʎ→j)
-1400: a yod is absorbed after a high front vowel word-finally or before a consonant
-    ʁu.vij → ʁu.vi   (j→∅)
 ```
 
 ## rousse
@@ -4368,7 +4376,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## saunier
 
-`sˌɑlin̪ˈɑːrium` → `sa.lə.n̪ɛʁ`
+`sˌɑlin̪ˈɑːrium` → `sa.lə̃.je`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -4391,40 +4399,34 @@ firing-rule trace (only the rules that changed the form).
     ˌsa.leˈn̪a.rʲo → ˌsa.leˈn̪aː.rʲo   (ˈa→ˈaː)
 600: an unstressed non-low vowel reduces to schwa before consonants + a primary-stressed low vowel
     ˌsa.leˈn̪aː.rʲo → ˌsa.ləˈn̪aː.rʲo   (e→ə)
+600: aːrʲ metathesizes to jɛːr
+    ˌsa.ləˈn̪aː.rʲo → ˌsa.ləˈn̪jɛː.ro   (ˈaːrʲ→ˈjɛːr)
 600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
-    ˌsa.ləˈn̪aː.rʲo → ˌsa.ləˈn̪aː.rʲə   (o→ə)
+    ˌsa.ləˈn̪jɛː.ro → ˌsa.ləˈn̪jɛː.rə   (o→ə)
 600: schwa becomes non-syllabic
-    ˌsa.ləˈn̪aː.rʲə → ˌsalə̯ˈn̪aːrʲə̯   (ə→ə̯, ə→ə̯)
+    ˌsa.ləˈn̪jɛː.rə → ˌsalə̯ˈn̪jɛːrə̯   (ə→ə̯, ə→ə̯)
 600: non-syllabic schwa restores before a front sonorant consonant
-    ˌsalə̯ˈn̪aːrʲə̯ → ˌsa.ləˈn̪aːrʲə̯   (ə̯→ə)
+    ˌsalə̯ˈn̪jɛːrə̯ → ˌsa.ləˈn̪jɛːrə̯   (ə̯→ə)
 600: non-syllabic schwa is lost elsewhere
-    ˌsa.ləˈn̪aːrʲə̯ → ˌsa.ləˈn̪aːrʲ   (ə̯→∅)
-600: j epenthesized after a non-consonantal segment directly before palatalized r
-    ˌsa.ləˈn̪aːrʲ → ˌsa.ləˈn̪aːjrʲ   (∅→j)
-600: palatalized r depalatalizes
-    ˌsa.ləˈn̪aːjrʲ → ˌsa.ləˈn̪aːjr   (rʲ→r)
-600: a vowel shortens before two or more non-syllabic segments + word end (recurrence)
-    ˌsa.ləˈn̪aːjr → ˌsa.ləˈn̪ajr   (ˈaː→ˈa)
-750: schwa is epenthesized word-finally after a low vowel + j + r
-    ˌsa.ləˈn̪ajr → ˌsa.ləˈn̪aj.rə   (∅→ə)
+    ˌsa.ləˈn̪jɛːrə̯ → ˌsa.ləˈn̪jɛːr   (ə̯→∅)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌsa.ləˈn̪jɛːr → ˌsa.ləˈn̪jie̯r   (ˈɛː→ˈie̯)
+600: j lost after a consonant before a high front unrounded sonorant + e-glide
+    ˌsa.ləˈn̪jie̯r → ˌsa.ləˈn̪ie̯r   (j→∅)
 1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
-    ˌsa.ləˈn̪aj.rə → ˌsa.lə̃ˈn̪aj.rə   (ə→ə̃)
-1200: final ajə (and aj before a consonant) becomes long ɛː
-    ˌsa.lə̃ˈn̪aj.rə → ˌsa.lə̃ˈn̪ɛː.rə   (ˈaj→ˈɛː)
-1400: final ə becomes a non-syllabic off-glide
-    ˌsa.lə̃ˈn̪ɛː.rə → ˌsa.lə̃ˈn̪ɛːrə̯   (ə→ə̯)
-1400: the final off-glide schwa is deleted elsewhere
-    ˌsa.lə̃ˈn̪ɛːrə̯ → ˌsa.lə̃ˈn̪ɛːr   (ə̯→∅)
-1400: r becomes uvular ʀ
-    ˌsa.lə̃ˈn̪ɛːr → ˌsa.lə̃ˈn̪ɛːʀ   (r→ʀ)
+    ˌsa.ləˈn̪ie̯r → ˌsa.lə̃ˈn̪ie̯r   (ə→ə̃)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌsa.lə̃ˈn̪ie̯r → ˌsa.lə̃ˈn̪jer   (ˈi→j, e̯→ˈe)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌsa.lə̃ˈn̪jer → ˌsa.lə̃ːˈjer   (ə̃n̪→ə̃ː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌsa.lə̃ːˈjer → ˌsa.lə̃ːˈjeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌsa.lə̃ːˈjeɹ → ˌsa.lə̃ːˈje   (ɹ→∅)
 1400: stress is leveled — no longer distinctive for vowels
-    ˌsa.lə̃ˈn̪ɛːʀ → sa.lə̃.n̪ɛːʀ   (ˌa→a, ˈɛː→ɛː)
+    ˌsa.lə̃ːˈje → sa.lə̃ː.je   (ˌa→a, ˈe→e)
 1400: distinctive vowel length is lost entirely
-    sa.lə̃.n̪ɛːʀ → sa.lə̃.n̪ɛʀ   (ɛː→ɛ)
-1400: a nasal vowel denasalizes before a surviving nasal consonant
-    sa.lə̃.n̪ɛʀ → sa.lə.n̪ɛʀ   (ə̃→ə)
-1400: the uvular trill ʀ becomes a fricative ʁ
-    sa.lə.n̪ɛʀ → sa.lə.n̪ɛʁ   (ʀ→ʁ)
+    sa.lə̃ː.je → sa.lə̃.je   (ə̃ː→ə̃)
 ```
 
 ## sauf
@@ -4550,7 +4552,7 @@ firing-rule trace (only the rules that changed the form).
     ˈsijs → ˈsij   (s→∅)
 1400: stress is leveled — no longer distinctive for vowels
     ˈsij → sij   (ˈi→i)
-1400: a yod is absorbed after a high front vowel word-finally or before a consonant
+1400: a yod is absorbed after a high front vowel (word-finally or before a consonant)
     sij → si   (j→∅)
 1500: six keeps its final s (numeral, pronounced in isolation)
     si → sis   (∅→s)
@@ -4754,7 +4756,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## époux
 
-`spˈon̪sum` → `spu`
+`spˈon̪sum` → `e.pu`
 
 ```
 -100: vowel lengthens before ns when the next syllable is unstressed
@@ -4765,34 +4767,40 @@ firing-rule trace (only the rules that changed the form).
     ˈspoː.sum → ˈspoː.sʊm   (u→ʊ)
 -100: i-prosthesis before word-initial s + consonant
     ˈspoː.sʊm → ɪsˈpoː.sʊm   (∅→ɪ)
+-100: the prosthetic vowel carries secondary stress
+    ɪsˈpoː.sʊm → ˌɪsˈpoː.sʊm   (ɪ→ˌɪ)
 -100: the length feature is dropped now that quality carries the contrast
-    ɪsˈpoː.sʊm → ɪsˈpo.sʊm   (ˈoː→ˈo)
+    ˌɪsˈpoː.sʊm → ˌɪsˈpo.sʊm   (ˈoː→ˈo)
 -100: lax high vowels lower to tense mid vowels
-    ɪsˈpo.sʊm → esˈpo.som   (ɪ→e, ʊ→o)
+    ˌɪsˈpo.sʊm → ˌesˈpo.som   (ˌɪ→ˌe, ʊ→o)
 -100: word-final nasal consonant lost after an unstressed vowel
-    esˈpo.som → esˈpo.so   (m→∅)
+    ˌesˈpo.som → ˌesˈpo.so   (m→∅)
 300: a stressed vowel lengthens before a single consonant + glide
-    esˈpo.so → esˈpoː.so   (ˈo→ˈoː)
+    ˌesˈpo.so → ˌesˈpoː.so   (ˈo→ˈoː)
 500: a voiceless fricative voices intervocalically
-    esˈpoː.so → esˈpoː.zo   (s→z)
+    ˌesˈpoː.so → ˌesˈpoː.zo   (s→z)
 600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
-    esˈpoː.zo → əsˈpoː.zə   (e→ə, o→ə)
+    ˌesˈpoː.zo → ˌesˈpoː.zə   (o→ə)
 600: schwa becomes non-syllabic
-    əsˈpoː.zə → ˈə̯spoːzə̯   (ə→ə̯, ə→ə̯)
+    ˌesˈpoː.zə → ˌesˈpoːzə̯   (ə→ə̯)
 600: non-syllabic schwa is lost elsewhere
-    ˈə̯spoːzə̯ → ˈspoːz   (ˈə̯spoːzə̯→ˈspoːz)
+    ˌesˈpoːzə̯ → ˌesˈpoːz   (ə̯→∅)
 600: long stressed vowels diphthongize
-    ˈspoːz → ˈspowz   (ˈoː→ˈow)
+    ˌesˈpoːz → ˌesˈpowz   (ˈoː→ˈow)
 600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
-    ˈspowz → ˈspoz   (w→∅)
+    ˌesˈpowz → ˌesˈpoz   (w→∅)
 750: all final obstruents devoice
-    ˈspoz → ˈspos   (z→s)
+    ˌesˈpoz → ˌesˈpos   (z→s)
 1000: round tense back vowels raise to u (o > u, oi > ui)
-    ˈspos → ˈspus   (ˈo→ˈu)
+    ˌesˈpos → ˌesˈpus   (ˈo→ˈu)
+1000: s becomes x after a vowel, before any consonant
+    ˌesˈpus → ˌexˈpus   (s→x)
+1000: the velar fricative x is lost
+    ˌexˈpus → ˌeˈpus   (x→∅)
 1400: final obstruents are lost
-    ˈspus → ˈspu   (s→∅)
+    ˌeˈpus → ˌeˈpu   (s→∅)
 1400: stress is leveled — no longer distinctive for vowels
-    ˈspu → spu   (ˈu→u)
+    ˌeˈpu → e.pu   (ˌe→e, ˈu→u)
 ```
 
 ## somme
@@ -5210,7 +5218,7 @@ firing-rule trace (only the rules that changed the form).
     uː.t̪iʎ → u.t̪iʎ   (uː→u)
 1400: ʎ becomes j
     u.t̪iʎ → u.t̪ij   (ʎ→j)
-1400: a yod is absorbed after a high front vowel word-finally or before a consonant
+1500: outil has a silent final l (no yod), unlike fille
     u.t̪ij → u.t̪i   (j→∅)
 ```
 
@@ -5354,7 +5362,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## vermeil
 
-`wˌermˈikulum` → `vɛ.ʁmi`
+`wˌermˈikulum` → `vɛ.ʁmɛj`
 
 ```
 -100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
@@ -5393,24 +5401,22 @@ firing-rule trace (only the rules that changed the form).
     ˌβɛrˈmeʎ → ˌβerˈmeʎ   (ˌɛ→ˌe)
 600: the remaining bilabial fricative becomes v
     ˌβerˈmeʎ → ˌverˈmeʎ   (β→v)
-1000: intertonic e raises to i before a palatal consonant (ɲ, ʎ)
-    ˌverˈmeʎ → ˌverˈmiʎ   (ˈe→ˈi)
 1000: a stressed mid unrounded vowel laxes and fronts before r + consonant
-    ˌverˈmiʎ → ˌvɛrˈmiʎ   (ˌe→ˌɛ)
+    ˌverˈmeʎ → ˌvɛrˈmeʎ   (ˌe→ˌɛ)
+1400: e lowers to ɛ before a lateral
+    ˌvɛrˈmeʎ → ˌvɛrˈmɛʎ   (ˈe→ˈɛ)
 1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
-    ˌvɛrˈmiʎ → ˌvɛɹˈmiʎ   (r→ɹ)
+    ˌvɛrˈmɛʎ → ˌvɛɹˈmɛʎ   (r→ɹ)
 1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
-    ˌvɛɹˈmiʎ → ˌvɛrˈmiʎ   (ɹ→r)
+    ˌvɛɹˈmɛʎ → ˌvɛrˈmɛʎ   (ɹ→r)
 1400: r becomes uvular ʀ
-    ˌvɛrˈmiʎ → ˌvɛʀˈmiʎ   (r→ʀ)
+    ˌvɛrˈmɛʎ → ˌvɛʀˈmɛʎ   (r→ʀ)
 1400: stress is leveled — no longer distinctive for vowels
-    ˌvɛʀˈmiʎ → vɛʀ.miʎ   (ˌɛ→ɛ, ˈi→i)
+    ˌvɛʀˈmɛʎ → vɛʀ.mɛʎ   (ˌɛ→ɛ, ˈɛ→ɛ)
 1400: the uvular trill ʀ becomes a fricative ʁ
-    vɛʀ.miʎ → vɛ.ʁmiʎ   (ʀ→ʁ)
+    vɛʀ.mɛʎ → vɛ.ʁmɛʎ   (ʀ→ʁ)
 1400: ʎ becomes j
-    vɛ.ʁmiʎ → vɛ.ʁmij   (ʎ→j)
-1400: a yod is absorbed after a high front vowel word-finally or before a consonant
-    vɛ.ʁmij → vɛ.ʁmi   (j→∅)
+    vɛ.ʁmɛʎ → vɛ.ʁmɛj   (ʎ→j)
 ```
 
 ## vieux
@@ -5803,7 +5809,7 @@ firing-rule trace (only the rules that changed the form).
 
 ## juin
 
-`iˈuːn̪ium` → `jœn̪`
+`iˈuːn̪ium` → `ʒɥɛ̃`
 
 ```
 -100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
@@ -5824,34 +5830,36 @@ firing-rule trace (only the rules that changed the form).
     ˈʝu.ɲo → ˈʝuː.ɲo   (ˈu→ˈuː)
 500: a high tense round non-nasal vowel centralizes
     ˈʝuː.ɲo → ˈʝʉː.ɲo   (ˈuː→ˈʉː)
+600: yod hardens to ɟ word-initially before a vowel
+    ˈʝʉː.ɲo → ˈɟʉː.ɲo   (ʝ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈɟʉː.ɲo → ˈd͡ʒʉː.ɲo   (ɟ→d͡ʒ)
 600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
-    ˈʝʉː.ɲo → ˈʝʉː.ɲə   (o→ə)
+    ˈd͡ʒʉː.ɲo → ˈd͡ʒʉː.ɲə   (o→ə)
 600: schwa becomes non-syllabic
-    ˈʝʉː.ɲə → ˈʝʉːɲə̯   (ə→ə̯)
+    ˈd͡ʒʉː.ɲə → ˈd͡ʒʉːɲə̯   (ə→ə̯)
 600: non-syllabic schwa is lost elsewhere
-    ˈʝʉːɲə̯ → ˈʝʉːɲ   (ə̯→∅)
-600: ʝ weakens to j unconditionally
-    ˈʝʉːɲ → ˈjʉːɲ   (ʝ→j)
+    ˈd͡ʒʉːɲə̯ → ˈd͡ʒʉːɲ   (ə̯→∅)
 600: a vowel shortens before ɲ
-    ˈjʉːɲ → ˈjʉɲ   (ˈʉː→ˈʉ)
+    ˈd͡ʒʉːɲ → ˈd͡ʒʉɲ   (ˈʉː→ˈʉ)
 1000: high round back vowels front (completion of u-fronting)
-    ˈjʉɲ → ˈjyɲ   (ˈʉ→ˈy)
+    ˈd͡ʒʉɲ → ˈd͡ʒyɲ   (ˈʉ→ˈy)
 1000: word-final ɲ ejects a nasalized j after a tense vowel
-    ˈjyɲ → ˈjyj̃ɲ   (∅→j̃)
-1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
-    ˈjyj̃ɲ → ˈjỹj̃ɲ   (ˈy→ˈỹ)
+    ˈd͡ʒyɲ → ˈd͡ʒyj̃ɲ   (∅→j̃)
+1000: the nasal diphthong ũj̃ becomes wĩ (syllabicity swap before a nasal)
+    ˈd͡ʒyj̃ɲ → d͡ʒɥj̩̃ɲ   (ˈy→ɥ, j̃→j̩̃)
+1000: all affricates become sibilants (deaffrication)
+    d͡ʒɥj̩̃ɲ → ʒɥj̩̃ɲ   (d͡ʒ→ʒ)
 1200: final ɲ becomes n
-    ˈjỹj̃ɲ → ˈjỹj̃n̪   (ɲ→n̪)
+    ʒɥj̩̃ɲ → ʒɥj̩̃n̪   (ɲ→n̪)
+1200: nasalized ĩ lowers to ẽ
+    ʒɥj̩̃n̪ → ʒɥj̩̃n̪   (j̩̃→j̩̃)
 1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
-    ˈjỹj̃n̪ → ˈjỹːn̪   (ˈỹj̃→ˈỹː)
-1400: nasalized front vowels lower (wẽ, jẽ, ø̃ open to wɛ̃, jɛ̃, œ̃)
-    ˈjỹːn̪ → ˈjœ̃ːn̪   (ˈỹː→ˈœ̃ː)
-1400: stress is leveled — no longer distinctive for vowels
-    ˈjœ̃ːn̪ → jœ̃ːn̪   (ˈœ̃ː→œ̃ː)
+    ʒɥj̩̃n̪ → ʒɥj̩̃ː   (j̩̃n̪→j̩̃ː)
+1400: nasalized ẽ lowers to ɛ̃
+    ʒɥj̩̃ː → ʒɥɛ̃ː   (j̩̃ː→ɛ̃ː)
 1400: distinctive vowel length is lost entirely
-    jœ̃ːn̪ → jœ̃n̪   (œ̃ː→œ̃)
-1400: a nasal vowel denasalizes before a surviving nasal consonant
-    jœ̃n̪ → jœn̪   (œ̃→œ)
+    ʒɥɛ̃ː → ʒɥɛ̃   (ɛ̃ː→ɛ̃)
 ```
 
 ## certe
@@ -6378,4 +6386,2511 @@ firing-rule trace (only the rules that changed the form).
     ˈvɛn̪ə̯ → ˈvɛn̪   (ə̯→∅)
 1400: stress is leveled — no longer distinctive for vowels
     ˈvɛn̪ → vɛn̪   (ˈɛ→ɛ)
+```
+
+## avancer
+
+`ˌɑbˌɑn̪t̪iˈɑːre` → `a.vɑ̃.se`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌɑˌbɑn̪.t̪iˈɑː.re → ˌɑˌbɑn̪.t̪ɪˈɑː.rɛ   (i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌɑˌbɑn̪.t̪ɪˈɑː.rɛ → ˌɑˌbɑn̪ˈt̪jɑː.rɛ   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌɑˌbɑn̪ˈt̪jɑː.rɛ → ˌɑˌbɑn̪ˈt̪ʝɑː.rɛ   (j→ʝ)
+-100: b lenites to β intervocalically / before a sonorant
+    ˌɑˌbɑn̪ˈt̪ʝɑː.rɛ → ˌɑˌβɑn̪ˈt̪ʝɑː.rɛ   (b→β)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɑˌβɑn̪ˈt̪ʝɑː.rɛ → ˌɑˌβɑn̪ˈt̪ʝɑ.rɛ   (ˈɑː→ˈɑ)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌɑˌβɑn̪ˈt̪ʝɑ.rɛ → ˌɑˌβɑn̪t͡sʲˈʝɑ.rɛ   (t̪→t͡sʲ)
+300: yod absorbed into a preceding palatalized consonant
+    ˌɑˌβɑn̪t͡sʲˈʝɑ.rɛ → ˌɑˌβɑn̪ˈt͡sʲɑ.rɛ   (ʝ→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌɑˌβɑn̪ˈt͡sʲɑ.rɛ → ˌɑˌβɑn̪ˈt͡sʲɑː.rɛ   (ˈɑ→ˈɑː)
+500: the low vowel fronts by default
+    ˌɑˌβɑn̪ˈt͡sʲɑː.rɛ → ˌaˌβan̪ˈt͡sʲaː.rɛ   (ˌɑ→ˌa, ˌɑ→ˌa, ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌaˌβan̪ˈt͡sʲaː.rɛ → ˌaˌβan̪ˈt͡sʲaː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌaˌβan̪ˈt͡sʲaː.rə → ˌaˌβan̪ˈt͡sʲaːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌaˌβan̪ˈt͡sʲaːrə̯ → ˌaˌβan̪ˈt͡sʲaːr   (ə̯→∅)
+600: a stressed low vowel becomes front non-tense after a front continuant glide, before a sonorant non-lateral consonant
+    ˌaˌβan̪ˈt͡sʲaːr → ˌaˌβan̪ˈt͡sʲɛːr   (ˈaː→ˈɛː)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌaˌβan̪ˈt͡sʲɛːr → ˌaˌβan̪ˈt͡sʲie̯r   (ˈɛː→ˈie̯)
+600: the remaining bilabial fricative becomes v
+    ˌaˌβan̪ˈt͡sʲie̯r → ˌaˌvan̪ˈt͡sʲie̯r   (β→v)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˌaˌvan̪ˈt͡sʲie̯r → ˌaˌvãn̪ˈt͡sʲie̯r   (ˌa→ˌã)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌaˌvãn̪ˈt͡sʲie̯r → ˌaˌvãn̪ˈt͡sʲjer   (ˈi→j, e̯→ˈe)
+1000: all affricates become sibilants (deaffrication)
+    ˌaˌvãn̪ˈt͡sʲjer → ˌaˌvãn̪ˈsʲjer   (t͡sʲ→sʲ)
+1200: je becomes e after a palatal consonant
+    ˌaˌvãn̪ˈsʲjer → ˌaˌvãn̪ˈsʲer   (j→∅)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˌaˌvãn̪ˈsʲer → ˌaˌvãn̪ˈser   (sʲ→s)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌaˌvãn̪ˈser → ˌaˌvãːˈser   (ˌãn̪→ˌãː)
+1400: long a becomes back ɑː
+    ˌaˌvãːˈser → ˌaˌvɑ̃ːˈser   (ˌãː→ˌɑ̃ː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌaˌvɑ̃ːˈser → ˌaˌvɑ̃ːˈseɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌaˌvɑ̃ːˈseɹ → ˌaˌvɑ̃ːˈse   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌaˌvɑ̃ːˈse → a.vɑ̃ː.se   (ˌa→a, ˌɑ̃ː→ɑ̃ː, ˈe→e)
+1400: distinctive vowel length is lost entirely
+    a.vɑ̃ː.se → a.vɑ̃.se   (ɑ̃ː→ɑ̃)
+```
+
+## agneaux
+
+`ˌɑgn̪ˈelloːs` → `a.ɲo`
+
+```
+-100: g assimilates to a following coronal nasal (gn cluster)
+    ˌɑˈgn̪el.loːs → ˌɑŋˈn̪el.loːs   (g→ŋ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌɑŋˈn̪el.loːs → ˌɑŋˈn̪ɛl.loːs   (ˈe→ˈɛ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɑŋˈn̪ɛl.loːs → ˌɑŋˈn̪ɛl.los   (oː→o)
+500: ŋ palatalizes to ɲ before a coronal
+    ˌɑŋˈn̪ɛl.los → ˌɑɲˈn̪ɛl.los   (ŋ→ɲ)
+500: the low vowel fronts by default
+    ˌɑɲˈn̪ɛl.los → ˌaɲˈn̪ɛl.los   (ˌɑ→ˌa)
+500: a nasal consonant is lost after ɲ
+    ˌaɲˈn̪ɛl.los → ˌaˈɲɛl.los   (n̪→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌaˈɲɛl.los → ˌaˈɲɛl.ləs   (o→ə)
+600: schwa becomes non-syllabic
+    ˌaˈɲɛl.ləs → ˌaˈɲɛllə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌaˈɲɛllə̯s → ˌaˈɲɛlls   (ə̯→∅)
+600: an identical consonant geminate reduces to one, before a consonant + consonant-or-boundary
+    ˌaˈɲɛlls → ˌaˈɲɛls   (l→∅)
+1000: l darkens before a consonant (beginnings of l-vocalization)
+    ˌaˈɲɛls → ˌaˈɲɛɫs   (l→ɫ)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˌaˈɲɛɫs → ˌãˈɲɛɫs   (ˌa→ˌã)
+1000: back dark-l variants vocalize to w
+    ˌãˈɲɛɫs → ˌãˈɲɛws   (ɫ→w)
+1000: a glide develops between a stressed or secondary-stressed lax front mid vowel and w
+    ˌãˈɲɛws → ˌãˈɲɛa̯ws   (∅→a̯)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌãˈɲɛa̯ws → ˌãˈɲe̯aws   (ˈɛ→e̯, a̯→ˈa)
+1200: aw becomes long oː
+    ˌãˈɲe̯aws → ˌãˈɲe̯oːs   (ˈaw→ˈoː)
+1200: the e-glide becomes a schwa-glide before a non-high round back vowel
+    ˌãˈɲe̯oːs → ˌãˈɲə̯oːs   (e̯→ə̯)
+1400: a non-syllabic schwa is lost before a vowel/glide
+    ˌãˈɲə̯oːs → ˌãˈɲoːs   (ə̯→∅)
+1400: final obstruents are lost
+    ˌãˈɲoːs → ˌãˈɲoː   (s→∅)
+1400: nasalized ã (and wɛ̃, jɛ̃) denasalizes before a nasal consonant + vowel
+    ˌãˈɲoː → ˌaˈɲoː   (ˌã→ˌa)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌaˈɲoː → a.ɲoː   (ˌa→a, ˈoː→oː)
+1400: distinctive vowel length is lost entirely
+    a.ɲoː → a.ɲo   (oː→o)
+```
+
+## amis
+
+`ˌɑmˈiːkoːs` → `a.mi`
+
+```
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɑˈmiː.koːs → ˌɑˈmi.kos   (ˈiː→ˈi, oː→o)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌɑˈmi.kos → ˌɑˈmiː.kos   (ˈi→ˈiː)
+500: k voices to g intervocalically
+    ˌɑˈmiː.kos → ˌɑˈmiː.gos   (k→g)
+500: g spirantizes to ɣ intervocalically (recurrence)
+    ˌɑˈmiː.gos → ˌɑˈmiː.ɣos   (g→ɣ)
+500: the low vowel fronts by default
+    ˌɑˈmiː.ɣos → ˌaˈmiː.ɣos   (ˌɑ→ˌa)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌaˈmiː.ɣos → ˌaˈmiː.ɣəs   (o→ə)
+600: schwa becomes non-syllabic
+    ˌaˈmiː.ɣəs → ˌaˈmiːɣə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌaˈmiːɣə̯s → ˌaˈmiːɣs   (ə̯→∅)
+600: a vowel shortens before a consonant cluster ending in an obstruent
+    ˌaˈmiːɣs → ˌaˈmiɣs   (ˈiː→ˈi)
+750: ɣ devoices to x before a voiceless segment or word-finally
+    ˌaˈmiɣs → ˌaˈmixs   (ɣ→x)
+750: remaining x/ɣ front
+    ˌaˈmixs → ˌaˈmiçs   (x→ç)
+750: ç merges into ʝ
+    ˌaˈmiçs → ˌaˈmiʝs   (ç→ʝ)
+750: ʝ becomes j everywhere
+    ˌaˈmiʝs → ˌaˈmijs   (ʝ→j)
+750: j deletes after a high front tense vowel
+    ˌaˈmijs → ˌaˈmis   (j→∅)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˌaˈmis → ˌãˈmis   (ˌa→ˌã)
+1400: final obstruents are lost
+    ˌãˈmis → ˌãˈmi   (s→∅)
+1400: nasalized ã (and wɛ̃, jɛ̃) denasalizes before a nasal consonant + vowel
+    ˌãˈmi → ˌaˈmi   (ˌã→ˌa)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌaˈmi → a.mi   (ˌa→a, ˈi→i)
+```
+
+## armure
+
+`ˌɑrmɑːt̪ˈuːrɑm` → `a.ʁmyʁ`
+
+```
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɑr.mɑːˈt̪uː.rɑm → ˌɑr.mɑˈt̪u.rɑm   (ɑː→ɑ, ˈuː→ˈu)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌɑr.mɑˈt̪u.rɑm → ˌɑr.mɑˈt̪u.rɑ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌɑr.mɑˈt̪u.rɑ → ˌɑr.mɑˈt̪uː.rɑ   (ˈu→ˈuː)
+500: the low vowel fronts by default
+    ˌɑr.mɑˈt̪uː.rɑ → ˌar.maˈt̪uː.ra   (ˌɑ→ˌa, ɑ→a, ɑ→a)
+500: a high tense round non-nasal vowel centralizes
+    ˌar.maˈt̪uː.ra → ˌar.maˈt̪ʉː.ra   (ˈuː→ˈʉː)
+600: a voiceless consonant voices intervocalically
+    ˌar.maˈt̪ʉː.ra → ˌar.maˈd̪ʉː.ra   (t̪→d̪)
+600: a voiced stop spirantizes intervocalically or before a non-nasal non-lateral sonorant
+    ˌar.maˈd̪ʉː.ra → ˌar.maˈðʉː.ra   (d̪→ð)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˌar.maˈðʉː.ra → ˌar.məˈðʉː.rə   (a→ə, a→ə)
+750: vowel length resets to short
+    ˌar.məˈðʉː.rə → ˌar.məˈðʉ.rə   (ˈʉː→ˈʉ)
+1000: high round back vowels front (completion of u-fronting)
+    ˌar.məˈðʉ.rə → ˌar.məˈðy.rə   (ˈʉ→ˈy)
+1000: the interdental fricatives (plain and palatalized) efface
+    ˌar.məˈðy.rə → ˌar.məˈy.rə   (ð→∅)
+1200: a stressless schwa desyllabifies before another vowel
+    ˌar.məˈy.rə → ˌarˈmə̯y.rə   (ə→ə̯)
+1400: a stressed vowel lengthens after a non-syllabic schwa
+    ˌarˈmə̯y.rə → ˌarˈmə̯yː.rə   (ˈy→ˈyː)
+1400: a non-syllabic schwa is lost before a vowel/glide
+    ˌarˈmə̯yː.rə → ˌarˈmyː.rə   (ə̯→∅)
+1400: final ə becomes a non-syllabic off-glide
+    ˌarˈmyː.rə → ˌarˈmyːrə̯   (ə→ə̯)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌarˈmyːrə̯ → ˌaɹˈmyːrə̯   (r→ɹ)
+1400: the final off-glide schwa is deleted elsewhere
+    ˌaɹˈmyːrə̯ → ˌaɹˈmyːr   (ə̯→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˌaɹˈmyːr → ˌarˈmyːr   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˌarˈmyːr → ˌaʀˈmyːʀ   (r→ʀ, r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌaʀˈmyːʀ → aʀ.myːʀ   (ˌa→a, ˈyː→yː)
+1400: distinctive vowel length is lost entirely
+    aʀ.myːʀ → aʀ.myʀ   (yː→y)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    aʀ.myʀ → a.ʁmyʁ   (ʀ→ʁ, ʀ→ʁ)
+```
+
+## baiser
+
+`bˌɑsiˈɑːre` → `bɛ.ze`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌbɑ.siˈɑː.re → ˌbɑ.sɪˈɑː.rɛ   (i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌbɑ.sɪˈɑː.rɛ → ˌbɑˈsjɑː.rɛ   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌbɑˈsjɑː.rɛ → ˌbɑsˈʝɑː.rɛ   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌbɑsˈʝɑː.rɛ → ˌbɑsˈʝɑ.rɛ   (ˈɑː→ˈɑ)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌbɑsˈʝɑ.rɛ → ˌbɑsˈʝɑː.rɛ   (ˈɑ→ˈɑː)
+500: a voiceless fricative voices before yod + a non-consonantal segment
+    ˌbɑsˈʝɑː.rɛ → ˌbɑzˈʝɑː.rɛ   (s→z)
+500: z + yod becomes palatalized z
+    ˌbɑzˈʝɑː.rɛ → ˌbɑˈzʲɑː.rɛ   (zʝ→zʲ)
+500: the low vowel fronts by default
+    ˌbɑˈzʲɑː.rɛ → ˌbaˈzʲaː.rɛ   (ˌɑ→ˌa, ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌbaˈzʲaː.rɛ → ˌbaˈzʲaː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌbaˈzʲaː.rə → ˌbaˈzʲaːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌbaˈzʲaːrə̯ → ˌbaˈzʲaːr   (ə̯→∅)
+600: a stressed low vowel becomes front non-tense after a front continuant glide, before a sonorant non-lateral consonant
+    ˌbaˈzʲaːr → ˌbaˈzʲɛːr   (ˈaː→ˈɛː)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌbaˈzʲɛːr → ˌbaˈzʲie̯r   (ˈɛː→ˈie̯)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˌbaˈzʲie̯r → ˌbajˈzie̯r   (zʲ→jz)
+600: a coronal palatalizes between two high-front segments
+    ˌbajˈzie̯r → ˌbajˈzʲie̯r   (z→zʲ)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌbajˈzʲie̯r → ˌbajˈzʲjer   (ˈi→j, e̯→ˈe)
+1200: je becomes e after a palatal consonant
+    ˌbajˈzʲjer → ˌbajˈzʲer   (j→∅)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˌbajˈzʲer → ˌbajˈzer   (zʲ→z)
+1200: final ajə (and aj before a consonant) becomes long ɛː
+    ˌbajˈzer → ˌbɛːˈzer   (ˌaj→ˌɛː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌbɛːˈzer → ˌbɛːˈzeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌbɛːˈzeɹ → ˌbɛːˈze   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌbɛːˈze → bɛː.ze   (ˌɛː→ɛː, ˈe→e)
+1400: distinctive vowel length is lost entirely
+    bɛː.ze → bɛ.ze   (ɛː→ɛ)
+```
+
+## blancs
+
+`blˈɑn̪koːs` → `blɑ̃`
+
+```
+-100: n assimilates to a following velar stop
+    ˈblɑn̪.koːs → ˈblɑŋ.koːs   (n̪→ŋ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈblɑŋ.koːs → ˈblɑŋ.kos   (oː→o)
+500: the low vowel fronts by default
+    ˈblɑŋ.kos → ˈblaŋ.kos   (ˈɑ→ˈa)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈblaŋ.kos → ˈblaŋ.kəs   (o→ə)
+600: schwa becomes non-syllabic
+    ˈblaŋ.kəs → ˈblaŋkə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈblaŋkə̯s → ˈblaŋks   (ə̯→∅)
+750: k is lost before word-final s
+    ˈblaŋks → ˈblaŋs   (k→∅)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˈblaŋs → ˈblãŋs   (ˈa→ˈã)
+1000: ŋ simplifies to n before a non-velar segment
+    ˈblãŋs → ˈblãn̪s   (ŋ→n̪)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˈblãn̪s → ˈblãːs   (ˈãn̪→ˈãː)
+1400: long a becomes back ɑː
+    ˈblãːs → ˈblɑ̃ːs   (ˈãː→ˈɑ̃ː)
+1400: final obstruents are lost
+    ˈblɑ̃ːs → ˈblɑ̃ː   (s→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈblɑ̃ː → blɑ̃ː   (ˈɑ̃ː→ɑ̃ː)
+1400: distinctive vowel length is lost entirely
+    blɑ̃ː → blɑ̃   (ɑ̃ː→ɑ̃)
+```
+
+## bouger
+
+`bˌullikˈɑːre` → `bu.ʒe`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌbul.liˈkɑː.re → ˌbʊl.lɪˈkɑː.rɛ   (ˌu→ˌʊ, i→ɪ, e→ɛ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌbʊl.lɪˈkɑː.rɛ → ˌbʊl.lɪˈkɑ.rɛ   (ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌbʊl.lɪˈkɑ.rɛ → ˌbol.leˈkɑ.rɛ   (ˌʊ→ˌo, ɪ→e)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌbol.leˈkɑ.rɛ → ˌbol.leˈkɑː.rɛ   (ˈɑ→ˈɑː)
+500: k voices to g intervocalically
+    ˌbol.leˈkɑː.rɛ → ˌbol.leˈgɑː.rɛ   (k→g)
+500: e lost in -ica- endings before the now-voiced g + low vowel
+    ˌbol.leˈgɑː.rɛ → ˌbollˈgɑː.rɛ   (e→∅)
+500: the low vowel fronts by default
+    ˌbollˈgɑː.rɛ → ˌbollˈgaː.rɛ   (ˈɑː→ˈaː)
+500: the high back consonant w fronts before a front vowel
+    ˌbollˈgaː.rɛ → ˌbollˈgʲaː.rɛ   (g→gʲ)
+600: a segment marked both back and front loses the back specification (recurrence)
+    ˌbollˈgʲaː.rɛ → ˌbollˈɟaː.rɛ   (gʲ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˌbollˈɟaː.rɛ → ˌbollˈd͡ʒaː.rɛ   (ɟ→d͡ʒ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌbollˈd͡ʒaː.rɛ → ˌbollˈd͡ʒaː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌbollˈd͡ʒaː.rə → ˌbollˈd͡ʒaːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌbollˈd͡ʒaːrə̯ → ˌbollˈd͡ʒaːr   (ə̯→∅)
+600: an identical consonant geminate reduces to one, before an obstruent or nasal
+    ˌbollˈd͡ʒaːr → ˌbolˈd͡ʒaːr   (l→∅)
+600: long stressed vowels diphthongize
+    ˌbolˈd͡ʒaːr → ˌbolˈd͡ʒae̯r   (ˈaː→ˈae̯)
+750: the ae̯ diphthong monophthongizes to a long e, preserving its stress level
+    ˌbolˈd͡ʒae̯r → ˌbolˈd͡ʒeːr   (ˈae̯→ˈeː)
+1000: l darkens before a consonant (beginnings of l-vocalization)
+    ˌbolˈd͡ʒeːr → ˌboɫˈd͡ʒeːr   (l→ɫ)
+1000: vowel length resets to short
+    ˌboɫˈd͡ʒeːr → ˌboɫˈd͡ʒer   (ˈeː→ˈe)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˌboɫˈd͡ʒer → ˌbuɫˈd͡ʒer   (ˌo→ˌu)
+1000: back dark-l variants vocalize to w
+    ˌbuɫˈd͡ʒer → ˌbuwˈd͡ʒer   (ɫ→w)
+1000: w deletes immediately after a high round vowel (u or y)
+    ˌbuwˈd͡ʒer → ˌbuˈd͡ʒer   (w→∅)
+1000: all affricates become sibilants (deaffrication)
+    ˌbuˈd͡ʒer → ˌbuˈʒer   (d͡ʒ→ʒ)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌbuˈʒer → ˌbuˈʒeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌbuˈʒeɹ → ˌbuˈʒe   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌbuˈʒe → bu.ʒe   (ˌu→u, ˈe→e)
+```
+
+## doigt
+
+`d̪ˈigit̪um` → `d̪wat̪`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈd̪i.gi.t̪um → ˈd̪ɪ.gɪ.t̪ʊm   (ˈi→ˈɪ, i→ɪ, u→ʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈd̪ɪ.gɪ.t̪ʊm → ˈd̪e.ge.t̪om   (ˈɪ→ˈe, ɪ→e, ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈd̪e.ge.t̪om → ˈd̪e.ge.t̪o   (m→∅)
+-100: a velar stop fronts before a following front non-low continuant (second palatalization trigger)
+    ˈd̪e.ge.t̪o → ˈd̪e.gʲe.t̪o   (g→gʲ)
+-100: a segment marked both back and front loses the back specification
+    ˈd̪e.gʲe.t̪o → ˈd̪e.ɟe.t̪o   (gʲ→ɟ)
+-100: a voiced high stop/affricate spirantizes after a vowel before a sonorant or yod
+    ˈd̪e.ɟe.t̪o → ˈd̪e.ʝe.t̪o   (ɟ→ʝ)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈd̪e.ʝe.t̪o → ˈd̪eː.ʝe.t̪o   (ˈe→ˈeː)
+600: an unstressed non-low vowel reduces to schwa before consonants + vowel + optional consonants + word end
+    ˈd̪eː.ʝe.t̪o → ˈd̪eː.ʝə.t̪o   (e→ə)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈd̪eː.ʝə.t̪o → ˈd̪eː.ʝə.t̪ə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈd̪eː.ʝə.t̪ə → ˈd̪eːʝə̯t̪ə̯   (ə→ə̯, ə→ə̯)
+600: non-syllabic schwa restores after another non-syllabic schwa + optional consonants, word-finally
+    ˈd̪eːʝə̯t̪ə̯ → ˈd̪eːʝə̯.t̪ə   (ə̯→ə)
+600: non-syllabic schwa is lost elsewhere
+    ˈd̪eːʝə̯.t̪ə → ˈd̪eːʝ.t̪ə   (ə̯→∅)
+600: an anterior non-lateral coronal palatalizes after a high-front consonant (recurrence)
+    ˈd̪eːʝ.t̪ə → ˈd̪eːʝ.t̪ʲə   (t̪→t̪ʲ)
+600: a vowel shortens before a consonant cluster ending in an obstruent
+    ˈd̪eːʝ.t̪ʲə → ˈd̪eʝ.t̪ʲə   (ˈeː→ˈe)
+600: ʝ weakens to j unconditionally
+    ˈd̪eʝ.t̪ʲə → ˈd̪ej.t̪ʲə   (ʝ→j)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˈd̪ej.t̪ʲə → ˈd̪ejj.t̪ə   (t̪ʲ→jt̪)
+600: j is lost after j or a consonant, before a consonant
+    ˈd̪ejj.t̪ə → ˈd̪ej.t̪ə   (j→∅)
+1000: a short tense front mid/high vowel backs and rounds before yod
+    ˈd̪ej.t̪ə → ˈd̪oj.t̪ə   (ˈe→ˈo)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˈd̪oj.t̪ə → ˈd̪uj.t̪ə   (ˈo→ˈu)
+1000: the yod of a back-round diphthong lowers to ɛ̯ everywhere (oj/uj > oɛ̯/uɛ̯)
+    ˈd̪uj.t̪ə → ˈd̪uɛ̯.t̪ə   (j→ɛ̯)
+1200: the diphthong oɛ̯ completes its shift to wɛ
+    ˈd̪uɛ̯.t̪ə → ˈd̪wɛ.t̪ə   (ˈu→w, ɛ̯→ˈɛ)
+1400: final ə becomes a non-syllabic off-glide
+    ˈd̪wɛ.t̪ə → ˈd̪wɛt̪ə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈd̪wɛt̪ə̯ → ˈd̪wɛt̪   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈd̪wɛt̪ → d̪wɛt̪   (ˈɛ→ɛ)
+1400: wɛ becomes wa
+    d̪wɛt̪ → d̪wat̪   (ɛ→a)
+```
+
+## dures
+
+`d̪ˈuːrɑːs` → `d̪yʁ`
+
+```
+-100: the length feature is dropped now that quality carries the contrast
+    ˈd̪uː.rɑːs → ˈd̪u.rɑs   (ˈuː→ˈu, ɑː→ɑ)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈd̪u.rɑs → ˈd̪uː.rɑs   (ˈu→ˈuː)
+500: the low vowel fronts by default
+    ˈd̪uː.rɑs → ˈd̪uː.ras   (ɑ→a)
+500: a high tense round non-nasal vowel centralizes
+    ˈd̪uː.ras → ˈd̪ʉː.ras   (ˈuː→ˈʉː)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈd̪ʉː.ras → ˈd̪ʉː.rəs   (a→ə)
+750: vowel length resets to short
+    ˈd̪ʉː.rəs → ˈd̪ʉ.rəs   (ˈʉː→ˈʉ)
+1000: high round back vowels front (completion of u-fronting)
+    ˈd̪ʉ.rəs → ˈd̪y.rəs   (ˈʉ→ˈy)
+1200: a single final consonant effaces after schwa
+    ˈd̪y.rəs → ˈd̪y.rə   (s→∅)
+1400: final ə becomes a non-syllabic off-glide
+    ˈd̪y.rə → ˈd̪yrə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈd̪yrə̯ → ˈd̪yr   (ə̯→∅)
+1400: r becomes uvular ʀ
+    ˈd̪yr → ˈd̪yʀ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈd̪yʀ → d̪yʀ   (ˈy→y)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    d̪yʀ → d̪yʁ   (ʀ→ʁ)
+```
+
+## fausse
+
+`fˈɑlsɑm` → `fos`
+
+```
+-100: l darkens before a non-lateral consonant
+    ˈfɑl.sɑm → ˈfɑɫ.sɑm   (l→ɫ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈfɑɫ.sɑm → ˈfɑɫ.sɑ   (m→∅)
+-100: a segment marked both back and front loses the back specification
+    ˈfɑɫ.sɑ → ˈfɑlʲ.sɑ   (ɫ→lʲ)
+500: the low vowel fronts by default
+    ˈfɑlʲ.sɑ → ˈfalʲ.sa   (ˈɑ→ˈa, ɑ→a)
+500: an anterior non-lateral coronal palatalizes after a high-front consonant
+    ˈfalʲ.sa → ˈfalʲ.sʲa   (s→sʲ)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˈfalʲ.sʲa → ˈfalʲj.sa   (sʲ→js)
+600: j is lost after j or a consonant, before a consonant
+    ˈfalʲj.sa → ˈfalʲ.sa   (j→∅)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈfalʲ.sa → ˈfalʲ.sə   (a→ə)
+1000: l darkens before a consonant (beginnings of l-vocalization)
+    ˈfalʲ.sə → ˈfaɫ.sə   (lʲ→ɫ)
+1000: back dark-l variants vocalize to w
+    ˈfaɫ.sə → ˈfaw.sə   (ɫ→w)
+1200: aw becomes long oː
+    ˈfaw.sə → ˈfoː.sə   (ˈaw→ˈoː)
+1400: final ə becomes a non-syllabic off-glide
+    ˈfoː.sə → ˈfoːsə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈfoːsə̯ → ˈfoːs   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈfoːs → foːs   (ˈoː→oː)
+1400: distinctive vowel length is lost entirely
+    foːs → fos   (oː→o)
+```
+
+## fille
+
+`fˈiːliɑm` → `fij`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈfiː.li.ɑm → ˈfiː.lɪ.ɑm   (i→ɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˈfiː.lɪ.ɑm → ˈfiː.ljɑm   (ɪ→j)
+-100: l darkens before a non-lateral consonant
+    ˈfiː.ljɑm → ˈfiː.ɫjɑm   (l→ɫ)
+-100: yod strengthens before a vowel
+    ˈfiː.ɫjɑm → ˈfiːɫ.ʝɑm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈfiːɫ.ʝɑm → ˈfiɫ.ʝɑm   (ˈiː→ˈi)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈfiɫ.ʝɑm → ˈfiɫ.ʝɑ   (m→∅)
+-100: a segment marked both back and front loses the back specification
+    ˈfiɫ.ʝɑ → ˈfilʲ.ʝɑ   (ɫ→lʲ)
+500: a lateral palatalizes before a high-front consonant
+    ˈfilʲ.ʝɑ → ˈfiʎ.ʝɑ   (lʲ→ʎ)
+500: the low vowel fronts by default
+    ˈfiʎ.ʝɑ → ˈfiʎ.ʝa   (ɑ→a)
+600: a yod is absorbed by a preceding palatal lateral (ʎj > ʎ)
+    ˈfiʎ.ʝa → ˈfi.ʎa   (ʝ→∅)
+600: a stressed vowel lengthens before a consonant + vowel
+    ˈfi.ʎa → ˈfiː.ʎa   (ˈi→ˈiː)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈfiː.ʎa → ˈfiː.ʎə   (a→ə)
+750: vowel length resets to short
+    ˈfiː.ʎə → ˈfi.ʎə   (ˈiː→ˈi)
+1400: final ə becomes a non-syllabic off-glide
+    ˈfi.ʎə → ˈfiʎə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈfiʎə̯ → ˈfiʎ   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈfiʎ → fiʎ   (ˈi→i)
+1400: ʎ becomes j
+    fiʎ → fij   (ʎ→j)
+```
+
+## forêt
+
+`fˌorˈest̪em` → `fɔ.ʁɛ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌfoˈres.t̪em → ˌfɔˈrɛs.t̪ɛm   (ˌo→ˌɔ, ˈe→ˈɛ, e→ɛ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌfɔˈrɛs.t̪ɛm → ˌfɔˈrɛs.t̪ɛ   (m→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌfɔˈrɛs.t̪ɛ → ˌfɔˈrɛs.t̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌfɔˈrɛs.t̪ə → ˌfɔˈrɛst̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌfɔˈrɛst̪ə̯ → ˌfɔˈrɛst̪   (ə̯→∅)
+600: secondary-stressed ɔ raises to o unconditionally
+    ˌfɔˈrɛst̪ → ˌfoˈrɛst̪   (ˌɔ→ˌo)
+1000: secondary-stressed o opens to ɔ before r or l, then stressed a or ɛ
+    ˌfoˈrɛst̪ → ˌfɔˈrɛst̪   (ˌo→ˌɔ)
+1000: s becomes x after a vowel, before any consonant
+    ˌfɔˈrɛst̪ → ˌfɔˈrɛxt̪   (s→x)
+1000: the velar fricative x is lost
+    ˌfɔˈrɛxt̪ → ˌfɔˈrɛt̪   (x→∅)
+1400: final obstruents are lost
+    ˌfɔˈrɛt̪ → ˌfɔˈrɛ   (t̪→∅)
+1400: r becomes uvular ʀ
+    ˌfɔˈrɛ → ˌfɔˈʀɛ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌfɔˈʀɛ → fɔ.ʀɛ   (ˌɔ→ɔ, ˈɛ→ɛ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    fɔ.ʀɛ → fɔ.ʁɛ   (ʀ→ʁ)
+```
+
+## fonds
+
+`fˈun̪d̪us` → `fɔ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈfun̪.d̪us → ˈfʊn̪.d̪ʊs   (ˈu→ˈʊ, u→ʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈfʊn̪.d̪ʊs → ˈfon̪.d̪os   (ˈʊ→ˈo, ʊ→o)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˈfon̪.d̪os → ˈfũn̪.d̪os   (ˈo→ˈũ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈfũn̪.d̪os → ˈfũn̪.d̪əs   (o→ə)
+600: schwa becomes non-syllabic
+    ˈfũn̪.d̪əs → ˈfũn̪d̪ə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈfũn̪d̪ə̯s → ˈfũn̪d̪s   (ə̯→∅)
+750: d/t plus s becomes the affricate ts
+    ˈfũn̪d̪s → ˈfũn̪t͡s   (d̪s→t͡s)
+1000: all affricates become sibilants (deaffrication)
+    ˈfũn̪t͡s → ˈfũn̪s   (t͡s→s)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˈfũn̪s → ˈfũːs   (ˈũn̪→ˈũː)
+1400: final obstruents are lost
+    ˈfũːs → ˈfũː   (s→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈfũː → fũː   (ˈũː→ũː)
+1400: distinctive vowel length is lost entirely
+    fũː → fũ   (ũː→ũ)
+1400: nasal ũ opens to ɔ̃
+    fũ → fɔ̃   (ũ→ɔ̃)
+```
+
+## gros
+
+`grˈossum` → `gʁo`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈgros.sum → ˈgrɔs.sʊm   (ˈo→ˈɔ, u→ʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈgrɔs.sʊm → ˈgrɔs.som   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈgrɔs.som → ˈgrɔs.so   (m→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈgrɔs.so → ˈgrɔs.sə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈgrɔs.sə → ˈgrɔssə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈgrɔssə̯ → ˈgrɔss   (ə̯→∅)
+1000: s becomes x after a vowel, before any consonant
+    ˈgrɔss → ˈgrɔxs   (s→x)
+1000: the velar fricative x is lost
+    ˈgrɔxs → ˈgrɔs   (x→∅)
+1400: final obstruents are lost
+    ˈgrɔs → ˈgrɔ   (s→∅)
+1400: r becomes uvular ʀ
+    ˈgrɔ → ˈgʀɔ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈgʀɔ → gʀɔ   (ˈɔ→ɔ)
+1400: word-final ɔ raises to o
+    gʀɔ → gʀo   (ɔ→o)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    gʀo → gʁo   (ʀ→ʁ)
+```
+
+## janvier
+
+`iˌɑːn̪uˈɑːrium` → `ʒə̃.je`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    iˌɑː.n̪uˈɑː.ri.um → ɪˌɑː.n̪ʊˈɑː.rɪ.ʊm   (i→ɪ, u→ʊ, i→ɪ, u→ʊ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ɪˌɑː.n̪ʊˈɑː.rɪ.ʊm → ˌjɑːˈn̪wɑː.rjʊm   (ɪ→j, ʊ→w, ɪ→j)
+-100: yod strengthens before a vowel
+    ˌjɑːˈn̪wɑː.rjʊm → ˌʝɑːˈn̪wɑːr.ʝʊm   (j→ʝ, j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌʝɑːˈn̪wɑːr.ʝʊm → ˌʝɑˈn̪wɑr.ʝʊm   (ˌɑː→ˌɑ, ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌʝɑˈn̪wɑr.ʝʊm → ˌʝɑˈn̪wɑr.ʝom   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌʝɑˈn̪wɑr.ʝom → ˌʝɑˈn̪wɑr.ʝo   (m→∅)
+500: r + yod becomes palatalized r
+    ˌʝɑˈn̪wɑr.ʝo → ˌʝɑˈn̪wɑ.rʲo   (rʝ→rʲ)
+500: the low vowel fronts by default
+    ˌʝɑˈn̪wɑ.rʲo → ˌʝaˈn̪wa.rʲo   (ˌɑ→ˌa, ˈɑ→ˈa)
+500: w lost after a non-back consonant
+    ˌʝaˈn̪wa.rʲo → ˌʝaˈn̪a.rʲo   (w→∅)
+500: a stressed vowel lengthens before an optional consonant + vowel (recurrence)
+    ˌʝaˈn̪a.rʲo → ˌʝaˈn̪aː.rʲo   (ˈa→ˈaː)
+500: secondary-stressed a becomes ɛ after a front consonant, before a nasal + long vowel
+    ˌʝaˈn̪aː.rʲo → ˌʝɛˈn̪aː.rʲo   (ˌa→ˌɛ)
+600: yod hardens to ɟ word-initially before a vowel
+    ˌʝɛˈn̪aː.rʲo → ˌɟɛˈn̪aː.rʲo   (ʝ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˌɟɛˈn̪aː.rʲo → ˌd͡ʒɛˈn̪aː.rʲo   (ɟ→d͡ʒ)
+600: aːrʲ metathesizes to jɛːr
+    ˌd͡ʒɛˈn̪aː.rʲo → ˌd͡ʒɛˈn̪jɛː.ro   (ˈaːrʲ→ˈjɛːr)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌd͡ʒɛˈn̪jɛː.ro → ˌd͡ʒɛˈn̪jɛː.rə   (o→ə)
+600: schwa becomes non-syllabic
+    ˌd͡ʒɛˈn̪jɛː.rə → ˌd͡ʒɛˈn̪jɛːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌd͡ʒɛˈn̪jɛːrə̯ → ˌd͡ʒɛˈn̪jɛːr   (ə̯→∅)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌd͡ʒɛˈn̪jɛːr → ˌd͡ʒɛˈn̪jie̯r   (ˈɛː→ˈie̯)
+600: j lost after a consonant before a high front unrounded sonorant + e-glide
+    ˌd͡ʒɛˈn̪jie̯r → ˌd͡ʒɛˈn̪ie̯r   (j→∅)
+600: secondary-stressed ɛ raises to e before any two segments
+    ˌd͡ʒɛˈn̪ie̯r → ˌd͡ʒeˈn̪ie̯r   (ˌɛ→ˌe)
+1000: secondary-stressed e reduces to schwa in an open syllable
+    ˌd͡ʒeˈn̪ie̯r → ˌd͡ʒəˈn̪ie̯r   (ˌe→ˌə)
+1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
+    ˌd͡ʒəˈn̪ie̯r → ˌd͡ʒə̃ˈn̪ie̯r   (ˌə→ˌə̃)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌd͡ʒə̃ˈn̪ie̯r → ˌd͡ʒə̃ˈn̪jer   (ˈi→j, e̯→ˈe)
+1000: all affricates become sibilants (deaffrication)
+    ˌd͡ʒə̃ˈn̪jer → ˌʒə̃ˈn̪jer   (d͡ʒ→ʒ)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌʒə̃ˈn̪jer → ˌʒə̃ːˈjer   (ˌə̃n̪→ˌə̃ː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌʒə̃ːˈjer → ˌʒə̃ːˈjeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌʒə̃ːˈjeɹ → ˌʒə̃ːˈje   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌʒə̃ːˈje → ʒə̃ː.je   (ˌə̃ː→ə̃ː, ˈe→e)
+1400: distinctive vowel length is lost entirely
+    ʒə̃ː.je → ʒə̃.je   (ə̃ː→ə̃)
+```
+
+## jeudi
+
+`iˈowisd̪ˈiːem` → `ʒø.d̪i`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    iˈo.wisˈd̪iː.em → iˈo.ɣʷisˈd̪iː.em   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    iˈo.ɣʷisˈd̪iː.em → ɪˈɔ.ɣʷɪsˈd̪iː.ɛm   (i→ɪ, ˈo→ˈɔ, i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ɪˈɔ.ɣʷɪsˈd̪iː.ɛm → ˈjɔ.ɣʷɪsˈd̪iː.ɛm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˈjɔ.ɣʷɪsˈd̪iː.ɛm → ˈʝɔ.ɣʷɪsˈd̪iː.ɛm   (j→ʝ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˈʝɔ.ɣʷɪsˈd̪iː.ɛm → ˈʝɔ.βʷɪsˈd̪iː.ɛm   (ɣʷ→βʷ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈʝɔ.βʷɪsˈd̪iː.ɛm → ˈʝɔ.βʷɪsˈd̪i.ɛm   (ˈiː→ˈi)
+-100: lax high vowels lower to tense mid vowels
+    ˈʝɔ.βʷɪsˈd̪i.ɛm → ˈʝɔ.βʷesˈd̪i.ɛm   (ɪ→e)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈʝɔ.βʷesˈd̪i.ɛm → ˈʝɔ.βʷesˈd̪i.ɛ   (m→∅)
+300: a stressed vowel lengthens before another vowel
+    ˈʝɔ.βʷesˈd̪i.ɛ → ˈʝɔ.βʷesˈd̪iː.ɛ   (ˈi→ˈiː)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈʝɔ.βʷesˈd̪iː.ɛ → ˈʝɔː.βʷesˈd̪iː.ɛ   (ˈɔ→ˈɔː)
+500: labialized bilabial fricatives delabialize
+    ˈʝɔː.βʷesˈd̪iː.ɛ → ˈʝɔː.βesˈd̪iː.ɛ   (βʷ→β)
+500: long stressed ɛː/ɔː diphthongize to ie̯/uo̯
+    ˈʝɔː.βesˈd̪iː.ɛ → ˈʝuo̯.βesˈd̪iː.ɛ   (ˈɔː→ˈuo̯)
+500: a high tense round non-nasal vowel centralizes
+    ˈʝuo̯.βesˈd̪iː.ɛ → ˈʝʉo̯.βesˈd̪iː.ɛ   (ˈu→ˈʉ)
+500: an unstressed front non-low vowel becomes a glide in hiatus after a stressed vowel
+    ˈʝʉo̯.βesˈd̪iː.ɛ → ˈʝʉo̯.βesˈd̪iːɪ̯   (ɛ→ɪ̯)
+600: yod hardens to ɟ word-initially before a vowel
+    ˈʝʉo̯.βesˈd̪iːɪ̯ → ˈɟʉo̯.βesˈd̪iːɪ̯   (ʝ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈɟʉo̯.βesˈd̪iːɪ̯ → ˈd͡ʒʉo̯.βesˈd̪iːɪ̯   (ɟ→d͡ʒ)
+600: an unstressed non-low vowel reduces to schwa before consonants + vowel + optional consonants + word end
+    ˈd͡ʒʉo̯.βesˈd̪iːɪ̯ → ˈd͡ʒʉo̯.βəsˈd̪iːɪ̯   (e→ə)
+600: schwa becomes non-syllabic
+    ˈd͡ʒʉo̯.βəsˈd̪iːɪ̯ → ˈd͡ʒʉo̯βə̯sˈd̪iːɪ̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈd͡ʒʉo̯βə̯sˈd̪iːɪ̯ → ˈd͡ʒʉo̯βsˈd̪iːɪ̯   (ə̯→∅)
+600: an anterior coronal voices after a non-high voiced labial consonant, before a voiced segment
+    ˈd͡ʒʉo̯βsˈd̪iːɪ̯ → ˈd͡ʒʉo̯βzˈd̪iːɪ̯   (s→z)
+600: the bilabial fricative becomes w before a non-labial obstruent
+    ˈd͡ʒʉo̯βzˈd̪iːɪ̯ → ˈd͡ʒʉo̯wzˈd̪iːɪ̯   (β→w)
+750: vowel length resets to short
+    ˈd͡ʒʉo̯wzˈd̪iːɪ̯ → ˈd͡ʒʉo̯wzˈd̪iɪ̯   (ˈiː→ˈi)
+750: a medial consonant/glide is lost between two consonants, before an obstruent (not l/r)
+    ˈd͡ʒʉo̯wzˈd̪iɪ̯ → ˈd͡ʒʉo̯wˈd̪iɪ̯   (z→∅)
+1000: high round back vowels front (completion of u-fronting)
+    ˈd͡ʒʉo̯wˈd̪iɪ̯ → ˈd͡ʒyo̯wˈd̪iɪ̯   (ˈʉ→ˈy)
+1000: the diphthong uo becomes ue
+    ˈd͡ʒyo̯wˈd̪iɪ̯ → ˈd͡ʒye̯wˈd̪iɪ̯   (o̯→e̯)
+1000: a high non-round glide deletes after stressed i
+    ˈd͡ʒye̯wˈd̪iɪ̯ → ˈd͡ʒye̯wˈd̪i   (ɪ̯→∅)
+1000: the e-glide rounds to ø before a back sonorant (or ɫ)
+    ˈd͡ʒye̯wˈd̪i → ˈd͡ʒyø̯wˈd̪i   (e̯→ø̯)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˈd͡ʒyø̯wˈd̪i → ˈd͡ʒɥøwˈd̪i   (ˈy→ɥ, ø̯→ˈø)
+1000: ɥ delabializes to j before a front rounded mid vowel (ɥø > jø)
+    ˈd͡ʒɥøwˈd̪i → ˈd͡ʒjøwˈd̪i   (ɥ→j)
+1000: the yod is lost after d͡ʒ before a front rounded mid vowel
+    ˈd͡ʒjøwˈd̪i → ˈd͡ʒøwˈd̪i   (j→∅)
+1000: øw becomes ø (the back-round glide is absorbed after ø)
+    ˈd͡ʒøwˈd̪i → ˈd͡ʒøˈd̪i   (w→∅)
+1000: all affricates become sibilants (deaffrication)
+    ˈd͡ʒøˈd̪i → ˈʒøˈd̪i   (d͡ʒ→ʒ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈʒøˈd̪i → ʒø.d̪i   (ˈø→ø, ˈi→i)
+```
+
+## chamois
+
+`kˌɑmˈoːxsum` → `ʃə̃.wa`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌkɑˈmoːx.sum → ˌkɑˈmoːx.sʊm   (u→ʊ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌkɑˈmoːx.sʊm → ˌkɑˈmox.sʊm   (ˈoː→ˈo)
+-100: lax high vowels lower to tense mid vowels
+    ˌkɑˈmox.sʊm → ˌkɑˈmox.som   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌkɑˈmox.som → ˌkɑˈmox.so   (m→∅)
+500: the low vowel fronts by default
+    ˌkɑˈmox.so → ˌkaˈmox.so   (ˌɑ→ˌa)
+500: the back high continuant obstruent (x) fronts before a coronal
+    ˌkaˈmox.so → ˌkaˈmoç.so   (x→ç)
+500: an anterior non-lateral coronal palatalizes after a high-front consonant
+    ˌkaˈmoç.so → ˌkaˈmoç.sʲo   (s→sʲ)
+500: the high back consonant w fronts before a front vowel
+    ˌkaˈmoç.sʲo → ˌkʲaˈmoç.sʲo   (k→kʲ)
+500: secondary-stressed a becomes ɛ after a front consonant, before a non-coronal non-consonantal segment
+    ˌkʲaˈmoç.sʲo → ˌkʲɛˈmoç.sʲo   (ˌa→ˌɛ)
+600: a segment marked both back and front loses the back specification (recurrence)
+    ˌkʲɛˈmoç.sʲo → ˌcɛˈmoç.sʲo   (kʲ→c)
+600: a palatal stop affricates to a postalveolar affricate
+    ˌcɛˈmoç.sʲo → ˌt͡ʃɛˈmoç.sʲo   (c→t͡ʃ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌt͡ʃɛˈmoç.sʲo → ˌt͡ʃɛˈmoç.sʲə   (o→ə)
+600: schwa becomes non-syllabic
+    ˌt͡ʃɛˈmoç.sʲə → ˌt͡ʃɛˈmoçsʲə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌt͡ʃɛˈmoçsʲə̯ → ˌt͡ʃɛˈmoçsʲ   (ə̯→∅)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˌt͡ʃɛˈmoçsʲ → ˌt͡ʃɛˈmoçjs   (sʲ→js)
+600: j is lost after j or a consonant, before a consonant
+    ˌt͡ʃɛˈmoçjs → ˌt͡ʃɛˈmoçs   (j→∅)
+600: secondary-stressed ɛ raises to e before any two segments
+    ˌt͡ʃɛˈmoçs → ˌt͡ʃeˈmoçs   (ˌɛ→ˌe)
+750: ç merges into ʝ
+    ˌt͡ʃeˈmoçs → ˌt͡ʃeˈmoʝs   (ç→ʝ)
+750: ʝ becomes j everywhere
+    ˌt͡ʃeˈmoʝs → ˌt͡ʃeˈmojs   (ʝ→j)
+1000: secondary-stressed e reduces to schwa in an open syllable
+    ˌt͡ʃeˈmojs → ˌt͡ʃəˈmojs   (ˌe→ˌə)
+1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
+    ˌt͡ʃəˈmojs → ˌt͡ʃə̃ˈmojs   (ˌə→ˌə̃)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˌt͡ʃə̃ˈmojs → ˌt͡ʃə̃ˈmujs   (ˈo→ˈu)
+1000: the yod of a back-round diphthong lowers to ɛ̯ everywhere (oj/uj > oɛ̯/uɛ̯)
+    ˌt͡ʃə̃ˈmujs → ˌt͡ʃə̃ˈmuɛ̯s   (j→ɛ̯)
+1000: all affricates become sibilants (deaffrication)
+    ˌt͡ʃə̃ˈmuɛ̯s → ˌʃə̃ˈmuɛ̯s   (t͡ʃ→ʃ)
+1200: the diphthong oɛ̯ completes its shift to wɛ
+    ˌʃə̃ˈmuɛ̯s → ˌʃə̃ˈmwɛs   (ˈu→w, ɛ̯→ˈɛ)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌʃə̃ˈmwɛs → ˌʃə̃ːˈwɛs   (ˌə̃m→ˌə̃ː)
+1400: final obstruents are lost
+    ˌʃə̃ːˈwɛs → ˌʃə̃ːˈwɛ   (s→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌʃə̃ːˈwɛ → ʃə̃ː.wɛ   (ˌə̃ː→ə̃ː, ˈɛ→ɛ)
+1400: distinctive vowel length is lost entirely
+    ʃə̃ː.wɛ → ʃə̃.wɛ   (ə̃ː→ə̃)
+1400: wɛ becomes wa
+    ʃə̃.wɛ → ʃə̃.wa   (ɛ→a)
+```
+
+## chère
+
+`kˈɑːrɑm` → `ʃɛʁ`
+
+```
+-100: the length feature is dropped now that quality carries the contrast
+    ˈkɑː.rɑm → ˈkɑ.rɑm   (ˈɑː→ˈɑ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈkɑ.rɑm → ˈkɑ.rɑ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈkɑ.rɑ → ˈkɑː.rɑ   (ˈɑ→ˈɑː)
+500: the low vowel fronts by default
+    ˈkɑː.rɑ → ˈkaː.ra   (ˈɑː→ˈaː, ɑ→a)
+500: the high back consonant w fronts before a front vowel
+    ˈkaː.ra → ˈkʲaː.ra   (k→kʲ)
+600: a segment marked both back and front loses the back specification (recurrence)
+    ˈkʲaː.ra → ˈcaː.ra   (kʲ→c)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈcaː.ra → ˈt͡ʃaː.ra   (c→t͡ʃ)
+600: long stressed vowels diphthongize
+    ˈt͡ʃaː.ra → ˈt͡ʃae̯.ra   (ˈaː→ˈae̯)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈt͡ʃae̯.ra → ˈt͡ʃae̯.rə   (a→ə)
+750: the ae̯ diphthong monophthongizes to a long e, preserving its stress level
+    ˈt͡ʃae̯.rə → ˈt͡ʃeː.rə   (ˈae̯→ˈeː)
+1000: vowel length resets to short
+    ˈt͡ʃeː.rə → ˈt͡ʃe.rə   (ˈeː→ˈe)
+1000: all affricates become sibilants (deaffrication)
+    ˈt͡ʃe.rə → ˈʃe.rə   (t͡ʃ→ʃ)
+1400: long e:/je: lower to ɛ:/jɛ: before a single consonant + coda (or ə)
+    ˈʃe.rə → ˈʃɛ.rə   (ˈe→ˈɛ)
+1400: final ə becomes a non-syllabic off-glide
+    ˈʃɛ.rə → ˈʃɛrə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈʃɛrə̯ → ˈʃɛr   (ə̯→∅)
+1400: r becomes uvular ʀ
+    ˈʃɛr → ˈʃɛʀ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈʃɛʀ → ʃɛʀ   (ˈɛ→ɛ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    ʃɛʀ → ʃɛʁ   (ʀ→ʁ)
+```
+
+## sangle
+
+`kˈin̪gulɑ` → `sɑ̃gl`
+
+```
+-100: n assimilates to a following velar stop
+    ˈkin̪.gu.lɑ → ˈkiŋ.gu.lɑ   (n̪→ŋ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈkiŋ.gu.lɑ → ˈkɪŋ.gʊ.lɑ   (ˈi→ˈɪ, u→ʊ)
+-100: posttonic ʊ/o syncopates before l + vowel near the end of the word
+    ˈkɪŋ.gʊ.lɑ → ˈkɪŋ.glɑ   (ʊ→∅)
+-100: lax high vowels lower to tense mid vowels
+    ˈkɪŋ.glɑ → ˈkeŋ.glɑ   (ˈɪ→ˈe)
+-100: a velar stop fronts before a following front non-low continuant (second palatalization trigger)
+    ˈkeŋ.glɑ → ˈkʲeŋ.glɑ   (k→kʲ)
+-100: a segment marked both back and front loses the back specification
+    ˈkʲeŋ.glɑ → ˈceŋ.glɑ   (kʲ→c)
+500: a palatal stop affricates
+    ˈceŋ.glɑ → ˈt͡sʲeŋ.glɑ   (c→t͡sʲ)
+500: the low vowel fronts by default
+    ˈt͡sʲeŋ.glɑ → ˈt͡sʲeŋ.gla   (ɑ→a)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈt͡sʲeŋ.gla → ˈt͡sʲeŋ.glə   (a→ə)
+1000: a mid front vowel nasalizes before a nasal (second nasalization)
+    ˈt͡sʲeŋ.glə → ˈt͡sʲẽŋ.glə   (ˈe→ˈẽ)
+1000: nasalized front mid vowels begin to lower
+    ˈt͡sʲẽŋ.glə → ˈt͡sʲɛ̃ŋ.glə   (ˈẽ→ˈɛ̃)
+1000: nasalized front mid vowels become nasalized a
+    ˈt͡sʲɛ̃ŋ.glə → ˈt͡sʲãŋ.glə   (ˈɛ̃→ˈã)
+1000: all affricates become sibilants (deaffrication)
+    ˈt͡sʲãŋ.glə → ˈsʲãŋ.glə   (t͡sʲ→sʲ)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˈsʲãŋ.glə → ˈsãŋ.glə   (sʲ→s)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˈsãŋ.glə → ˈsãː.glə   (ˈãŋ→ˈãː)
+1400: final ə becomes a non-syllabic off-glide
+    ˈsãː.glə → ˈsãːglə̯   (ə→ə̯)
+1400: long a becomes back ɑː
+    ˈsãːglə̯ → ˈsɑ̃ːglə̯   (ˈãː→ˈɑ̃ː)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈsɑ̃ːglə̯ → ˈsɑ̃ːgl   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈsɑ̃ːgl → sɑ̃ːgl   (ˈɑ̃ː→ɑ̃ː)
+1400: distinctive vowel length is lost entirely
+    sɑ̃ːgl → sɑ̃gl   (ɑ̃ː→ɑ̃)
+```
+
+## coq
+
+`kˈokkum` → `kɔk`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈkok.kum → ˈkɔk.kʊm   (ˈo→ˈɔ, u→ʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈkɔk.kʊm → ˈkɔk.kom   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈkɔk.kom → ˈkɔk.ko   (m→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈkɔk.ko → ˈkɔk.kə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈkɔk.kə → ˈkɔkkə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈkɔkkə̯ → ˈkɔkk   (ə̯→∅)
+1200: geminates simplify to single consonants
+    ˈkɔkk → ˈkɔk   (k→∅)
+1400: final f/k/s are supported by an epenthetic off-glide (escaping the coming consonant loss)
+    ˈkɔk → ˈkɔkə̯   (∅→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈkɔkə̯ → ˈkɔk   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈkɔk → kɔk   (ˈɔ→ɔ)
+```
+
+## graisse
+
+`krˈɑssiɑ` → `gʁɛs`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈkrɑs.si.ɑ → ˈkrɑs.sɪ.ɑ   (i→ɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˈkrɑs.sɪ.ɑ → ˈkrɑs.sjɑ   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˈkrɑs.sjɑ → ˈkrɑss.ʝɑ   (j→ʝ)
+500: s + high-front consonant becomes geminate palatalized s
+    ˈkrɑss.ʝɑ → ˈkrɑssʲ.sʲɑ   (s→sʲ, ʝ→sʲ)
+500: s + high-front consonant becomes geminate palatalized s (recurrence)
+    ˈkrɑssʲ.sʲɑ → ˈkrɑsʲsʲ.sʲɑ   (s→sʲ)
+500: palatalized s lost before a geminate palatalized s (prevents a triple geminate)
+    ˈkrɑsʲsʲ.sʲɑ → ˈkrɑsʲ.sʲɑ   (sʲ→∅)
+500: the low vowel fronts by default
+    ˈkrɑsʲ.sʲɑ → ˈkrasʲ.sʲa   (ˈɑ→ˈa, ɑ→a)
+600: geminate palatalized s degeminates
+    ˈkrasʲ.sʲa → ˈkra.sʲa   (sʲ→∅)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˈkra.sʲa → ˈkraj.sa   (sʲ→js)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈkraj.sa → ˈkraj.sə   (a→ə)
+1000: word-initial k voices before r/l + a
+    ˈkraj.sə → ˈgraj.sə   (k→g)
+1200: final ajə (and aj before a consonant) becomes long ɛː
+    ˈgraj.sə → ˈgrɛː.sə   (ˈaj→ˈɛː)
+1400: final ə becomes a non-syllabic off-glide
+    ˈgrɛː.sə → ˈgrɛːsə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈgrɛːsə̯ → ˈgrɛːs   (ə̯→∅)
+1400: r becomes uvular ʀ
+    ˈgrɛːs → ˈgʀɛːs   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈgʀɛːs → gʀɛːs   (ˈɛː→ɛː)
+1400: distinctive vowel length is lost entirely
+    gʀɛːs → gʀɛs   (ɛː→ɛ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    gʀɛs → gʁɛs   (ʀ→ʁ)
+```
+
+## coffin
+
+`kˈupulɑm` → `kubl`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈku.pu.lɑm → ˈkʊ.pʊ.lɑm   (ˈu→ˈʊ, u→ʊ)
+-100: posttonic ʊ/o syncopates before l + vowel near the end of the word
+    ˈkʊ.pʊ.lɑm → ˈkʊ.plɑm   (ʊ→∅)
+-100: lax high vowels lower to tense mid vowels
+    ˈkʊ.plɑm → ˈko.plɑm   (ˈʊ→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈko.plɑm → ˈko.plɑ   (m→∅)
+300: a stressed vowel lengthens before a plosive + non-nasal sonorant (muta cum liquida)
+    ˈko.plɑ → ˈkoː.plɑ   (ˈo→ˈoː)
+500: a vowel shortens before a consonant cluster
+    ˈkoː.plɑ → ˈko.plɑ   (ˈoː→ˈo)
+500: a stressed vowel lengthens before a plosive + non-nasal sonorant
+    ˈko.plɑ → ˈkoː.plɑ   (ˈo→ˈoː)
+500: the low vowel fronts by default
+    ˈkoː.plɑ → ˈkoː.pla   (ɑ→a)
+500: a vowel shortens before a consonant cluster (recurrence)
+    ˈkoː.pla → ˈko.pla   (ˈoː→ˈo)
+500: a stressed vowel lengthens before a plosive + non-nasal sonorant (recurrence)
+    ˈko.pla → ˈkoː.pla   (ˈo→ˈoː)
+600: long stressed vowels diphthongize
+    ˈkoː.pla → ˈkow.pla   (ˈoː→ˈow)
+600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
+    ˈkow.pla → ˈko.pla   (w→∅)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈko.pla → ˈko.plə   (a→ə)
+750: p voices to b after a vowel, before a continuant non-nasal sonorant
+    ˈko.plə → ˈko.blə   (p→b)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˈko.blə → ˈku.blə   (ˈo→ˈu)
+1400: final ə becomes a non-syllabic off-glide
+    ˈku.blə → ˈkublə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈkublə̯ → ˈkubl   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈkubl → kubl   (ˈu→u)
+```
+
+## lai
+
+`lˈɑːikum` → `laj`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈlɑː.i.kum → ˈlɑː.ɪ.kʊm   (i→ɪ, u→ʊ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈlɑː.ɪ.kʊm → ˈlɑ.ɪ.kʊm   (ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˈlɑ.ɪ.kʊm → ˈlɑ.e.kom   (ɪ→e, ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈlɑ.e.kom → ˈlɑ.e.ko   (m→∅)
+300: a stressed vowel lengthens before another vowel
+    ˈlɑ.e.ko → ˈlɑː.e.ko   (ˈɑ→ˈɑː)
+500: k voices to g intervocalically
+    ˈlɑː.e.ko → ˈlɑː.e.go   (k→g)
+500: g spirantizes to ɣ intervocalically (recurrence)
+    ˈlɑː.e.go → ˈlɑː.e.ɣo   (g→ɣ)
+500: the low vowel fronts by default
+    ˈlɑː.e.ɣo → ˈlaː.e.ɣo   (ˈɑː→ˈaː)
+500: an unstressed front non-low vowel becomes a glide in hiatus after a stressed vowel
+    ˈlaː.e.ɣo → ˈlaːi̯.ɣo   (e→i̯)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈlaːi̯.ɣo → ˈlaːi̯.ɣə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈlaːi̯.ɣə → ˈlaːi̯ɣə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈlaːi̯ɣə̯ → ˈlaːi̯ɣ   (ə̯→∅)
+600: a vowel shortens before a consonant cluster ending in an obstruent
+    ˈlaːi̯ɣ → ˈlai̯ɣ   (ˈaː→ˈa)
+750: all final obstruents devoice
+    ˈlai̯ɣ → ˈlai̯x   (ɣ→x)
+750: remaining x/ɣ front
+    ˈlai̯x → ˈlai̯ç   (x→ç)
+750: ç merges into ʝ
+    ˈlai̯ç → ˈlai̯ʝ   (ç→ʝ)
+750: ʝ becomes j everywhere
+    ˈlai̯ʝ → ˈlai̯j   (ʝ→j)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈlai̯j → lai̯j   (ˈa→a)
+1400: a high front vowel after another vowel is absorbed into a following j
+    lai̯j → laj   (i̯→∅)
+```
+
+## loche
+
+`lˈɑwkkɑm` → `lɔʒ`
+
+```
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈlɑwk.kɑm → ˈlɑwk.kɑ   (m→∅)
+300: a stop is deleted internal to a cluster, before a high stop
+    ˈlɑwk.kɑ → ˈlɑw.kɑ   (k→∅)
+500: the low vowel fronts by default
+    ˈlɑw.kɑ → ˈlaw.ka   (ˈɑ→ˈa, ɑ→a)
+500: the high back consonant w fronts before a front vowel
+    ˈlaw.ka → ˈlaw.kʲa   (k→kʲ)
+500: a becomes ɔ before the high back round glide (w), at any stress level
+    ˈlaw.kʲa → ˈlɔw.kʲa   (ˈa→ˈɔ)
+600: a segment marked both back and front loses the back specification (recurrence)
+    ˈlɔw.kʲa → ˈlɔw.ca   (kʲ→c)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈlɔw.ca → ˈlɔw.t͡ʃa   (c→t͡ʃ)
+600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
+    ˈlɔw.t͡ʃa → ˈlɔ.t͡ʃa   (w→∅)
+750: a voiceless fricative voices intervocalically (recurrence, after the diphthongs resolve)
+    ˈlɔ.t͡ʃa → ˈlɔ.d͡ʒa   (t͡ʃ→d͡ʒ)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈlɔ.d͡ʒa → ˈlɔ.d͡ʒə   (a→ə)
+1000: all affricates become sibilants (deaffrication)
+    ˈlɔ.d͡ʒə → ˈlɔ.ʒə   (d͡ʒ→ʒ)
+1400: final ə becomes a non-syllabic off-glide
+    ˈlɔ.ʒə → ˈlɔʒə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈlɔʒə̯ → ˈlɔʒ   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈlɔʒ → lɔʒ   (ˈɔ→ɔ)
+```
+
+## ligne
+
+`lˈiːn̪eɑm` → `liɲ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈliː.n̪e.ɑm → ˈliː.n̪ɛ.ɑm   (e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˈliː.n̪ɛ.ɑm → ˈliː.n̪jɑm   (ɛ→j)
+-100: yod strengthens before a vowel
+    ˈliː.n̪jɑm → ˈliːn̪.ʝɑm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈliːn̪.ʝɑm → ˈlin̪.ʝɑm   (ˈiː→ˈi)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈlin̪.ʝɑm → ˈlin̪.ʝɑ   (m→∅)
+300: the coronal nasal palatalizes before yod
+    ˈlin̪.ʝɑ → ˈli.ɲɑ   (n̪ʝ→ɲ)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈli.ɲɑ → ˈliː.ɲɑ   (ˈi→ˈiː)
+500: the low vowel fronts by default
+    ˈliː.ɲɑ → ˈliː.ɲa   (ɑ→a)
+600: a vowel shortens before ɲ
+    ˈliː.ɲa → ˈli.ɲa   (ˈiː→ˈi)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈli.ɲa → ˈli.ɲə   (a→ə)
+1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
+    ˈli.ɲə → ˈlĩ.ɲə   (ˈi→ˈĩ)
+1200: nasalized high front ĩ denasalizes before a nasal consonant + glide
+    ˈlĩ.ɲə → ˈli.ɲə   (ˈĩ→ˈi)
+1400: final ə becomes a non-syllabic off-glide
+    ˈli.ɲə → ˈliɲə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈliɲə̯ → ˈliɲ   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈliɲ → liɲ   (ˈi→i)
+```
+
+## maie
+
+`mˈɑgid̪em` → `mɛ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈmɑ.gi.d̪em → ˈmɑ.gɪ.d̪ɛm   (i→ɪ, e→ɛ)
+-100: unstressed front vowel lost between a back stop and a coronal (type a)
+    ˈmɑ.gɪ.d̪ɛm → ˈmɑg.d̪ɛm   (ɪ→∅)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈmɑg.d̪ɛm → ˈmɑg.d̪ɛ   (m→∅)
+500: a velar stop spirantizes after a vowel/glide before a coronal consonant
+    ˈmɑg.d̪ɛ → ˈmɑɣ.d̪ɛ   (g→ɣ)
+500: the low vowel fronts by default
+    ˈmɑɣ.d̪ɛ → ˈmaɣ.d̪ɛ   (ˈɑ→ˈa)
+500: the back high continuant obstruent (x) fronts before a coronal
+    ˈmaɣ.d̪ɛ → ˈmaʝ.d̪ɛ   (ɣ→ʝ)
+500: an anterior non-lateral coronal palatalizes after a high-front consonant
+    ˈmaʝ.d̪ɛ → ˈmaʝ.d̪ʲɛ   (d̪→d̪ʲ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈmaʝ.d̪ʲɛ → ˈmaʝ.d̪ʲə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈmaʝ.d̪ʲə → ˈmaʝd̪ʲə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈmaʝd̪ʲə̯ → ˈmaʝd̪ʲ   (ə̯→∅)
+600: ʝ weakens to j before optional consonants + word end
+    ˈmaʝd̪ʲ → ˈmajd̪ʲ   (ʝ→j)
+600: a stressed vowel lengthens before j + optional consonants + a high-front coronal
+    ˈmajd̪ʲ → ˈmaːjd̪ʲ   (ˈa→ˈaː)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˈmaːjd̪ʲ → ˈmaːjjd̪   (d̪ʲ→jd̪)
+600: j is lost after j or a consonant, before a consonant
+    ˈmaːjjd̪ → ˈmaːjd̪   (j→∅)
+600: a vowel shortens before two or more non-syllabic segments + word end (recurrence)
+    ˈmaːjd̪ → ˈmajd̪   (ˈaː→ˈa)
+750: all final obstruents devoice
+    ˈmajd̪ → ˈmajt̪   (d̪→t̪)
+1200: final ajə (and aj before a consonant) becomes long ɛː
+    ˈmajt̪ → ˈmɛːt̪   (ˈaj→ˈɛː)
+1400: final obstruents are lost
+    ˈmɛːt̪ → ˈmɛː   (t̪→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈmɛː → mɛː   (ˈɛː→ɛː)
+1400: distinctive vowel length is lost entirely
+    mɛː → mɛ   (ɛː→ɛ)
+```
+
+## mari
+
+`mˌɑrˈiːt̪um` → `ma.ʁi`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌmɑˈriː.t̪um → ˌmɑˈriː.t̪ʊm   (u→ʊ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌmɑˈriː.t̪ʊm → ˌmɑˈri.t̪ʊm   (ˈiː→ˈi)
+-100: lax high vowels lower to tense mid vowels
+    ˌmɑˈri.t̪ʊm → ˌmɑˈri.t̪om   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌmɑˈri.t̪om → ˌmɑˈri.t̪o   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌmɑˈri.t̪o → ˌmɑˈriː.t̪o   (ˈi→ˈiː)
+500: the low vowel fronts by default
+    ˌmɑˈriː.t̪o → ˌmaˈriː.t̪o   (ˌɑ→ˌa)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌmaˈriː.t̪o → ˌmaˈriː.t̪ə   (o→ə)
+600: schwa becomes non-syllabic
+    ˌmaˈriː.t̪ə → ˌmaˈriːt̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌmaˈriːt̪ə̯ → ˌmaˈriːt̪   (ə̯→∅)
+750: a word-final stop re-opens to a fricative after a vowel
+    ˌmaˈriːt̪ → ˌmaˈriːθ   (t̪→θ)
+750: vowel length resets to short
+    ˌmaˈriːθ → ˌmaˈriθ   (ˈiː→ˈi)
+1000: the interdental fricatives (plain and palatalized) efface
+    ˌmaˈriθ → ˌmaˈri   (θ→∅)
+1400: r becomes uvular ʀ
+    ˌmaˈri → ˌmaˈʀi   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌmaˈʀi → ma.ʀi   (ˌa→a, ˈi→i)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    ma.ʀi → ma.ʁi   (ʀ→ʁ)
+```
+
+## moyenne
+
+`mˌed̪iˈɑːn̪ɑm` → `me.jɛn̪`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌme.d̪iˈɑː.n̪ɑm → ˌmɛ.d̪ɪˈɑː.n̪ɑm   (ˌe→ˌɛ, i→ɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌmɛ.d̪ɪˈɑː.n̪ɑm → ˌmɛˈd̪jɑː.n̪ɑm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌmɛˈd̪jɑː.n̪ɑm → ˌmɛˈd̪ʝɑː.n̪ɑm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌmɛˈd̪ʝɑː.n̪ɑm → ˌmɛˈd̪ʝɑ.n̪ɑm   (ˈɑː→ˈɑ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌmɛˈd̪ʝɑ.n̪ɑm → ˌmɛˈd̪ʝɑ.n̪ɑ   (m→∅)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌmɛˈd̪ʝɑ.n̪ɑ → ˌmɛˈɟʝɑ.n̪ɑ   (d̪→ɟ)
+-100: a voiced high stop/affricate spirantizes after a vowel before a sonorant or yod
+    ˌmɛˈɟʝɑ.n̪ɑ → ˌmɛʝˈʝɑ.n̪ɑ   (ɟ→ʝ)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌmɛʝˈʝɑ.n̪ɑ → ˌmɛʝˈʝɑː.n̪ɑ   (ˈɑ→ˈɑː)
+500: secondary-stressed ɛ/ɔ become tense before geminate yod
+    ˌmɛʝˈʝɑː.n̪ɑ → ˌmeʝˈʝɑː.n̪ɑ   (ˌɛ→ˌe)
+500: yod degeminates (lost before another yod)
+    ˌmeʝˈʝɑː.n̪ɑ → ˌmeˈʝɑː.n̪ɑ   (ʝ→∅)
+500: the low vowel fronts by default
+    ˌmeˈʝɑː.n̪ɑ → ˌmeˈʝaː.n̪a   (ˈɑː→ˈaː, ɑ→a)
+600: a stressed low vowel becomes front non-tense after a front glide, before a consonant + non-consonantal
+    ˌmeˈʝaː.n̪a → ˌmeˈʝɛː.n̪a   (ˈaː→ˈɛː)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌmeˈʝɛː.n̪a → ˌmeˈʝie̯.n̪a   (ˈɛː→ˈie̯)
+600: ʝ weakens to j unconditionally
+    ˌmeˈʝie̯.n̪a → ˌmeˈjie̯.n̪a   (ʝ→j)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˌmeˈjie̯.n̪a → ˌmeˈjie̯.n̪ə   (a→ə)
+1000: secondary-stressed e reduces to schwa in an open syllable
+    ˌmeˈjie̯.n̪ə → ˌməˈjie̯.n̪ə   (ˌe→ˌə)
+1000: secondary-stressed schwa reverts to e before a palatal consonant
+    ˌməˈjie̯.n̪ə → ˌmeˈjie̯.n̪ə   (ˌə→ˌe)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌmeˈjie̯.n̪ə → ˌmejˈje.n̪ə   (ˈi→j, e̯→ˈe)
+1200: geminates simplify to single consonants
+    ˌmejˈje.n̪ə → ˌmeˈje.n̪ə   (j→∅)
+1200: any remaining vowel nasalizes before a nasal consonant (recurrence)
+    ˌmeˈje.n̪ə → ˌmeˈjẽ.n̪ə   (ˈe→ˈẽ)
+1400: nasalized ẽ lowers to ɛ̃
+    ˌmeˈjẽ.n̪ə → ˌmeˈjɛ̃.n̪ə   (ˈẽ→ˈɛ̃)
+1400: the open front nasal ɛ̃ (and œ̃) denasalizes before a nasal consonant + vowel
+    ˌmeˈjɛ̃.n̪ə → ˌmeˈjɛ.n̪ə   (ˈɛ̃→ˈɛ)
+1400: final ə becomes a non-syllabic off-glide
+    ˌmeˈjɛ.n̪ə → ˌmeˈjɛn̪ə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˌmeˈjɛn̪ə̯ → ˌmeˈjɛn̪   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌmeˈjɛn̪ → me.jɛn̪   (ˌe→e, ˈɛ→ɛ)
+```
+
+## mèche
+
+`mˈikkɑm` → `mɛʃ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈmik.kɑm → ˈmɪk.kɑm   (ˈi→ˈɪ)
+-100: lax high vowels lower to tense mid vowels
+    ˈmɪk.kɑm → ˈmek.kɑm   (ˈɪ→ˈe)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈmek.kɑm → ˈmek.kɑ   (m→∅)
+500: the low vowel fronts by default
+    ˈmek.kɑ → ˈmek.ka   (ɑ→a)
+500: the high back consonant w fronts before a front vowel
+    ˈmek.ka → ˈmek.kʲa   (k→kʲ)
+600: a segment marked both back and front loses the back specification (recurrence)
+    ˈmek.kʲa → ˈmek.ca   (kʲ→c)
+600: a palatal stop affricates to a postalveolar affricate
+    ˈmek.ca → ˈme.kt͡ʃa   (c→t͡ʃ)
+600: a stop assimilates place to a following affricate (k/tʃ, g/dʒ)
+    ˈme.kt͡ʃa → ˈme.t̪t͡ʃa   (k→t̪)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈme.t̪t͡ʃa → ˈme.t̪t͡ʃə   (a→ə)
+750: a dental stop deletes before another coronal stop
+    ˈme.t̪t͡ʃə → ˈme.t͡ʃə   (t̪→∅)
+1000: stressed e laxes to ɛ before a consonant + vowel
+    ˈme.t͡ʃə → ˈmɛ.t͡ʃə   (ˈe→ˈɛ)
+1000: all affricates become sibilants (deaffrication)
+    ˈmɛ.t͡ʃə → ˈmɛ.ʃə   (t͡ʃ→ʃ)
+1400: final ə becomes a non-syllabic off-glide
+    ˈmɛ.ʃə → ˈmɛʃə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈmɛʃə̯ → ˈmɛʃ   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈmɛʃ → mɛʃ   (ˈɛ→ɛ)
+```
+
+## mordre
+
+`mˈord̪ere` → `mɔʁd̪ʁ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈmor.d̪e.re → ˈmɔr.d̪ɛ.rɛ   (ˈo→ˈɔ, e→ɛ, e→ɛ)
+500: ɛ lost before a coronal non-nasal sonorant + vowel, near the end of the word
+    ˈmɔr.d̪ɛ.rɛ → ˈmɔr.d̪rɛ   (ɛ→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈmɔr.d̪rɛ → ˈmɔr.d̪rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈmɔr.d̪rə → ˈmɔrd̪rə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈmɔrd̪rə̯ → ˈmɔrd̪r   (ə̯→∅)
+600: schwa epenthesized after an obstruent + sonorant consonant, before optional consonants + word end
+    ˈmɔrd̪r → ˈmɔr.d̪rə   (∅→ə)
+1400: final ə becomes a non-syllabic off-glide
+    ˈmɔr.d̪rə → ˈmɔrd̪rə̯   (ə→ə̯)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈmɔrd̪rə̯ → ˈmɔɹd̪rə̯   (r→ɹ)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈmɔɹd̪rə̯ → ˈmɔɹd̪r   (ə̯→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈmɔɹd̪r → ˈmɔrd̪r   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˈmɔrd̪r → ˈmɔʀd̪ʀ   (r→ʀ, r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈmɔʀd̪ʀ → mɔʀd̪ʀ   (ˈɔ→ɔ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    mɔʀd̪ʀ → mɔʁd̪ʁ   (ʀ→ʁ, ʀ→ʁ)
+```
+
+## nef
+
+`n̪ˈɑːwem` → `n̪ɛf`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˈn̪ɑː.wem → ˈn̪ɑː.ɣʷem   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈn̪ɑː.ɣʷem → ˈn̪ɑː.ɣʷɛm   (e→ɛ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˈn̪ɑː.ɣʷɛm → ˈn̪ɑː.βʷɛm   (ɣʷ→βʷ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈn̪ɑː.βʷɛm → ˈn̪ɑ.βʷɛm   (ˈɑː→ˈɑ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈn̪ɑ.βʷɛm → ˈn̪ɑ.βʷɛ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈn̪ɑ.βʷɛ → ˈn̪ɑː.βʷɛ   (ˈɑ→ˈɑː)
+500: labialized bilabial fricatives delabialize
+    ˈn̪ɑː.βʷɛ → ˈn̪ɑː.βɛ   (βʷ→β)
+500: the low vowel fronts by default
+    ˈn̪ɑː.βɛ → ˈn̪aː.βɛ   (ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈn̪aː.βɛ → ˈn̪aː.βə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈn̪aː.βə → ˈn̪aːβə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈn̪aːβə̯ → ˈn̪aːβ   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˈn̪aːβ → ˈn̪ae̯β   (ˈaː→ˈae̯)
+600: the remaining bilabial fricative becomes v
+    ˈn̪ae̯β → ˈn̪ae̯v   (β→v)
+750: all final obstruents devoice
+    ˈn̪ae̯v → ˈn̪ae̯f   (v→f)
+750: the ae̯ diphthong monophthongizes to a long e, preserving its stress level
+    ˈn̪ae̯f → ˈn̪eːf   (ˈae̯→ˈeː)
+1000: vowel length resets to short
+    ˈn̪eːf → ˈn̪ef   (ˈeː→ˈe)
+1400: long e:/je: lower to ɛ:/jɛ: before a single consonant + coda (or ə)
+    ˈn̪ef → ˈn̪ɛf   (ˈe→ˈɛ)
+1400: final f/k/s are supported by an epenthetic off-glide (escaping the coming consonant loss)
+    ˈn̪ɛf → ˈn̪ɛfə̯   (∅→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈn̪ɛfə̯ → ˈn̪ɛf   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈn̪ɛf → n̪ɛf   (ˈɛ→ɛ)
+```
+
+## nouvelle
+
+`n̪ˌowˈellɑm` → `n̪u.vɛl`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˌn̪oˈwel.lɑm → ˌn̪oˈɣʷel.lɑm   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌn̪oˈɣʷel.lɑm → ˌn̪ɔˈɣʷɛl.lɑm   (ˌo→ˌɔ, ˈe→ˈɛ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˌn̪ɔˈɣʷɛl.lɑm → ˌn̪ɔˈβʷɛl.lɑm   (ɣʷ→βʷ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌn̪ɔˈβʷɛl.lɑm → ˌn̪ɔˈβʷɛl.lɑ   (m→∅)
+500: labialized bilabial fricatives delabialize
+    ˌn̪ɔˈβʷɛl.lɑ → ˌn̪ɔˈβɛl.lɑ   (βʷ→β)
+500: the low vowel fronts by default
+    ˌn̪ɔˈβɛl.lɑ → ˌn̪ɔˈβɛl.la   (ɑ→a)
+600: secondary-stressed ɔ raises to o unconditionally
+    ˌn̪ɔˈβɛl.la → ˌn̪oˈβɛl.la   (ˌɔ→ˌo)
+600: the remaining bilabial fricative becomes v
+    ˌn̪oˈβɛl.la → ˌn̪oˈvɛl.la   (β→v)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˌn̪oˈvɛl.la → ˌn̪oˈvɛl.lə   (a→ə)
+1000: intervocalic geminate ll degeminates to a single l (before l-vocalization)
+    ˌn̪oˈvɛl.lə → ˌn̪oˈvɛ.lə   (l→∅)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˌn̪oˈvɛ.lə → ˌn̪uˈvɛ.lə   (ˌo→ˌu)
+1400: final ə becomes a non-syllabic off-glide
+    ˌn̪uˈvɛ.lə → ˌn̪uˈvɛlə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˌn̪uˈvɛlə̯ → ˌn̪uˈvɛl   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌn̪uˈvɛl → n̪u.vɛl   (ˌu→u, ˈɛ→ɛ)
+```
+
+## œuf
+
+`ˈowum` → `œf`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˈo.wum → ˈo.ɣʷum   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈo.ɣʷum → ˈɔ.ɣʷʊm   (ˈo→ˈɔ, u→ʊ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˈɔ.ɣʷʊm → ˈɔ.βʷʊm   (ɣʷ→βʷ)
+-100: lax high vowels lower to tense mid vowels
+    ˈɔ.βʷʊm → ˈɔ.βʷom   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈɔ.βʷom → ˈɔ.βʷo   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈɔ.βʷo → ˈɔː.βʷo   (ˈɔ→ˈɔː)
+500: labialized bilabial fricatives delabialize
+    ˈɔː.βʷo → ˈɔː.βo   (βʷ→β)
+500: long stressed ɛː/ɔː diphthongize to ie̯/uo̯
+    ˈɔː.βo → ˈuo̯.βo   (ˈɔː→ˈuo̯)
+500: a high tense round non-nasal vowel centralizes
+    ˈuo̯.βo → ˈʉo̯.βo   (ˈu→ˈʉ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈʉo̯.βo → ˈʉo̯.βə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈʉo̯.βə → ˈʉo̯βə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈʉo̯βə̯ → ˈʉo̯β   (ə̯→∅)
+600: the remaining bilabial fricative becomes v
+    ˈʉo̯β → ˈʉo̯v   (β→v)
+750: all final obstruents devoice
+    ˈʉo̯v → ˈʉo̯f   (v→f)
+1000: high round back vowels front (completion of u-fronting)
+    ˈʉo̯f → ˈyo̯f   (ˈʉ→ˈy)
+1000: the diphthong uo becomes ue
+    ˈyo̯f → ˈye̯f   (o̯→e̯)
+1000: the stressed diphthong ye̯ (from ue̯) monophthongizes to ø
+    ˈye̯f → ˈøf   (ˈye̯→ˈø)
+1400: final f/k/s are supported by an epenthetic off-glide (escaping the coming consonant loss)
+    ˈøf → ˈøfə̯   (∅→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈøfə̯ → ˈøf   (ə̯→∅)
+1400: front round ø opens to œ before a coda consonant in the final syllable
+    ˈøf → ˈœf   (ˈø→ˈœ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈœf → œf   (ˈœ→œ)
+```
+
+## part
+
+`pˈɑrt̪em` → `paʁ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈpɑr.t̪em → ˈpɑr.t̪ɛm   (e→ɛ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈpɑr.t̪ɛm → ˈpɑr.t̪ɛ   (m→∅)
+500: the low vowel fronts by default
+    ˈpɑr.t̪ɛ → ˈpar.t̪ɛ   (ˈɑ→ˈa)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈpar.t̪ɛ → ˈpar.t̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈpar.t̪ə → ˈpart̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈpart̪ə̯ → ˈpart̪   (ə̯→∅)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈpart̪ → ˈpaɹt̪   (r→ɹ)
+1400: final obstruents are lost
+    ˈpaɹt̪ → ˈpaɹ   (t̪→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈpaɹ → ˈpar   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˈpar → ˈpaʀ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈpaʀ → paʀ   (ˈa→a)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    paʀ → paʁ   (ʀ→ʁ)
+```
+
+## poêle
+
+`pˈeːn̪silem` → `pwaz`
+
+```
+-100: n lost after a long vowel before s (compensatory lengthening already applied)
+    ˈpeːn̪.si.lem → ˈpeː.si.lem   (n̪→∅)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈpeː.si.lem → ˈpeː.sɪ.lɛm   (i→ɪ, e→ɛ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈpeː.sɪ.lɛm → ˈpe.sɪ.lɛm   (ˈeː→ˈe)
+-100: lax high vowels lower to tense mid vowels
+    ˈpe.sɪ.lɛm → ˈpe.se.lɛm   (ɪ→e)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈpe.se.lɛm → ˈpe.se.lɛ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈpe.se.lɛ → ˈpeː.se.lɛ   (ˈe→ˈeː)
+500: a voiceless fricative voices intervocalically
+    ˈpeː.se.lɛ → ˈpeː.ze.lɛ   (s→z)
+600: an unstressed non-low vowel reduces to schwa before consonants + vowel + optional consonants + word end
+    ˈpeː.ze.lɛ → ˈpeː.zə.lɛ   (e→ə)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈpeː.zə.lɛ → ˈpeː.zə.lə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈpeː.zə.lə → ˈpeːzə̯lə̯   (ə→ə̯, ə→ə̯)
+600: non-syllabic schwa restores before a front sonorant consonant
+    ˈpeːzə̯lə̯ → ˈpeː.zələ̯   (ə̯→ə)
+600: non-syllabic schwa is lost elsewhere
+    ˈpeː.zələ̯ → ˈpeː.zəl   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˈpeː.zəl → ˈpej.zəl   (ˈeː→ˈej)
+1000: a short tense front mid/high vowel backs and rounds before yod
+    ˈpej.zəl → ˈpoj.zəl   (ˈe→ˈo)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˈpoj.zəl → ˈpuj.zəl   (ˈo→ˈu)
+1000: the yod of a back-round diphthong lowers to ɛ̯ everywhere (oj/uj > oɛ̯/uɛ̯)
+    ˈpuj.zəl → ˈpuɛ̯.zəl   (j→ɛ̯)
+1200: a single final consonant effaces after schwa
+    ˈpuɛ̯.zəl → ˈpuɛ̯.zə   (l→∅)
+1200: the diphthong oɛ̯ completes its shift to wɛ
+    ˈpuɛ̯.zə → ˈpwɛ.zə   (ˈu→w, ɛ̯→ˈɛ)
+1400: final ə becomes a non-syllabic off-glide
+    ˈpwɛ.zə → ˈpwɛzə̯   (ə→ə̯)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈpwɛzə̯ → ˈpwɛz   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈpwɛz → pwɛz   (ˈɛ→ɛ)
+1400: wɛ becomes wa
+    pwɛz → pwaz   (ɛ→a)
+```
+
+## poix
+
+`pˈikem` → `pwa`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈpi.kem → ˈpɪ.kɛm   (ˈi→ˈɪ, e→ɛ)
+-100: lax high vowels lower to tense mid vowels
+    ˈpɪ.kɛm → ˈpe.kɛm   (ˈɪ→ˈe)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈpe.kɛm → ˈpe.kɛ   (m→∅)
+-100: a velar stop fronts before a following front non-low continuant (second palatalization trigger)
+    ˈpe.kɛ → ˈpe.kʲɛ   (k→kʲ)
+-100: a segment marked both back and front loses the back specification
+    ˈpe.kʲɛ → ˈpe.cɛ   (kʲ→c)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈpe.cɛ → ˈpeː.cɛ   (ˈe→ˈeː)
+500: a palatal stop affricates
+    ˈpeː.cɛ → ˈpeː.t͡sʲɛ   (c→t͡sʲ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈpeː.t͡sʲɛ → ˈpeː.t͡sʲə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˈpeː.t͡sʲə → ˈpeːt͡sʲə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈpeːt͡sʲə̯ → ˈpeːt͡sʲ   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˈpeːt͡sʲ → ˈpejt͡sʲ   (ˈeː→ˈej)
+1000: a short tense front mid/high vowel backs and rounds before yod
+    ˈpejt͡sʲ → ˈpojt͡sʲ   (ˈe→ˈo)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˈpojt͡sʲ → ˈpujt͡sʲ   (ˈo→ˈu)
+1000: the yod of a back-round diphthong lowers to ɛ̯ everywhere (oj/uj > oɛ̯/uɛ̯)
+    ˈpujt͡sʲ → ˈpuɛ̯t͡sʲ   (j→ɛ̯)
+1000: all affricates become sibilants (deaffrication)
+    ˈpuɛ̯t͡sʲ → ˈpuɛ̯sʲ   (t͡sʲ→sʲ)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˈpuɛ̯sʲ → ˈpuɛ̯s   (sʲ→s)
+1200: the diphthong oɛ̯ completes its shift to wɛ
+    ˈpuɛ̯s → ˈpwɛs   (ˈu→w, ɛ̯→ˈɛ)
+1400: final obstruents are lost
+    ˈpwɛs → ˈpwɛ   (s→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈpwɛ → pwɛ   (ˈɛ→ɛ)
+1400: wɛ becomes wa
+    pwɛ → pwa   (ɛ→a)
+```
+
+## plats
+
+`plˈɑt̪t̪oːs` → `pla`
+
+```
+-100: the length feature is dropped now that quality carries the contrast
+    ˈplɑt̪.t̪oːs → ˈplɑt̪.t̪os   (oː→o)
+500: the low vowel fronts by default
+    ˈplɑt̪.t̪os → ˈplat̪.t̪os   (ˈɑ→ˈa)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈplat̪.t̪os → ˈplat̪.t̪əs   (o→ə)
+600: schwa becomes non-syllabic
+    ˈplat̪.t̪əs → ˈplat̪t̪ə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈplat̪t̪ə̯s → ˈplat̪t̪s   (ə̯→∅)
+600: an identical consonant geminate reduces to one, before a consonant + consonant-or-boundary
+    ˈplat̪t̪s → ˈplat̪s   (t̪→∅)
+750: d/t plus s becomes the affricate ts
+    ˈplat̪s → ˈplat͡s   (t̪s→t͡s)
+1000: all affricates become sibilants (deaffrication)
+    ˈplat͡s → ˈplas   (t͡s→s)
+1400: final obstruents are lost
+    ˈplas → ˈpla   (s→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈpla → pla   (ˈa→a)
+```
+
+## porcs
+
+`pˈorkoːs` → `pɔʁ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈpor.koːs → ˈpɔr.koːs   (ˈo→ˈɔ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈpɔr.koːs → ˈpɔr.kos   (oː→o)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈpɔr.kos → ˈpɔr.kəs   (o→ə)
+600: schwa becomes non-syllabic
+    ˈpɔr.kəs → ˈpɔrkə̯s   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈpɔrkə̯s → ˈpɔrks   (ə̯→∅)
+750: k is lost before word-final s
+    ˈpɔrks → ˈpɔrs   (k→∅)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈpɔrs → ˈpɔɹs   (r→ɹ)
+1400: final obstruents are lost
+    ˈpɔɹs → ˈpɔɹ   (s→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈpɔɹ → ˈpɔr   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˈpɔr → ˈpɔʀ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈpɔʀ → pɔʀ   (ˈɔ→ɔ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    pɔʀ → pɔʁ   (ʀ→ʁ)
+```
+
+## priser
+
+`prˌet̪iˈɑːre` → `pʁi.ze`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌpre.t̪iˈɑː.re → ˌprɛ.t̪ɪˈɑː.rɛ   (ˌe→ˌɛ, i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌprɛ.t̪ɪˈɑː.rɛ → ˌprɛˈt̪jɑː.rɛ   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌprɛˈt̪jɑː.rɛ → ˌprɛˈt̪ʝɑː.rɛ   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌprɛˈt̪ʝɑː.rɛ → ˌprɛˈt̪ʝɑ.rɛ   (ˈɑː→ˈɑ)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌprɛˈt̪ʝɑ.rɛ → ˌprɛt͡sʲˈʝɑ.rɛ   (t̪→t͡sʲ)
+300: yod absorbed into a preceding palatalized consonant
+    ˌprɛt͡sʲˈʝɑ.rɛ → ˌprɛˈt͡sʲɑ.rɛ   (ʝ→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌprɛˈt͡sʲɑ.rɛ → ˌprɛˈt͡sʲɑː.rɛ   (ˈɑ→ˈɑː)
+500: a voiceless fricative voices intervocalically
+    ˌprɛˈt͡sʲɑː.rɛ → ˌprɛˈd͡zʲɑː.rɛ   (t͡sʲ→d͡zʲ)
+500: the low vowel fronts by default
+    ˌprɛˈd͡zʲɑː.rɛ → ˌprɛˈd͡zʲaː.rɛ   (ˈɑː→ˈaː)
+600: a voiced stop spirantizes intervocalically or before r
+    ˌprɛˈd͡zʲaː.rɛ → ˌprɛˈzʲaː.rɛ   (d͡zʲ→zʲ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌprɛˈzʲaː.rɛ → ˌprɛˈzʲaː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌprɛˈzʲaː.rə → ˌprɛˈzʲaːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌprɛˈzʲaːrə̯ → ˌprɛˈzʲaːr   (ə̯→∅)
+600: a stressed low vowel becomes front non-tense after a front continuant glide, before a sonorant non-lateral consonant
+    ˌprɛˈzʲaːr → ˌprɛˈzʲɛːr   (ˈaː→ˈɛː)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌprɛˈzʲɛːr → ˌprɛˈzʲie̯r   (ˈɛː→ˈie̯)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˌprɛˈzʲie̯r → ˌprɛjˈzie̯r   (zʲ→jz)
+600: secondary-stressed ɛj becomes i before a coronal
+    ˌprɛjˈzie̯r → ˌpriˈzie̯r   (ˌɛj→ˌi)
+600: a coronal palatalizes between two high-front segments
+    ˌpriˈzie̯r → ˌpriˈzʲie̯r   (z→zʲ)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌpriˈzʲie̯r → ˌpriˈzʲjer   (ˈi→j, e̯→ˈe)
+1200: je becomes e after a palatal consonant
+    ˌpriˈzʲjer → ˌpriˈzʲer   (j→∅)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˌpriˈzʲer → ˌpriˈzer   (zʲ→z)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌpriˈzer → ˌpriˈzeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌpriˈzeɹ → ˌpriˈze   (ɹ→∅)
+1400: r becomes uvular ʀ
+    ˌpriˈze → ˌpʀiˈze   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌpʀiˈze → pʀi.ze   (ˌi→i, ˈe→e)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    pʀi.ze → pʁi.ze   (ʀ→ʁ)
+```
+
+## poinçon
+
+`pˌun̪kt̪iˈoːn̪em` → `pwɛ̃.sɔ̃`
+
+```
+-100: n assimilates to a following velar stop
+    ˌpun̪k.t̪iˈoː.n̪em → ˌpuŋk.t̪iˈoː.n̪em   (n̪→ŋ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌpuŋk.t̪iˈoː.n̪em → ˌpʊŋk.t̪ɪˈoː.n̪ɛm   (ˌu→ˌʊ, i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌpʊŋk.t̪ɪˈoː.n̪ɛm → ˌpʊŋkˈt̪joː.n̪ɛm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌpʊŋkˈt̪joː.n̪ɛm → ˌpʊŋkˈt̪ʝoː.n̪ɛm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌpʊŋkˈt̪ʝoː.n̪ɛm → ˌpʊŋkˈt̪ʝo.n̪ɛm   (ˈoː→ˈo)
+-100: k lost after ŋ before a voiceless coronal
+    ˌpʊŋkˈt̪ʝo.n̪ɛm → ˌpʊŋˈt̪ʝo.n̪ɛm   (k→∅)
+-100: lax high vowels lower to tense mid vowels
+    ˌpʊŋˈt̪ʝo.n̪ɛm → ˌpoŋˈt̪ʝo.n̪ɛm   (ˌʊ→ˌo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌpoŋˈt̪ʝo.n̪ɛm → ˌpoŋˈt̪ʝo.n̪ɛ   (m→∅)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌpoŋˈt̪ʝo.n̪ɛ → ˌpoŋt͡sʲˈʝo.n̪ɛ   (t̪→t͡sʲ)
+300: yod absorbed into a preceding palatalized consonant
+    ˌpoŋt͡sʲˈʝo.n̪ɛ → ˌpoŋˈt͡sʲo.n̪ɛ   (ʝ→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌpoŋˈt͡sʲo.n̪ɛ → ˌpoŋˈt͡sʲoː.n̪ɛ   (ˈo→ˈoː)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˌpoŋˈt͡sʲoː.n̪ɛ → ˌpũŋˈt͡sʲũː.n̪ɛ   (ˌo→ˌũ, ˈoː→ˈũː)
+500: ŋ palatalizes to ɲ before a coronal
+    ˌpũŋˈt͡sʲũː.n̪ɛ → ˌpũɲˈt͡sʲũː.n̪ɛ   (ŋ→ɲ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌpũɲˈt͡sʲũː.n̪ɛ → ˌpũɲˈt͡sʲũː.n̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌpũɲˈt͡sʲũː.n̪ə → ˌpũɲˈt͡sʲũːn̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌpũɲˈt͡sʲũːn̪ə̯ → ˌpũɲˈt͡sʲũːn̪   (ə̯→∅)
+750: pre-consonantal ɲ resolves to a nasalized j + dental n
+    ˌpũɲˈt͡sʲũːn̪ → ˌpũj̃n̪ˈt͡sʲũːn̪   (ɲ→j̃n̪)
+750: vowel length resets to short
+    ˌpũj̃n̪ˈt͡sʲũːn̪ → ˌpũj̃n̪ˈt͡sʲũn̪   (ˈũː→ˈũ)
+750: a medial consonant/glide is lost between two consonants, before an obstruent (not l/r)
+    ˌpũj̃n̪ˈt͡sʲũn̪ → ˌpũj̃ˈt͡sʲũn̪   (n̪→∅)
+1000: the nasal diphthong ũj̃ becomes wĩ (syllabicity swap before a nasal)
+    ˌpũj̃ˈt͡sʲũn̪ → pwj̩̃ˈt͡sʲũn̪   (ˌũ→w, j̃→j̩̃)
+1000: all affricates become sibilants (deaffrication)
+    pwj̩̃ˈt͡sʲũn̪ → pwj̩̃ˈsʲũn̪   (t͡sʲ→sʲ)
+1200: nasalized ĩ lowers after w
+    pwj̩̃ˈsʲũn̪ → pwj̩̃ˈsʲũn̪   (j̩̃→j̩̃)
+1200: the remaining anterior palatalized consonants depalatalize
+    pwj̩̃ˈsʲũn̪ → pwj̩̃ˈsũn̪   (sʲ→s)
+1200: a front unrounded non-low vowel laxes and lowers after w
+    pwj̩̃ˈsũn̪ → pwɛ̃ˈsũn̪   (j̩̃→ɛ̃)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    pwɛ̃ˈsũn̪ → pwɛ̃ˈsũː   (ˈũn̪→ˈũː)
+1400: stress is leveled — no longer distinctive for vowels
+    pwɛ̃ˈsũː → pwɛ̃.sũː   (ˈũː→ũː)
+1400: distinctive vowel length is lost entirely
+    pwɛ̃.sũː → pwɛ̃.sũ   (ũː→ũ)
+1400: nasal ũ opens to ɔ̃
+    pwɛ̃.sũ → pwɛ̃.sɔ̃   (ũ→ɔ̃)
+```
+
+## rez
+
+`rˈɑːsum` → `ʁe`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈrɑː.sum → ˈrɑː.sʊm   (u→ʊ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˈrɑː.sʊm → ˈrɑ.sʊm   (ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˈrɑ.sʊm → ˈrɑ.som   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈrɑ.som → ˈrɑ.so   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˈrɑ.so → ˈrɑː.so   (ˈɑ→ˈɑː)
+500: a voiceless fricative voices intervocalically
+    ˈrɑː.so → ˈrɑː.zo   (s→z)
+500: the low vowel fronts by default
+    ˈrɑː.zo → ˈraː.zo   (ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈraː.zo → ˈraː.zə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈraː.zə → ˈraːzə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈraːzə̯ → ˈraːz   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˈraːz → ˈrae̯z   (ˈaː→ˈae̯)
+750: all final obstruents devoice
+    ˈrae̯z → ˈrae̯s   (z→s)
+750: the ae̯ diphthong monophthongizes to a long e, preserving its stress level
+    ˈrae̯s → ˈreːs   (ˈae̯→ˈeː)
+1000: vowel length resets to short
+    ˈreːs → ˈres   (ˈeː→ˈe)
+1400: final obstruents are lost
+    ˈres → ˈre   (s→∅)
+1400: r becomes uvular ʀ
+    ˈre → ˈʀe   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈʀe → ʀe   (ˈe→e)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    ʀe → ʁe   (ʀ→ʁ)
+```
+
+## rumeur
+
+`rˌuːmˈoːrem` → `ʁy.muʁ`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌruːˈmoː.rem → ˌruːˈmoː.rɛm   (e→ɛ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌruːˈmoː.rɛm → ˌruˈmo.rɛm   (ˌuː→ˌu, ˈoː→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌruˈmo.rɛm → ˌruˈmo.rɛ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌruˈmo.rɛ → ˌruˈmoː.rɛ   (ˈo→ˈoː)
+500: a high tense round non-nasal vowel centralizes
+    ˌruˈmoː.rɛ → ˌrʉˈmoː.rɛ   (ˌu→ˌʉ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌrʉˈmoː.rɛ → ˌrʉˈmoː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌrʉˈmoː.rə → ˌrʉˈmoːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌrʉˈmoːrə̯ → ˌrʉˈmoːr   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˌrʉˈmoːr → ˌrʉˈmowr   (ˈoː→ˈow)
+600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
+    ˌrʉˈmowr → ˌrʉˈmor   (w→∅)
+1000: high round back vowels front (completion of u-fronting)
+    ˌrʉˈmor → ˌryˈmor   (ˌʉ→ˌy)
+1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
+    ˌryˈmor → ˌrỹˈmor   (ˌy→ˌỹ)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˌrỹˈmor → ˌrỹˈmur   (ˈo→ˈu)
+1200: nasalized high front ĩ denasalizes before a nasal consonant + glide
+    ˌrỹˈmur → ˌryˈmur   (ˌỹ→ˌy)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌryˈmur → ˌryˈmuɹ   (r→ɹ)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˌryˈmuɹ → ˌryˈmur   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˌryˈmur → ˌʀyˈmuʀ   (r→ʀ, r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌʀyˈmuʀ → ʀy.muʀ   (ˌy→y, ˈu→u)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    ʀy.muʀ → ʁy.muʁ   (ʀ→ʁ, ʀ→ʁ)
+```
+
+## sautier
+
+`sˌɑlt̪uˈɑːrium` → `so.p̪e`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌsɑl.t̪uˈɑː.ri.um → ˌsɑl.t̪ʊˈɑː.rɪ.ʊm   (u→ʊ, i→ɪ, u→ʊ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌsɑl.t̪ʊˈɑː.rɪ.ʊm → ˌsɑlˈt̪wɑː.rjʊm   (ʊ→w, ɪ→j)
+-100: l darkens before a non-lateral consonant
+    ˌsɑlˈt̪wɑː.rjʊm → ˌsɑɫˈt̪wɑː.rjʊm   (l→ɫ)
+-100: yod strengthens before a vowel
+    ˌsɑɫˈt̪wɑː.rjʊm → ˌsɑɫˈt̪wɑːr.ʝʊm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌsɑɫˈt̪wɑːr.ʝʊm → ˌsɑɫˈt̪wɑr.ʝʊm   (ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌsɑɫˈt̪wɑr.ʝʊm → ˌsɑɫˈt̪wɑr.ʝom   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌsɑɫˈt̪wɑr.ʝom → ˌsɑɫˈt̪wɑr.ʝo   (m→∅)
+-100: a segment marked both back and front loses the back specification
+    ˌsɑɫˈt̪wɑr.ʝo → ˌsɑlʲˈt̪wɑr.ʝo   (ɫ→lʲ)
+500: r + yod becomes palatalized r
+    ˌsɑlʲˈt̪wɑr.ʝo → ˌsɑlʲˈt̪wɑ.rʲo   (rʝ→rʲ)
+500: the low vowel fronts by default
+    ˌsɑlʲˈt̪wɑ.rʲo → ˌsalʲˈt̪wa.rʲo   (ˌɑ→ˌa, ˈɑ→ˈa)
+500: w lost after a non-back consonant
+    ˌsalʲˈt̪wa.rʲo → ˌsalʲˈt̪a.rʲo   (w→∅)
+500: an anterior non-lateral coronal palatalizes after a high-front consonant
+    ˌsalʲˈt̪a.rʲo → ˌsalʲˈt̪ʲa.rʲo   (t̪→t̪ʲ)
+500: a stressed vowel lengthens before an optional consonant + vowel (recurrence)
+    ˌsalʲˈt̪ʲa.rʲo → ˌsalʲˈt̪ʲaː.rʲo   (ˈa→ˈaː)
+600: aːrʲ metathesizes to jɛːr
+    ˌsalʲˈt̪ʲaː.rʲo → ˌsalʲˈt̪ʲjɛː.ro   (ˈaːrʲ→ˈjɛːr)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌsalʲˈt̪ʲjɛː.ro → ˌsalʲˈt̪ʲjɛː.rə   (o→ə)
+600: schwa becomes non-syllabic
+    ˌsalʲˈt̪ʲjɛː.rə → ˌsalʲˈt̪ʲjɛːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌsalʲˈt̪ʲjɛːrə̯ → ˌsalʲˈt̪ʲjɛːr   (ə̯→∅)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌsalʲˈt̪ʲjɛːr → ˌsalʲˈt̪ʲjie̯r   (ˈɛː→ˈie̯)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˌsalʲˈt̪ʲjie̯r → ˌsalʲjˈt̪jie̯r   (t̪ʲ→jt̪)
+600: j is lost after j or a consonant, before a consonant
+    ˌsalʲjˈt̪jie̯r → ˌsalʲˈt̪jie̯r   (j→∅)
+600: a coronal palatalizes between two high-front segments
+    ˌsalʲˈt̪jie̯r → ˌsalʲˈt̪ʲjie̯r   (t̪→t̪ʲ)
+600: j lost after a consonant before a high front unrounded sonorant + e-glide
+    ˌsalʲˈt̪ʲjie̯r → ˌsalʲˈt̪ʲie̯r   (j→∅)
+1000: l darkens before a consonant (beginnings of l-vocalization)
+    ˌsalʲˈt̪ʲie̯r → ˌsaɫˈt̪ʲie̯r   (lʲ→ɫ)
+1000: back dark-l variants vocalize to w
+    ˌsaɫˈt̪ʲie̯r → ˌsawˈt̪ʲie̯r   (ɫ→w)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌsawˈt̪ʲie̯r → ˌsawˈt̪ʲjer   (ˈi→j, e̯→ˈe)
+1200: aw becomes long oː
+    ˌsawˈt̪ʲjer → ˌsoːˈt̪ʲjer   (ˌaw→ˌoː)
+1200: je becomes e after a palatal consonant
+    ˌsoːˈt̪ʲjer → ˌsoːˈt̪ʲer   (j→∅)
+1200: the remaining anterior palatalized consonants depalatalize
+    ˌsoːˈt̪ʲer → ˌsoːˈp̪er   (t̪ʲ→p̪)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌsoːˈp̪er → ˌsoːˈp̪eɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌsoːˈp̪eɹ → ˌsoːˈp̪e   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌsoːˈp̪e → soː.p̪e   (ˌoː→oː, ˈe→e)
+1400: distinctive vowel length is lost entirely
+    soː.p̪e → so.p̪e   (oː→o)
+```
+
+## saison
+
+`sˌɑt̪iˈoːn̪em` → `sɛ.zɔ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌsɑ.t̪iˈoː.n̪em → ˌsɑ.t̪ɪˈoː.n̪ɛm   (i→ɪ, e→ɛ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌsɑ.t̪ɪˈoː.n̪ɛm → ˌsɑˈt̪joː.n̪ɛm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌsɑˈt̪joː.n̪ɛm → ˌsɑˈt̪ʝoː.n̪ɛm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌsɑˈt̪ʝoː.n̪ɛm → ˌsɑˈt̪ʝo.n̪ɛm   (ˈoː→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌsɑˈt̪ʝo.n̪ɛm → ˌsɑˈt̪ʝo.n̪ɛ   (m→∅)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌsɑˈt̪ʝo.n̪ɛ → ˌsɑt͡sʲˈʝo.n̪ɛ   (t̪→t͡sʲ)
+300: yod absorbed into a preceding palatalized consonant
+    ˌsɑt͡sʲˈʝo.n̪ɛ → ˌsɑˈt͡sʲo.n̪ɛ   (ʝ→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌsɑˈt͡sʲo.n̪ɛ → ˌsɑˈt͡sʲoː.n̪ɛ   (ˈo→ˈoː)
+500: a voiceless fricative voices intervocalically
+    ˌsɑˈt͡sʲoː.n̪ɛ → ˌsɑˈd͡zʲoː.n̪ɛ   (t͡sʲ→d͡zʲ)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˌsɑˈd͡zʲoː.n̪ɛ → ˌsɑˈd͡zʲũː.n̪ɛ   (ˈoː→ˈũː)
+500: the low vowel fronts by default
+    ˌsɑˈd͡zʲũː.n̪ɛ → ˌsaˈd͡zʲũː.n̪ɛ   (ˌɑ→ˌa)
+600: a voiced stop spirantizes intervocalically or before r
+    ˌsaˈd͡zʲũː.n̪ɛ → ˌsaˈzʲũː.n̪ɛ   (d͡zʲ→zʲ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌsaˈzʲũː.n̪ɛ → ˌsaˈzʲũː.n̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌsaˈzʲũː.n̪ə → ˌsaˈzʲũːn̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌsaˈzʲũːn̪ə̯ → ˌsaˈzʲũːn̪   (ə̯→∅)
+600: a palatalized consonant moves its palatalization onto a preceding j
+    ˌsaˈzʲũːn̪ → ˌsajˈzũːn̪   (zʲ→jz)
+750: vowel length resets to short
+    ˌsajˈzũːn̪ → ˌsajˈzũn̪   (ˈũː→ˈũ)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌsajˈzũn̪ → ˌsajˈzũː   (ˈũn̪→ˈũː)
+1200: final ajə (and aj before a consonant) becomes long ɛː
+    ˌsajˈzũː → ˌsɛːˈzũː   (ˌaj→ˌɛː)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌsɛːˈzũː → sɛː.zũː   (ˌɛː→ɛː, ˈũː→ũː)
+1400: distinctive vowel length is lost entirely
+    sɛː.zũː → sɛ.zũ   (ɛː→ɛ, ũː→ũ)
+1400: nasal ũ opens to ɔ̃
+    sɛ.zũ → sɛ.zɔ̃   (ũ→ɔ̃)
+```
+
+## serpent
+
+`sˌerpˈen̪t̪em` → `sɛʁ.pɑ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌserˈpen̪.t̪em → ˌsɛrˈpɛn̪.t̪ɛm   (ˌe→ˌɛ, ˈe→ˈɛ, e→ɛ)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌsɛrˈpɛn̪.t̪ɛm → ˌsɛrˈpɛn̪.t̪ɛ   (m→∅)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌsɛrˈpɛn̪.t̪ɛ → ˌsɛrˈpɛn̪.t̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌsɛrˈpɛn̪.t̪ə → ˌsɛrˈpɛn̪t̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌsɛrˈpɛn̪t̪ə̯ → ˌsɛrˈpɛn̪t̪   (ə̯→∅)
+600: secondary-stressed ɛ raises to e before any two segments
+    ˌsɛrˈpɛn̪t̪ → ˌserˈpɛn̪t̪   (ˌɛ→ˌe)
+1000: a mid front vowel nasalizes before a nasal (second nasalization)
+    ˌserˈpɛn̪t̪ → ˌserˈpɛ̃n̪t̪   (ˈɛ→ˈɛ̃)
+1000: a stressed mid unrounded vowel laxes and fronts before r + consonant
+    ˌserˈpɛ̃n̪t̪ → ˌsɛrˈpɛ̃n̪t̪   (ˌe→ˌɛ)
+1000: nasalized front mid vowels become nasalized a
+    ˌsɛrˈpɛ̃n̪t̪ → ˌsɛrˈpãn̪t̪   (ˈɛ̃→ˈã)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌsɛrˈpãn̪t̪ → ˌsɛrˈpãːt̪   (ˈãn̪→ˈãː)
+1400: long a becomes back ɑː
+    ˌsɛrˈpãːt̪ → ˌsɛrˈpɑ̃ːt̪   (ˈãː→ˈɑ̃ː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌsɛrˈpɑ̃ːt̪ → ˌsɛɹˈpɑ̃ːt̪   (r→ɹ)
+1400: final obstruents are lost
+    ˌsɛɹˈpɑ̃ːt̪ → ˌsɛɹˈpɑ̃ː   (t̪→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˌsɛɹˈpɑ̃ː → ˌsɛrˈpɑ̃ː   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˌsɛrˈpɑ̃ː → ˌsɛʀˈpɑ̃ː   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌsɛʀˈpɑ̃ː → sɛʀ.pɑ̃ː   (ˌɛ→ɛ, ˈɑ̃ː→ɑ̃ː)
+1400: distinctive vowel length is lost entirely
+    sɛʀ.pɑ̃ː → sɛʀ.pɑ̃   (ɑ̃ː→ɑ̃)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    sɛʀ.pɑ̃ → sɛʁ.pɑ̃   (ʀ→ʁ)
+```
+
+## écuyer
+
+`skˌuːt̪ˈɑːrium` → `e.kɥi.je`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌskuːˈt̪ɑː.ri.um → ˌskuːˈt̪ɑː.rɪ.ʊm   (i→ɪ, u→ʊ)
+-100: i-prosthesis before word-initial s + consonant
+    ˌskuːˈt̪ɑː.rɪ.ʊm → ɪsˌkuːˈt̪ɑː.rɪ.ʊm   (∅→ɪ)
+-100: the prosthetic vowel carries secondary stress
+    ɪsˌkuːˈt̪ɑː.rɪ.ʊm → ˌɪsˌkuːˈt̪ɑː.rɪ.ʊm   (ɪ→ˌɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌɪsˌkuːˈt̪ɑː.rɪ.ʊm → ˌɪsˌkuːˈt̪ɑː.rjʊm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌɪsˌkuːˈt̪ɑː.rjʊm → ˌɪsˌkuːˈt̪ɑːr.ʝʊm   (j→ʝ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɪsˌkuːˈt̪ɑːr.ʝʊm → ˌɪsˌkuˈt̪ɑr.ʝʊm   (ˌuː→ˌu, ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌɪsˌkuˈt̪ɑr.ʝʊm → ˌesˌkuˈt̪ɑr.ʝom   (ˌɪ→ˌe, ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌesˌkuˈt̪ɑr.ʝom → ˌesˌkuˈt̪ɑr.ʝo   (m→∅)
+500: r + yod becomes palatalized r
+    ˌesˌkuˈt̪ɑr.ʝo → ˌesˌkuˈt̪ɑ.rʲo   (rʝ→rʲ)
+500: the low vowel fronts by default
+    ˌesˌkuˈt̪ɑ.rʲo → ˌesˌkuˈt̪a.rʲo   (ˈɑ→ˈa)
+500: a high tense round non-nasal vowel centralizes
+    ˌesˌkuˈt̪a.rʲo → ˌesˌkʉˈt̪a.rʲo   (ˌu→ˌʉ)
+500: a stressed vowel lengthens before an optional consonant + vowel (recurrence)
+    ˌesˌkʉˈt̪a.rʲo → ˌesˌkʉˈt̪aː.rʲo   (ˈa→ˈaː)
+600: aːrʲ metathesizes to jɛːr
+    ˌesˌkʉˈt̪aː.rʲo → ˌesˌkʉˈt̪jɛː.ro   (ˈaːrʲ→ˈjɛːr)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌesˌkʉˈt̪jɛː.ro → ˌesˌkʉˈt̪jɛː.rə   (o→ə)
+600: schwa becomes non-syllabic
+    ˌesˌkʉˈt̪jɛː.rə → ˌesˌkʉˈt̪jɛːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌesˌkʉˈt̪jɛːrə̯ → ˌesˌkʉˈt̪jɛːr   (ə̯→∅)
+600: a voiceless anterior consonant voices before a coronal sonorant non-nasal consonant
+    ˌesˌkʉˈt̪jɛːr → ˌesˌkʉˈd̪jɛːr   (t̪→d̪)
+600: long stressed ɛː/ɔː diphthongize (recurrence)
+    ˌesˌkʉˈd̪jɛːr → ˌesˌkʉˈd̪jie̯r   (ˈɛː→ˈie̯)
+600: a voiced stop spirantizes intervocalically or before a non-nasal non-lateral sonorant
+    ˌesˌkʉˈd̪jie̯r → ˌesˌkʉˈðjie̯r   (d̪→ð)
+600: j lost after a consonant before a high front unrounded sonorant + e-glide
+    ˌesˌkʉˈðjie̯r → ˌesˌkʉˈðie̯r   (j→∅)
+1000: high round back vowels front (completion of u-fronting)
+    ˌesˌkʉˈðie̯r → ˌesˌkyˈðie̯r   (ˌʉ→ˌy)
+1000: s becomes x after a vowel, before any consonant
+    ˌesˌkyˈðie̯r → ˌexˌkyˈðie̯r   (s→x)
+1000: diphthongs shift their stress onto the second element (ie̯ > je, ɛa̯ > e̯a, yø̯ > ɥø)
+    ˌexˌkyˈðie̯r → ˌexˌkyˈðjer   (ˈi→j, e̯→ˈe)
+1000: the interdental fricatives (plain and palatalized) efface
+    ˌexˌkyˈðjer → ˌexˌkyˈjer   (ð→∅)
+1000: the velar fricative x is lost
+    ˌexˌkyˈjer → ˌeˌkyˈjer   (x→∅)
+1200: yj becomes ɥi (the y desyllabifies, the yod becomes the nucleus)
+    ˌeˌkyˈjer → ˌeˌkɥiˈer   (ˌy→ɥ, j→ˌi)
+1400: j is inserted between a back-conditioned ɥi and a following vowel
+    ˌeˌkɥiˈer → ˌeˌkɥiˈjer   (∅→j)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌeˌkɥiˈjer → ˌeˌkɥiˈjeɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌeˌkɥiˈjeɹ → ˌeˌkɥiˈje   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌeˌkɥiˈje → e.kɥi.je   (ˌe→e, ˌi→i, ˈe→e)
+```
+
+## étaim
+
+`st̪ˈɑːmen̪` → `e.t̪ɛ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈst̪ɑː.men̪ → ˈst̪ɑː.mɛn̪   (e→ɛ)
+-100: i-prosthesis before word-initial s + consonant
+    ˈst̪ɑː.mɛn̪ → ɪsˈt̪ɑː.mɛn̪   (∅→ɪ)
+-100: the prosthetic vowel carries secondary stress
+    ɪsˈt̪ɑː.mɛn̪ → ˌɪsˈt̪ɑː.mɛn̪   (ɪ→ˌɪ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌɪsˈt̪ɑː.mɛn̪ → ˌɪsˈt̪ɑ.mɛn̪   (ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌɪsˈt̪ɑ.mɛn̪ → ˌesˈt̪ɑ.mɛn̪   (ˌɪ→ˌe)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌesˈt̪ɑ.mɛn̪ → ˌesˈt̪ɑ.mɛ   (n̪→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌesˈt̪ɑ.mɛ → ˌesˈt̪ɑː.mɛ   (ˈɑ→ˈɑː)
+500: the low vowel fronts by default
+    ˌesˈt̪ɑː.mɛ → ˌesˈt̪aː.mɛ   (ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌesˈt̪aː.mɛ → ˌesˈt̪aː.mə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌesˈt̪aː.mə → ˌesˈt̪aːmə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌesˈt̪aːmə̯ → ˌesˈt̪aːm   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˌesˈt̪aːm → ˌesˈt̪ae̯m   (ˈaː→ˈae̯)
+750: the ae̯ diphthong's offglide hardens to j before a non-velar/palatal nasal, under stress
+    ˌesˈt̪ae̯m → ˌesˈt̪ajm   (e̯→j)
+1000: j nasalizes after a low vowel, before a nasal (first nasalization)
+    ˌesˈt̪ajm → ˌesˈt̪aj̃m   (j→j̃)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˌesˈt̪aj̃m → ˌesˈt̪ãj̃m   (ˈa→ˈã)
+1000: nasalized aj becomes ɛ̃j everywhere
+    ˌesˈt̪ãj̃m → ˌesˈt̪ɛ̃j̃m   (ˈã→ˈɛ̃)
+1000: s becomes x after a vowel, before any consonant
+    ˌesˈt̪ɛ̃j̃m → ˌexˈt̪ɛ̃j̃m   (s→x)
+1000: the velar fricative x is lost
+    ˌexˈt̪ɛ̃j̃m → ˌeˈt̪ɛ̃j̃m   (x→∅)
+1200: j̃ deletes before a nasalized non-tense front vowel
+    ˌeˈt̪ɛ̃j̃m → ˌeˈt̪ɛ̃m   (j̃→∅)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌeˈt̪ɛ̃m → ˌeˈt̪ɛ̃ː   (ˈɛ̃m→ˈɛ̃ː)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌeˈt̪ɛ̃ː → e.t̪ɛ̃ː   (ˌe→e, ˈɛ̃ː→ɛ̃ː)
+1400: distinctive vowel length is lost entirely
+    e.t̪ɛ̃ː → e.t̪ɛ̃   (ɛ̃ː→ɛ̃)
+```
+
+## sourde
+
+`sˈurd̪ɑm` → `suʁd̪`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈsur.d̪ɑm → ˈsʊr.d̪ɑm   (ˈu→ˈʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈsʊr.d̪ɑm → ˈsor.d̪ɑm   (ˈʊ→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈsor.d̪ɑm → ˈsor.d̪ɑ   (m→∅)
+500: the low vowel fronts by default
+    ˈsor.d̪ɑ → ˈsor.d̪a   (ɑ→a)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈsor.d̪a → ˈsor.d̪ə   (a→ə)
+1000: round tense back vowels raise to u (o > u, oi > ui)
+    ˈsor.d̪ə → ˈsur.d̪ə   (ˈo→ˈu)
+1400: final ə becomes a non-syllabic off-glide
+    ˈsur.d̪ə → ˈsurd̪ə̯   (ə→ə̯)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈsurd̪ə̯ → ˈsuɹd̪ə̯   (r→ɹ)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈsuɹd̪ə̯ → ˈsuɹd̪   (ə̯→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈsuɹd̪ → ˈsurd̪   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˈsurd̪ → ˈsuʀd̪   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈsuʀd̪ → suʀd̪   (ˈu→u)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    suʀd̪ → suʁd̪   (ʀ→ʁ)
+```
+
+## tarde
+
+`t̪ˈɑrd̪ɑm` → `t̪aʁd̪`
+
+```
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈt̪ɑr.d̪ɑm → ˈt̪ɑr.d̪ɑ   (m→∅)
+500: the low vowel fronts by default
+    ˈt̪ɑr.d̪ɑ → ˈt̪ar.d̪a   (ˈɑ→ˈa, ɑ→a)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˈt̪ar.d̪a → ˈt̪ar.d̪ə   (a→ə)
+1400: final ə becomes a non-syllabic off-glide
+    ˈt̪ar.d̪ə → ˈt̪ard̪ə̯   (ə→ə̯)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˈt̪ard̪ə̯ → ˈt̪aɹd̪ə̯   (r→ɹ)
+1400: the final off-glide schwa is deleted elsewhere
+    ˈt̪aɹd̪ə̯ → ˈt̪aɹd̪   (ə̯→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˈt̪aɹd̪ → ˈt̪ard̪   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˈt̪ard̪ → ˈt̪aʀd̪   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈt̪aʀd̪ → t̪aʀd̪   (ˈa→a)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    t̪aʀd̪ → t̪aʁd̪   (ʀ→ʁ)
+```
+
+## timon
+
+`t̪ˌiːmˈoːn̪em` → `t̪i.mɔ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌt̪iːˈmoː.n̪em → ˌt̪iːˈmoː.n̪ɛm   (e→ɛ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌt̪iːˈmoː.n̪ɛm → ˌt̪iˈmo.n̪ɛm   (ˌiː→ˌi, ˈoː→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌt̪iˈmo.n̪ɛm → ˌt̪iˈmo.n̪ɛ   (m→∅)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌt̪iˈmo.n̪ɛ → ˌt̪iˈmoː.n̪ɛ   (ˈo→ˈoː)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˌt̪iˈmoː.n̪ɛ → ˌt̪iˈmũː.n̪ɛ   (ˈoː→ˈũː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌt̪iˈmũː.n̪ɛ → ˌt̪iˈmũː.n̪ə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌt̪iˈmũː.n̪ə → ˌt̪iˈmũːn̪ə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌt̪iˈmũːn̪ə̯ → ˌt̪iˈmũːn̪   (ə̯→∅)
+750: vowel length resets to short
+    ˌt̪iˈmũːn̪ → ˌt̪iˈmũn̪   (ˈũː→ˈũ)
+1000: any remaining vowel nasalizes before a nasal consonant (general nasalization)
+    ˌt̪iˈmũn̪ → ˌt̪ĩˈmũn̪   (ˌi→ˌĩ)
+1200: nasalized high front ĩ denasalizes before a nasal consonant + glide
+    ˌt̪ĩˈmũn̪ → ˌt̪iˈmũn̪   (ˌĩ→ˌi)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌt̪iˈmũn̪ → ˌt̪iˈmũː   (ˈũn̪→ˈũː)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌt̪iˈmũː → t̪i.mũː   (ˌi→i, ˈũː→ũː)
+1400: distinctive vowel length is lost entirely
+    t̪i.mũː → t̪i.mũ   (ũː→ũ)
+1400: nasal ũ opens to ɔ̃
+    t̪i.mũ → t̪i.mɔ̃   (ũ→ɔ̃)
+```
+
+## trou
+
+`t̪rˈɑwkum` → `t̪ʁo`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˈt̪rɑw.kum → ˈt̪rɑw.kʊm   (u→ʊ)
+-100: lax high vowels lower to tense mid vowels
+    ˈt̪rɑw.kʊm → ˈt̪rɑw.kom   (ʊ→o)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˈt̪rɑw.kom → ˈt̪rɑw.ko   (m→∅)
+500: the low vowel fronts by default
+    ˈt̪rɑw.ko → ˈt̪raw.ko   (ˈɑ→ˈa)
+500: a becomes ɔ before the high back round glide (w), at any stress level
+    ˈt̪raw.ko → ˈt̪rɔw.ko   (ˈa→ˈɔ)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˈt̪rɔw.ko → ˈt̪rɔw.kə   (o→ə)
+600: schwa becomes non-syllabic
+    ˈt̪rɔw.kə → ˈt̪rɔwkə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˈt̪rɔwkə̯ → ˈt̪rɔwk   (ə̯→∅)
+600: the high back round glide is lost after a lax round vowel, before a non-front non-syllabic segment, a strident, or a non-syllabic sonorant
+    ˈt̪rɔwk → ˈt̪rɔk   (w→∅)
+750: a word-final stop re-opens to a fricative after a vowel
+    ˈt̪rɔk → ˈt̪rɔx   (k→x)
+750: x closes to k word-finally after a stressed back vowel
+    ˈt̪rɔx → ˈt̪rɔk   (x→k)
+1400: final obstruents are lost
+    ˈt̪rɔk → ˈt̪rɔ   (k→∅)
+1400: r becomes uvular ʀ
+    ˈt̪rɔ → ˈt̪ʀɔ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˈt̪ʀɔ → t̪ʀɔ   (ˈɔ→ɔ)
+1400: word-final ɔ raises to o
+    t̪ʀɔ → t̪ʀo   (ɔ→o)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    t̪ʀo → t̪ʁo   (ʀ→ʁ)
+```
+
+## ton
+
+`t̪uˌum` → `t̪ɔ̃`
+
+```
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    t̪uˌum → t̪ʊˌʊm   (u→ʊ, ˌu→ˌʊ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    t̪ʊˌʊm → ˌt̪wʊm   (ʊ→w)
+-100: lax high vowels lower to tense mid vowels
+    ˌt̪wʊm → ˌt̪wom   (ˌʊ→ˌo)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˌt̪wom → ˌt̪wũm   (ˌo→ˌũ)
+500: w lost after a non-back consonant
+    ˌt̪wũm → ˌt̪ũm   (w→∅)
+1000: final m dentalizes after a vowel
+    ˌt̪ũm → ˌt̪ũn̪   (m→n̪)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌt̪ũn̪ → ˌt̪ũː   (ˌũn̪→ˌũː)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌt̪ũː → t̪ũː   (ˌũː→ũː)
+1400: distinctive vowel length is lost entirely
+    t̪ũː → t̪ũ   (ũː→ũ)
+1400: nasal ũ opens to ɔ̃
+    t̪ũ → t̪ɔ̃   (ũ→ɔ̃)
+```
+
+## vanter
+
+`wˌɑːn̪it̪ˈɑːre` → `vɑ̃.t̪e`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˌwɑː.n̪iˈt̪ɑː.re → ˌɣʷɑː.n̪iˈt̪ɑː.re   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌɣʷɑː.n̪iˈt̪ɑː.re → ˌɣʷɑː.n̪ɪˈt̪ɑː.rɛ   (i→ɪ, e→ɛ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˌɣʷɑː.n̪ɪˈt̪ɑː.rɛ → ˌβʷɑː.n̪ɪˈt̪ɑː.rɛ   (ɣʷ→βʷ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌβʷɑː.n̪ɪˈt̪ɑː.rɛ → ˌβʷɑ.n̪ɪˈt̪ɑ.rɛ   (ˌɑː→ˌɑ, ˈɑː→ˈɑ)
+-100: lax high vowels lower to tense mid vowels
+    ˌβʷɑ.n̪ɪˈt̪ɑ.rɛ → ˌβʷɑ.n̪eˈt̪ɑ.rɛ   (ɪ→e)
+300: a stressed vowel lengthens before a single consonant + glide
+    ˌβʷɑ.n̪eˈt̪ɑ.rɛ → ˌβʷɑ.n̪eˈt̪ɑː.rɛ   (ˈɑ→ˈɑː)
+500: labialized bilabial fricatives delabialize
+    ˌβʷɑ.n̪eˈt̪ɑː.rɛ → ˌβɑ.n̪eˈt̪ɑː.rɛ   (βʷ→β)
+500: an unstressed front tense vowel lost before a coronal + long low vowel
+    ˌβɑ.n̪eˈt̪ɑː.rɛ → ˌβɑn̪ˈt̪ɑː.rɛ   (e→∅)
+500: the low vowel fronts by default
+    ˌβɑn̪ˈt̪ɑː.rɛ → ˌβan̪ˈt̪aː.rɛ   (ˌɑ→ˌa, ˈɑː→ˈaː)
+600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
+    ˌβan̪ˈt̪aː.rɛ → ˌβan̪ˈt̪aː.rə   (ɛ→ə)
+600: schwa becomes non-syllabic
+    ˌβan̪ˈt̪aː.rə → ˌβan̪ˈt̪aːrə̯   (ə→ə̯)
+600: non-syllabic schwa is lost elsewhere
+    ˌβan̪ˈt̪aːrə̯ → ˌβan̪ˈt̪aːr   (ə̯→∅)
+600: long stressed vowels diphthongize
+    ˌβan̪ˈt̪aːr → ˌβan̪ˈt̪ae̯r   (ˈaː→ˈae̯)
+600: the remaining bilabial fricative becomes v
+    ˌβan̪ˈt̪ae̯r → ˌvan̪ˈt̪ae̯r   (β→v)
+750: the ae̯ diphthong monophthongizes to a long e, preserving its stress level
+    ˌvan̪ˈt̪ae̯r → ˌvan̪ˈt̪eːr   (ˈae̯→ˈeː)
+1000: a low vowel nasalizes before a nasal (first nasalization)
+    ˌvan̪ˈt̪eːr → ˌvãn̪ˈt̪eːr   (ˌa→ˌã)
+1000: vowel length resets to short
+    ˌvãn̪ˈt̪eːr → ˌvãn̪ˈt̪er   (ˈeː→ˈe)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌvãn̪ˈt̪er → ˌvãːˈt̪er   (ˌãn̪→ˌãː)
+1400: long a becomes back ɑː
+    ˌvãːˈt̪er → ˌvɑ̃ːˈt̪er   (ˌãː→ˌɑ̃ː)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌvɑ̃ːˈt̪er → ˌvɑ̃ːˈt̪eɹ   (r→ɹ)
+1400: final ɹ effaces after a monosyllabic e(ː) or a we(ː) nucleus
+    ˌvɑ̃ːˈt̪eɹ → ˌvɑ̃ːˈt̪e   (ɹ→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌvɑ̃ːˈt̪e → vɑ̃ː.t̪e   (ˌɑ̃ː→ɑ̃ː, ˈe→e)
+1400: distinctive vowel length is lost entirely
+    vɑ̃ː.t̪e → vɑ̃.t̪e   (ɑ̃ː→ɑ̃)
+```
+
+## vergogne
+
+`wˌereːkˈun̪d̪iɑm` → `vɛʁ.gɔɲ`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˌwe.reːˈkun̪.d̪i.ɑm → ˌɣʷe.reːˈkun̪.d̪i.ɑm   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌɣʷe.reːˈkun̪.d̪i.ɑm → ˌɣʷɛ.reːˈkʊn̪.d̪ɪ.ɑm   (ˌe→ˌɛ, ˈu→ˈʊ, i→ɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌɣʷɛ.reːˈkʊn̪.d̪ɪ.ɑm → ˌɣʷɛ.reːˈkʊn̪.d̪jɑm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌɣʷɛ.reːˈkʊn̪.d̪jɑm → ˌɣʷɛ.reːˈkʊn̪.d̪ʝɑm   (j→ʝ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˌɣʷɛ.reːˈkʊn̪.d̪ʝɑm → ˌβʷɛ.reːˈkʊn̪.d̪ʝɑm   (ɣʷ→βʷ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌβʷɛ.reːˈkʊn̪.d̪ʝɑm → ˌβʷɛ.reˈkʊn̪.d̪ʝɑm   (eː→e)
+-100: lax high vowels lower to tense mid vowels
+    ˌβʷɛ.reˈkʊn̪.d̪ʝɑm → ˌβʷɛ.reˈkon̪.d̪ʝɑm   (ˈʊ→ˈo)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌβʷɛ.reˈkon̪.d̪ʝɑm → ˌβʷɛ.reˈkon̪.d̪ʝɑ   (m→∅)
+-100: t/d palatalize before yod (t → tsʲ, d → ɟ)
+    ˌβʷɛ.reˈkon̪.d̪ʝɑ → ˌβʷɛ.reˈkon̪.ɟʝɑ   (d̪→ɟ)
+300: yod absorbed into a preceding palatalized consonant
+    ˌβʷɛ.reˈkon̪.ɟʝɑ → ˌβʷɛ.reˈkon̪.ɟɑ   (ʝ→∅)
+500: k voices to g intervocalically
+    ˌβʷɛ.reˈkon̪.ɟɑ → ˌβʷɛ.reˈgon̪.ɟɑ   (k→g)
+500: unstressed mid front vowel syncopates between (front vowel + r) and (consonant + back stressed vowel)
+    ˌβʷɛ.reˈgon̪.ɟɑ → ˌβʷɛrˈgon̪.ɟɑ   (e→∅)
+500: labialized bilabial fricatives delabialize
+    ˌβʷɛrˈgon̪.ɟɑ → ˌβɛrˈgon̪.ɟɑ   (βʷ→β)
+500: a round non-high vowel becomes tense, high, and nasalized before a nasal
+    ˌβɛrˈgon̪.ɟɑ → ˌβɛrˈgũn̪.ɟɑ   (ˈo→ˈũ)
+500: a non-labial nasal palatalizes before a voiced high-front non-nasal consonant
+    ˌβɛrˈgũn̪.ɟɑ → ˌβɛrˈgũɲ.ɟɑ   (n̪→ɲ)
+500: a high-front glide is lost after a high-front nasal sonorant consonant (ɲ)
+    ˌβɛrˈgũɲ.ɟɑ → ˌβɛrˈgũ.ɲɑ   (ɟ→∅)
+500: the low vowel fronts by default
+    ˌβɛrˈgũ.ɲɑ → ˌβɛrˈgũ.ɲa   (ɑ→a)
+500: a stressed vowel lengthens before an optional consonant + vowel (recurrence)
+    ˌβɛrˈgũ.ɲa → ˌβɛrˈgũː.ɲa   (ˈũ→ˈũː)
+600: a vowel shortens before ɲ
+    ˌβɛrˈgũː.ɲa → ˌβɛrˈgũ.ɲa   (ˈũː→ˈũ)
+600: secondary-stressed ɛ raises to e before any two segments
+    ˌβɛrˈgũ.ɲa → ˌβerˈgũ.ɲa   (ˌɛ→ˌe)
+600: the remaining bilabial fricative becomes v
+    ˌβerˈgũ.ɲa → ˌverˈgũ.ɲa   (β→v)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˌverˈgũ.ɲa → ˌverˈgũ.ɲə   (a→ə)
+1000: a stressed mid unrounded vowel laxes and fronts before r + consonant
+    ˌverˈgũ.ɲə → ˌvɛrˈgũ.ɲə   (ˌe→ˌɛ)
+1400: final ə becomes a non-syllabic off-glide
+    ˌvɛrˈgũ.ɲə → ˌvɛrˈgũɲə̯   (ə→ə̯)
+1400: r loses its trill and becomes the approximant ɹ intervocalically/preconsonantally
+    ˌvɛrˈgũɲə̯ → ˌvɛɹˈgũɲə̯   (r→ɹ)
+1400: the final off-glide schwa is deleted elsewhere
+    ˌvɛɹˈgũɲə̯ → ˌvɛɹˈgũɲ   (ə̯→∅)
+1400: the approximant ɹ reasserts as a trill r wherever it was not deleted
+    ˌvɛɹˈgũɲ → ˌvɛrˈgũɲ   (ɹ→r)
+1400: r becomes uvular ʀ
+    ˌvɛrˈgũɲ → ˌvɛʀˈgũɲ   (r→ʀ)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌvɛʀˈgũɲ → vɛʀ.gũɲ   (ˌɛ→ɛ, ˈũ→ũ)
+1400: nasal ũ opens to ɔ̃
+    vɛʀ.gũɲ → vɛʀ.gɔ̃ɲ   (ũ→ɔ̃)
+1400: a nasal vowel denasalizes before a surviving nasal consonant
+    vɛʀ.gɔ̃ɲ → vɛʀ.gɔɲ   (ɔ̃→ɔ)
+1400: the uvular trill ʀ becomes a fricative ʁ
+    vɛʀ.gɔɲ → vɛʁ.gɔɲ   (ʀ→ʁ)
+```
+
+## vendange
+
+`wˌin̪d̪ˈeːmiɑm` → `vɑ̃.d̪ɑ̃ʒ`
+
+```
+-100: j/w harden to fricative-like consonants before a vowel (not in a falling diphthong)
+    ˌwin̪ˈd̪eː.mi.ɑm → ˌɣʷin̪ˈd̪eː.mi.ɑm   (w→ɣʷ)
+-100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
+    ˌɣʷin̪ˈd̪eː.mi.ɑm → ˌɣʷɪn̪ˈd̪eː.mɪ.ɑm   (ˌi→ˌɪ, i→ɪ)
+-100: unstressed short non-low vowels glide before another vowel (yod/w formation)
+    ˌɣʷɪn̪ˈd̪eː.mɪ.ɑm → ˌɣʷɪn̪ˈd̪eː.mjɑm   (ɪ→j)
+-100: yod strengthens before a vowel
+    ˌɣʷɪn̪ˈd̪eː.mjɑm → ˌɣʷɪn̪ˈd̪eːm.ʝɑm   (j→ʝ)
+-100: any remaining labiovelar approximant becomes a labialized voiced bilabial fricative
+    ˌɣʷɪn̪ˈd̪eːm.ʝɑm → ˌβʷɪn̪ˈd̪eːm.ʝɑm   (ɣʷ→βʷ)
+-100: the length feature is dropped now that quality carries the contrast
+    ˌβʷɪn̪ˈd̪eːm.ʝɑm → ˌβʷɪn̪ˈd̪em.ʝɑm   (ˈeː→ˈe)
+-100: lax high vowels lower to tense mid vowels
+    ˌβʷɪn̪ˈd̪em.ʝɑm → ˌβʷen̪ˈd̪em.ʝɑm   (ˌɪ→ˌe)
+-100: word-final nasal consonant lost after an unstressed vowel
+    ˌβʷen̪ˈd̪em.ʝɑm → ˌβʷen̪ˈd̪em.ʝɑ   (m→∅)
+500: labialized bilabial fricatives delabialize
+    ˌβʷen̪ˈd̪em.ʝɑ → ˌβen̪ˈd̪em.ʝɑ   (βʷ→β)
+500: the low vowel fronts by default
+    ˌβen̪ˈd̪em.ʝɑ → ˌβen̪ˈd̪em.ʝa   (ɑ→a)
+600: yod hardens to ɟ word-medially after one or more consonants, before a vowel
+    ˌβen̪ˈd̪em.ʝa → ˌβen̪ˈd̪em.ɟa   (ʝ→ɟ)
+600: a palatal stop affricates to a postalveolar affricate
+    ˌβen̪ˈd̪em.ɟa → ˌβen̪ˈd̪em.d͡ʒa   (ɟ→d͡ʒ)
+600: m becomes n before dʒ
+    ˌβen̪ˈd̪em.d͡ʒa → ˌβen̪ˈd̪en̪.d͡ʒa   (m→n̪)
+600: the remaining bilabial fricative becomes v
+    ˌβen̪ˈd̪en̪.d͡ʒa → ˌven̪ˈd̪en̪.d͡ʒa   (β→v)
+750: an unstressed a reduces to schwa, word-medially or finally
+    ˌven̪ˈd̪en̪.d͡ʒa → ˌven̪ˈd̪en̪.d͡ʒə   (a→ə)
+1000: a mid front vowel nasalizes before a nasal (second nasalization)
+    ˌven̪ˈd̪en̪.d͡ʒə → ˌvẽn̪ˈd̪ẽn̪.d͡ʒə   (ˌe→ˌẽ, ˈe→ˈẽ)
+1000: nasalized front mid vowels begin to lower
+    ˌvẽn̪ˈd̪ẽn̪.d͡ʒə → ˌvɛ̃n̪ˈd̪ɛ̃n̪.d͡ʒə   (ˌẽ→ˌɛ̃, ˈẽ→ˈɛ̃)
+1000: nasalized front mid vowels become nasalized a
+    ˌvɛ̃n̪ˈd̪ɛ̃n̪.d͡ʒə → ˌvãn̪ˈd̪ãn̪.d͡ʒə   (ˌɛ̃→ˌã, ˈɛ̃→ˈã)
+1000: all affricates become sibilants (deaffrication)
+    ˌvãn̪ˈd̪ãn̪.d͡ʒə → ˌvãn̪ˈd̪ãn̪.ʒə   (d͡ʒ→ʒ)
+1200: a nasal consonant effaces praeconsonantally (or finally) after a nasal vowel, lengthening it
+    ˌvãn̪ˈd̪ãn̪.ʒə → ˌvãːˈd̪ãː.ʒə   (ˌãn̪ˈd̪ãn̪→ˌãːˈd̪ãː)
+1400: final ə becomes a non-syllabic off-glide
+    ˌvãːˈd̪ãː.ʒə → ˌvãːˈd̪ãːʒə̯   (ə→ə̯)
+1400: long a becomes back ɑː
+    ˌvãːˈd̪ãːʒə̯ → ˌvɑ̃ːˈd̪ɑ̃ːʒə̯   (ˌãː→ˌɑ̃ː, ˈãː→ˈɑ̃ː)
+1400: the final off-glide schwa is deleted elsewhere
+    ˌvɑ̃ːˈd̪ɑ̃ːʒə̯ → ˌvɑ̃ːˈd̪ɑ̃ːʒ   (ə̯→∅)
+1400: stress is leveled — no longer distinctive for vowels
+    ˌvɑ̃ːˈd̪ɑ̃ːʒ → vɑ̃ː.d̪ɑ̃ːʒ   (ˌɑ̃ː→ɑ̃ː, ˈɑ̃ː→ɑ̃ː)
+1400: distinctive vowel length is lost entirely
+    vɑ̃ː.d̪ɑ̃ːʒ → vɑ̃.d̪ɑ̃ʒ   (ɑ̃ː→ɑ̃, ɑ̃ː→ɑ̃)
 ```
