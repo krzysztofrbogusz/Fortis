@@ -76,7 +76,7 @@ consonant place of articulation are expressed through the _same_ `oral` /
 | `/k/` (voiceless velar stop)    | `-syllabic, +consonantal, -continuant, +lingual, +back, aperture: high`                                      |
 | `/u/` (high back rounded vowel) | `+syllabic, -consonantal, +continuant, +labial, +rounded, +lingual, +back, aperture: high, advancement: atr` |
 | `/i/` (high front vowel)        | `+syllabic, -consonantal, +continuant, +lingual, +front, aperture: high, advancement: atr`                   |
-| `/e/` (mid front vowel)         | `+syllabic, -consonantal, +continuant, +lingual, +front, aperture: mid`                                      |
+| `/e/` (mid front vowel)         | `+syllabic, -consonantal, +continuant, +lingual, +front, aperture: mid, advancement: atr`                    |
 | `/t/` (voiceless alveolar stop) | `-syllabic, +consonantal, -continuant, +lingual, +front, +anterior`                                          |
 | `/a/` (low vowel)               | `+syllabic, -consonantal, +continuant, +lingual, +front, aperture: low, advancement: rtr`                    |
 
@@ -312,14 +312,17 @@ any other, by writing its own `features.toml`.
   true Unicode combining diacritic). Stress marks (`ˈ`, `ˌ`) additionally
   set `marks_boundary = true`; the tone diacritics and tone letters are
   `read_only` or `contour`-aware where relevant, since tone is rendered
-  back out rather than re-parsed the same way it was written.
+  back out rather than re-parsed the same way it was written. A `combining`
+  diacritic may be written on the dotted-circle carrier (`◌̃`) so the mark is
+  legible in isolation; the carrier is stripped on load, so `◌̃` and `̃` are the
+  same diacritic. The shipped file writes every combining diacritic that way.
 
 - **`sonorities.toml`** assigns each segment a sonority level by first-match
   against an ordered list of feature-bundle predicates. The default scale
   has eight levels — vowel, semivowel, glide, rhotic, lateral, nasal,
   fricative, stop — each a one-line bundle (e.g. a rhotic is `consonantal: +,
-sonorant: +, nasal: none, lateral: none`; a glide adds `aperture: !none` to
-  that, ranking j/w above rhotics). A glide is defined by *having* a
+sonorant: +, nasal: none, lateral: none`; a glide adds `continuant: +` and
+  `aperture: !none` to that, ranking j/w above rhotics). A glide is defined by *having* a
   tongue-body place, not by being high: j/w pair with i/u, and a pharyngeal
   ʕ̞ or uvular ʁ̞ approximant (the consonantal counterparts of ɑ and ʌ) would
   classify as glides too, while the coronal/labial approximants ɹ, ʋ (no

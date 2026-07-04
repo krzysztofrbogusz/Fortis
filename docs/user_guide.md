@@ -148,24 +148,22 @@ a single-segment bundle for the nucleus, an element sequence for an onset or cod
 
 ### 4.1 words.toml
 
-Each entry maps an IPA string directly to a gloss. The IPA string is the key; the gloss is the value.
+Each entry's key is an IPA string; its value is either a **gloss string** or a
+**table**. The table form adds optional *target* annotations — attested forms the
+derivation is graded against (§8.3): `final`, the attested surface form, and any
+number of integer-keyed `stages`, the attested form at that derivation `time`.
 
 ```toml
 # Words for testing phonological derivation.
-# Format: IPA = "gloss"
-"xenti"     = "in front"
+"xenti"     = "in front"                        # gloss only
 "mexteːr"   = "mother"
-"ɣʷeroː"    = "eagle"
 "bʱleɣʷmoː" = "flower"
-"kʲm̩tom"    = "hundred"
-"n̩ter"      = "inside"
-"wl̩kʷos"    = "wolf"
-"xr̩tkʲos"   = "bear"
-"wergʲom"   = "work"
-"wr̩mis"     = "worm"
-"gʲʱhjeti"   = "go"
-"ketus"     = "fight"
+"ˈɑmɑt"     = {gloss = "loves", final = "ɛm",   # gloss + attested targets
+               600 = "ˈãj̃məθ", 1400 = "ɛm"}
 ```
+
+Only the IPA key feeds derivation; `final` and `stages` are ignored by the engine
+and read only by the grader.
 
 A word may also carry a **floating lexical tone** — a melody with no host segment
 of its own (e.g. a grammatical floating H) — written `⟨◌́⟩`: a tone diacritic on a
@@ -201,39 +199,48 @@ definition  = "∅ [+cons, +syll] → u [-syll]"
 **Fields:**
 
 - `definition` _(required)_ — the rule in Fortis notation (§5).
-- `time` _(optional, default `0`)_ — an integer giving relative chronology. Lower values apply earlier; the value is a sort key, not a calendar date, and may be negative. Omit it for an undated rule (it sorts at 0) — useful for a single synchronic derivation where chronology is irrelevant.
+- `time` _(optional)_ — an integer giving relative chronology. Lower values apply earlier; the value is a sort key, not a calendar date, and may be negative. Omit it for an **undated** rule, which applies _after_ every timed rule (not at `0`) — useful for a single synchronic derivation where chronology is irrelevant.
 - `name` _(optional)_ — a short human-readable label.
 - `description` _(optional)_ — a one-sentence description.
 - `application` _(optional, default `"simultaneous"`)_ — one of `"simultaneous"`, `"left_to_right"`, `"right_to_left"`. See §6.2.
 - `words` _(optional)_ — a word, or list of words, the rule is restricted to (matched against each word's IPA **or** gloss). With it set, the rule fires only on those words and is skipped for all others — a **sporadic** / lexically-restricted change, or a rule staged to demonstrate a synchronic mechanism on one word. Omit it (the default) and the rule applies to every word. A listed name that matches no word (by IPA or gloss) raises a load-time warning, since the rule could then never fire — a guard against typos.
 
-**Ordering:** rules are sorted by `time` ascending, then by order of appearance in the file for rules that share a time. Leaving gaps between `time` values (e.g. −2000, −1000, 0) lets you insert later rules without renumbering.
+**Ordering:** rules are sorted by `time` ascending — undated rules (no `time`) last — then by order of appearance in the file for rules that share a time. Leaving gaps between `time` values (e.g. −2000, −1000, 0) lets you insert later rules without renumbering.
 
 The three rules above also illustrate the result-position distinction of §5.1: in `laryngeal_coloring`, `a` is a **letter** and replaces the matched segment entirely; in `u_epenthesis`, the inserted `u` is a letter (full segment) while `[+cons, +syll] → [-syll]` is a **bundle** that merges, changing only syllabicity and leaving the rest of the consonant intact.
 
 ### 4.3 tiers.toml
 
-Declares the autosegmental tiers (§5.12). Each table's header is the tier's name; the features it `carries` then live as autosegments linked to an anchor, not in the segment bundle. The file is **optional** — omit it and the engine runs with no tiers.
+Declares the autosegmental tiers (§5.12). Each top-level table **is** one
+suprasegmental feature: the table name is the feature (and tier) name, and that
+one feature is lifted onto its own tier as autosegments linked to an anchor,
+rather than stored in the segment bundle. So each table both **defines the
+feature** (`kind`/`values`/`short`, exactly as a `features.toml` entry, §3.2) and
+sets its **association policy** (`anchor`, `melody`, …). The file is **optional** —
+omit it and the engine runs with no tiers.
 
 ```toml
 [tone]
-carries     = ["tone"]      # the feature(s) this tier holds
+kind        = "scalar"      # feature definition, as in features.toml (§3.2)
+short       = "tn"
+values      = { 1 = "extra-low", 2 = "low", 3 = "mid", 4 = "high", 5 = "extra-high" }
 anchor      = "+syllabic"   # a segment matching this pattern can bear an autosegment
 melody      = true          # melody (tone): floats and re-docks under stability
-stability   = "left"        # which way a stranded tone carries — "left" (default) or "right"
 ocp         = true          # merge adjacent identical autosegments (the OCP)
 stray_erase = true          # remove a still-floating autosegment at the surface
 
 [stress]
-carries = ["stress"]
-anchor  = "+syllabic"
-melody  = false             # metrical (stress): stays put under deletion
-ocp     = false
+kind   = "scalar"
+short  = "str"
+values = { 1 = "secondary", 2 = "primary" }
+anchor = "+syllabic"
+melody = false              # metrical (stress): stays put under deletion
+ocp    = false
 ```
 
 **Fields:**
 
-- `carries` _(required)_ — the feature name(s) lifted onto this tier. No feature may be carried by more than one tier.
+- `kind`, `values`, `short` — the feature definition, exactly as a `features.toml` entry (§3.2); `kind` is required (and `values` for a `scalar`). The tier carries this single feature, named for the table.
 - `anchor` _(required)_ — a feature pattern; a segment matching it can bear an autosegment (typically the syllable nucleus, `+syllabic`).
 - `melody` _(required)_ — `true` for a melody tier (tone): an autosegment stranded by deletion floats and is carried to a neighbour (stability, §5.12). `false` for a metrical tier (stress): it stays put.
 - `ocp` _(optional, default `true`)_ — merge adjacent identical autosegments.
@@ -500,7 +507,7 @@ A feature declared on a tier in `tiers.toml` (e.g. `tone`, `stress`) is an _auto
 - **Delink** — `[+syll] → [tone: none]` removes the association.
 - **Stability** — _automatic_: when a rule deletes a segment carrying a **melody** tier autosegment (`melody = true`, e.g. tone), it is carried onto the surviving neighbour (the tier's `stability` direction — `"left"` by default, or `"right"`) and re-docked to its nucleus, so a tone outlives its vowel. **Metrical** tiers (`melody = false`, e.g. stress) stay put. A word-initial deletion with no left neighbour leaves the autosegment floating; a still-floating autosegment is stray-erased at the surface.
 
-A `tiers.toml` entry declares which features a tier `carries`, the `anchor` it links to, whether it is a `melody` (vs metrical), and its `ocp` / `stray_erase` policies. With no `tiers.toml`, none of this runs.
+A `tiers.toml` entry declares one suprasegmental feature (its `kind`/`values`, §4.3), the `anchor` it links to, whether it is a `melody` (vs metrical), and its `ocp` / `stray_erase` policies. With no `tiers.toml`, none of this runs.
 
 `~` is used (not `@`, which already marks contour positions). A `~n=` binding and `~n` recall follow the same validation as ordinary references (§5.7): every recall needs a binding and every binding must be recalled. A floating element `⟨…⟩` is pattern-only — valid in target and context positions, but a validation error in the result.
 
@@ -575,6 +582,26 @@ meħˈteːr – "mother"
 
 The change summary shows the segments that changed as `old→new` (e.g. `kʲ→k`); for a length change it trims the shared prefix/suffix and shows just the differing region (`m̩→um`, with `∅` for a fully inserted or deleted side).
 
+### 8.3 Written reports and grading
+
+Alongside the printed trace, every CLI run writes into the project directory:
+
+- **`output.md`** — the firing-rule trace (as above) in Markdown.
+- **`derivation_table.csv`** — one row per word, one column per rule (each titled
+  `<time>: <name>`), holding the word's form right after that rule fired (empty
+  where it did not).
+- **`distances.md`** — written only when the lexicon carries attested forms
+  (`final`/`stages`, §4.1). It grades each derived form against its target with
+  two edit distances: a **phone** distance (a base segment plus its combining
+  marks is one phone; an exact match is 0) and a finer **feature** distance (a
+  substitution costs the number of features that differ, so `ɑ̃` is one edit from
+  `ɑ` but eleven from `t`; an adjacent-segment swap counts as one). Both are
+  reported per word and in aggregate, for each stage and the final surface. The
+  standalone grader `python -m src.fortis.analysis.main` writes the same file.
+
+A run ends with a one-line summary on stderr — words derived, rules applied,
+per-phase timing, and the files saved.
+
 ---
 
 ## 9. Validation
@@ -615,6 +642,8 @@ Rule definitions are validated at load time. Errors are collected rather than fa
 
 - A disjunction in the result with no corresponding target disjunction.
 - A result disjunction whose branch count differs from its target disjunction.
+- More than one top-level disjunction on a single side.
+- A nested disjunction coexisting with a top-level disjunction on the same side.
 
 **Negation**
 
