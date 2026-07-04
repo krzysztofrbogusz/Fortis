@@ -562,51 +562,6 @@ firing-rule trace (only the rules that changed the form).
     ˈabl → abl   (ˈa→a)
 ```
 
-## auguste
-
-`ˌɑwˈgustus` → `ɔ.u`
-
-```
--100: Classical Latin length distinction becomes a quality (tense) distinction, first pass
-    ˌɑwˈgus.tus → ˌɑwˈgʊs.tʊs   (ˈu→ˈʊ, u→ʊ)
--100: lax high vowels lower to tense mid vowels
-    ˌɑwˈgʊs.tʊs → ˌɑwˈgos.tos   (ˈʊ→ˈo, ʊ→o)
-500: g spirantizes to ɣ intervocalically (recurrence)
-    ˌɑwˈgos.tos → ˌɑwˈɣos.tos   (g→ɣ)
-500: the velar fricative is lost before a primary-stressed tense round vowel (recurrence)
-    ˌɑwˈɣos.tos → ˌɑˈwos.tos   (ɣ→∅)
-500: the low vowel fronts by default
-    ˌɑˈwos.tos → ˌaˈwos.tos   (ˌɑ→ˌa)
-500: a becomes ɔ before the high back round glide (w), at any stress level
-    ˌaˈwos.tos → ˌɔˈwos.tos   (ˌa→ˌɔ)
-600: an unstressed non-low non-nasalized vowel reduces to schwa before a consonant or word end
-    ˌɔˈwos.tos → ˌɔˈwos.təs   (o→ə)
-600: schwa becomes non-syllabic
-    ˌɔˈwos.təs → ˌɔˈwostə̯s   (ə→ə̯)
-600: non-syllabic schwa is lost elsewhere
-    ˌɔˈwostə̯s → ˌɔˈwosts   (ə̯→∅)
-600: secondary-stressed ɔ raises to ɯ before w
-    ˌɔˈwosts → ˌɯˈwosts   (ˌɔ→ˌɯ)
-600: the intermediate central vowels revert to ɛ/ɔ
-    ˌɯˈwosts → ˌɔˈwosts   (ˌɯ→ˌɔ)
-750: a medial consonant/glide is lost between two consonants, before an obstruent (not l/r)
-    ˌɔˈwosts → ˌɔˈwoss   (t→∅)
-750: an identical consonant geminate reduces to one (recurrence)
-    ˌɔˈwoss → ˌɔˈwos   (s→∅)
-1000: ow simplifies to o before any coronal sonorant
-    ˌɔˈwos → ˌɔˈos   (w→∅)
-1000: round tense back vowels raise to u (o > u, oi > ui)
-    ˌɔˈos → ˌɔˈus   (ˈo→ˈu)
-1000: a primary-stressed vowel lengthens before word-final s
-    ˌɔˈus → ˌɔˈuːs   (ˈu→ˈuː)
-1400: final obstruents are lost
-    ˌɔˈuːs → ˌɔˈuː   (s→∅)
-1400: stress is leveled — no longer distinctive for vowels
-    ˌɔˈuː → ɔ.uː   (ˌɔ→ɔ, ˈuː→uː)
-1400: distinctive vowel length is lost entirely
-    ɔ.uː → ɔ.u   (uː→u)
-```
-
 ## avers
 
 `ˌɑd̪ˈwersum` → `a.vjɛʁ`

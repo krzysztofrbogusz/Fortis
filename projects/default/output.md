@@ -30,6 +30,15 @@ Final devoicing
     tag → tak   (g→k)
 ```
 
+## feature override
+
+`seke` → `se.kə`
+
+```
+Feature override (e^[oral: none] → schwa)
+    se.ke → se.kə   (e→ə)
+```
+
 ## coda lenition, early
 
 `asta` → `ah.ta`

@@ -3,7 +3,6 @@
   import {
     initEngine,
     listFiles,
-    listOutputFiles,
     readFile,
     writeFile,
     removeFile,
@@ -22,33 +21,45 @@
   let initError = $state(null);
 
   let files = $state([]); // editable inventory filenames
-  let outputFiles = $state([]); // generated report filenames (read-only)
   let fileSource = $state({}); // filename -> "default" | "project"
-  let projectName = $state("default"); // title of the left panel
-  let active = $state(null); // filename, from either files or outputFiles
+  let active = $state(null); // active inventory filename in the left pane
   let content = $state(""); // viewer content for the active file
   let busy = $state(false); // a derivation run is in flight
   let progress = $state(0); // derivation progress, 0..1 (only meaningful while busy)
   let progressText = $state(""); // "213 / 448" during a run
   let runToken = 0; // bumped for each new run/load; a run whose token is stale aborts (supersession)
-  let reportsReady = $state(false); // true once run_derivations() has written the reports at least once
 
   let openDefs = $state({}); // per-card: index → whether that card's rule definitions are shown
   let result = $state(null); // { derivations } | { error }
   let grading = $state(null); // grading summary from the last run, or null when there's no target
-  let resultView = $state("derivations"); // right-pane view: "derivations" | "grading"
-  let csvMode = $state("table"); // csv view (letters.csv / derivation_table.csv): "table" | "raw"
+  let tableCsv = $state(""); // derivation_table.csv content, for the right-pane Table view
+  let resultView = $state("derivations"); // right-pane view: "derivations" | "table" | "grading"
+
+  // A project with more than this many words OR rules is too costly to re-run on
+  // every edit; it waits for the "Run project" button instead of auto-running.
+  const AUTO_RUN_WORDS = 500;
+  const AUTO_RUN_RULES = 100;
+  let needsRun = $state(false); // a large project is awaiting a manual run
+  let pendingSize = $state(null); // { words, rules } of the project awaiting a run
 
   let fileInput; // single-file <input>
   let projectInput; // multi-file (folder) <input>
   let examples = $state([]); // bundled example projects from the static manifest
-  let picked = $state(""); // dir of the example currently loaded via the picker ("" = none)
+  let imported = $state([]); // imported (local-folder) projects: { id, label, files }
+  let picked = $state(""); // id of the selected project ("" = the built-in default)
 
   let debounceTimer = null;
 
-  const isOutput = (name) => outputFiles.includes(name);
   const defaultFiles = $derived(files.filter((f) => fileSource[f] !== "project"));
   const projectFiles = $derived(files.filter((f) => fileSource[f] === "project"));
+
+  // Everything the project switcher lists: the built-in default, the bundled
+  // examples, and any locally-imported folders (added by loadProject).
+  const projects = $derived([
+    { id: "", label: "Default" },
+    ...examples.map((e) => ({ id: e.dir, label: e.label || e.dir, kind: "example", entry: e })),
+    ...imported.map((p) => ({ id: p.id, label: p.label, kind: "imported", files: p.files })),
+  ]);
 
   let theme = $state(localStorage.getItem("theme") ?? "system"); // "light" | "dark" | "system"
   $effect(() => {
@@ -61,7 +72,6 @@
     try {
       await initEngine((m) => (status = m));
       files = listFiles();
-      outputFiles = listOutputFiles();
       examples = await listExampleProjects();
       ready = true;
       refreshStatus();
@@ -86,7 +96,7 @@
   // before the next synchronous Pyodide batch blocks the main thread again.
   const paint = () => new Promise((r) => setTimeout(r, 0));
 
-  async function rerun() {
+  async function rerun(force = false) {
     if (!ready) return;
     const myToken = ++runToken; // claim this run; a newer run bumps the token and supersedes us
     busy = true;
@@ -94,6 +104,7 @@
     progressText = "";
     result = null; // clear the previous results so the pane doesn't show stale output under the bar
     grading = null; // and the previous grading summary
+    tableCsv = ""; // and the previous derivation table
     openDefs = {}; // reset per-card definition toggles (indices map to new words after a run)
     await paint(); // paint the (updated) left pane + cleared right pane before the first batch blocks
     if (myToken !== runToken) return; // superseded while painting — a newer run owns the session now
@@ -101,9 +112,14 @@
       const prep = prepareRun();
       if (prep.error) {
         result = { error: prep.error };
-        reportsReady = false;
         return;
       }
+      if (!force && (prep.words > AUTO_RUN_WORDS || prep.rules > AUTO_RUN_RULES)) {
+        pendingSize = { words: prep.words, rules: prep.rules };
+        needsRun = true; // too large to auto-run — wait for the Run project button
+        return;
+      }
+      needsRun = false;
       const total = prep.words;
       const acc = [];
       // Drive the run in slices, painting the bar between them. Batch size is
@@ -130,9 +146,8 @@
       const fin = finalizeRun();
       grading = fin?.grading ?? null;
       if (!grading && resultView === "grading") resultView = "derivations"; // no target ⇒ leave the (now hidden) tab
+      tableCsv = readFile("derivation_table.csv"); // for the Table view
       result = { derivations: acc };
-      reportsReady = true;
-      if (isOutput(active)) content = readFile(active); // keep an open report tab in sync
     } catch (e) {
       if (myToken === runToken) result = { error: [e?.message ?? String(e)] };
     } finally {
@@ -144,7 +159,11 @@
     writeFile(active, content);
     refreshStatus();
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(rerun, 400);
+    debounceTimer = setTimeout(() => rerun(), 400); // auto-run only if under the size limit
+  }
+
+  function runProject() {
+    rerun(true); // force a run regardless of size (the Run project button)
   }
 
   async function removeFileTab(name, ev) {
@@ -155,14 +174,30 @@
     await rerun();
   }
 
-  function saveActiveFile() {
-    const blob = new Blob([content], { type: "text/plain" });
+  function download(filename, text) {
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = active;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function saveActiveFile() {
+    download(active, content);
+  }
+
+  // The report file each right-pane view is generated from.
+  const RESULT_FILE = {
+    derivations: "output.md",
+    table: "derivation_table.csv",
+    grading: "distances.md",
+  };
+
+  function saveResult() {
+    const name = RESULT_FILE[resultView];
+    if (name) download(name, readFile(name));
   }
 
   function matchFile(name) {
@@ -189,46 +224,39 @@
     ev.target.value = "";
   }
 
-  // Load one of the bundled example projects (the picker). "" reverts to the
-  // pristine default. Mirrors loadProject's overlay flow, but fetches the files
-  // from the app's static assets instead of a local folder.
-  async function loadExample(ev) {
-    const dir = ev.target.value;
-    picked = dir;
-    if (!dir) {
-      resetOverlay();
-      projectName = "default";
-      refreshStatus();
-      selectFile(active);
-      await rerun();
-      return;
-    }
-    const entry = examples.find((e) => e.dir === dir);
-    if (!entry) return;
-    // Represent the picked project in the left pane at once, and clear the right
-    // pane, before the (network) file load — so the UI reflects the choice
-    // immediately instead of showing the previous project until the run ends.
+  // Switch to a project from the title switcher: the built-in default (id ""),
+  // a bundled example (fetched from static assets), or a locally-imported folder
+  // (its cached files re-written into the overlay). Replaces the overlay wholesale.
+  async function selectProject(id) {
+    const proj = projects.find((p) => p.id === id);
+    if (!proj) return;
+    picked = id;
+    // Reflect the choice and clear the right pane at once, before any (network) load.
     const myToken = ++runToken; // a second pick supersedes this one
     busy = true;
     progress = 0;
     progressText = "";
-    projectName = entry.label || entry.dir;
     result = null;
     await paint();
     if (myToken !== runToken) return; // superseded while painting
     try {
-      await loadExampleProject(entry); // fetch this project's files into the overlay
-      // If the user picked again during the fetch, abandon: writing more files
-      // and running would race the newer selection's overlay + session.
-      if (myToken !== runToken) return;
+      if (proj.kind === "example") {
+        await loadExampleProject(proj.entry); // resets the overlay, then fetches its files
+      } else {
+        resetOverlay(); // default or imported: start from the pristine base
+        if (proj.kind === "imported") {
+          for (const [name, text] of Object.entries(proj.files)) writeFile(name, text);
+        }
+      }
+      if (myToken !== runToken) return; // superseded during the fetch
       refreshStatus();
       selectFile(active);
       await rerun(); // bumps runToken and takes over the busy flag from here
     } catch (e) {
       if (myToken === runToken) {
-        alert(`Could not load ${entry.label || entry.dir}: ${e?.message ?? e}`);
+        alert(`Could not load ${proj.label}: ${e?.message ?? e}`);
         picked = "";
-        projectName = "default";
+        resetOverlay();
         refreshStatus();
         selectFile(active);
       }
@@ -237,33 +265,27 @@
     }
   }
 
+  // Import a local folder as a project: cache its inventory files, add it to the
+  // switcher (replacing an earlier import of the same folder), and select it.
   async function loadProject(ev) {
     const incoming = Array.from(ev.target.files ?? []);
-    picked = ""; // a local-folder load supersedes any example-picker selection
-    resetOverlay(); // loading a project REPLACES the current one, not merges into it
-    let written = 0;
+    ev.target.value = "";
+    const collected = {};
     const skipped = [];
     for (const file of incoming) {
       const target = matchFile(file.name);
-      if (!target) {
-        skipped.push(file.name);
-        continue;
-      }
-      writeFile(target, await file.text());
-      written += 1;
+      if (target) collected[target] = await file.text();
+      else skipped.push(file.name);
     }
-    const folder = incoming[0]?.webkitRelativePath?.split("/")[0];
-    projectName = written && folder ? folder : "default";
-    refreshStatus();
-    // Refresh the editor with whatever the active file now is.
-    selectFile(active);
-    await rerun();
-    let msg = `Loaded ${written} inventory file(s).`;
-    if (skipped.length)
-      msg += `\nIgnored (not inventory files): ${skipped.join(", ")}`;
-    if (!written) msg = "No matching inventory files found in the selection.";
-    alert(msg);
-    ev.target.value = "";
+    if (!Object.keys(collected).length) {
+      alert("No matching inventory files found in the selection.");
+      return;
+    }
+    const folder = incoming[0]?.webkitRelativePath?.split("/")[0] || "imported";
+    const id = `imported:${folder}`;
+    imported = [...imported.filter((p) => p.id !== id), { id, label: folder, files: collected }];
+    await selectProject(id);
+    if (skipped.length) alert(`Ignored (not inventory files): ${skipped.join(", ")}`);
   }
 </script>
 
@@ -306,22 +328,21 @@
     <!-- LEFT: inventories -->
     <section class="panel left">
       <div class="panel-head">
-        <h2>{projectName}</h2>
+        <div class="project-picker">
+          <select
+            class="project-select"
+            disabled={!ready}
+            bind:value={picked}
+            onchange={() => selectProject(picked)}
+            title="Switch or load a project"
+          >
+            {#each projects as p}
+              <option value={p.id}>{p.label}</option>
+            {/each}
+          </select>
+          <span class="caret" aria-hidden="true">▾</span>
+        </div>
         <div class="actions">
-          {#if examples.length}
-            <select
-              class="example-picker"
-              disabled={!ready}
-              bind:value={picked}
-              onchange={loadExample}
-              title="Load a bundled example project"
-            >
-              <option value="">Engine showcase</option>
-              {#each examples as ex}
-                <option value={ex.dir}>{ex.label}</option>
-              {/each}
-            </select>
-          {/if}
           <button disabled={!ready} onclick={() => fileInput.click()}
             >Load file</button
           >
@@ -368,40 +389,8 @@
         </div>
       {/if}
 
-      <div class="file-group-label">Reports</div>
-      <div class="tabs">
-        {#each outputFiles as f}
-          <button
-            class="tab report-tab"
-            class:active={f === active}
-            disabled={!ready || !reportsReady}
-            title="Generated report — read only"
-            onclick={() => selectFile(f)}>{f}</button
-          >
-        {/each}
-      </div>
-
-      {#if active === "letters.csv" || active === "derivation_table.csv"}
-        <div class="view-bar">
-          <span class="view-lbl">View</span>
-          <button
-            class:active={csvMode === "table"}
-            disabled={!ready}
-            onclick={() => (csvMode = "table")}>Table</button
-          >
-          <button
-            class:active={csvMode === "raw"}
-            disabled={!ready}
-            onclick={() => (csvMode = "raw")}>Raw</button
-          >
-        </div>
-      {/if}
-
-      {#if (active === "letters.csv" || active === "derivation_table.csv") && csvMode === "table"}
+      {#if active === "letters.csv"}
         <CsvTable {content} />
-      {:else if isOutput(active)}
-        <textarea class="editor ipa" spellcheck="false" readonly value={content}
-        ></textarea>
       {:else}
         <textarea
           class="editor ipa"
@@ -436,30 +425,60 @@
         <div class="head-row">
           <h2>Results</h2>
           <div class="actions">
-            {#if grading}
+            {#if result?.derivations}
               <div class="view-tabs">
                 <button
                   class:active={resultView === "derivations"}
                   onclick={() => (resultView = "derivations")}>Derivations</button
                 >
                 <button
-                  class:active={resultView === "grading"}
-                  onclick={() => (resultView = "grading")}>Grading</button
+                  class:active={resultView === "table"}
+                  onclick={() => (resultView = "table")}>Table</button
                 >
+                {#if grading}
+                  <button
+                    class:active={resultView === "grading"}
+                    onclick={() => (resultView = "grading")}>Grading</button
+                  >
+                {/if}
               </div>
-            {/if}
-            {#if busy}
-              <span class="running">
-                <span class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)}>
-                  <span class="progress-fill" style="width:{Math.round(progress * 100)}%"></span>
-                </span>
-                <span class="progress-text">{progressText || "running…"}</span>
-              </span>
+              <button
+                class="save-result"
+                disabled={!ready}
+                title="Download this view's report file"
+                onclick={saveResult}>Save</button
+              >
             {/if}
           </div>
         </div>
       </div>
 
+      {#if busy}
+        <div class="results ipa">
+          <div class="run-prompt">
+            <span class="progress big" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)}>
+              <span class="progress-fill" style="width:{Math.round(progress * 100)}%"></span>
+            </span>
+            <p class="muted progress-text">{progressText || "running…"}</p>
+          </div>
+        </div>
+      {:else if needsRun}
+        <div class="results ipa">
+          <div class="run-prompt">
+            <button class="run-project" disabled={!ready || busy} onclick={runProject}
+              >Run project</button
+            >
+            {#if pendingSize}
+              <p class="muted">
+                {pendingSize.words} words × {pendingSize.rules} rules — too large to run on
+                every edit. Click to run.
+              </p>
+            {/if}
+          </div>
+        </div>
+      {:else if resultView === "table" && tableCsv}
+        <CsvTable content={tableCsv} />
+      {:else}
       <div class="results ipa">
         {#if resultView === "grading" && grading}
           <table class="grade-summary">
@@ -571,6 +590,7 @@
           {/each}
         {/if}
       </div>
+      {/if}
     </section>
   </main>
 </div>
@@ -704,10 +724,43 @@
     font-size: var(--fs-body);
     padding: 4px 10px;
   }
-  .example-picker {
-    font-size: var(--fs-body);
+  .project-picker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .project-picker:hover {
+    border-color: var(--accent-border);
+    background: var(--accent-bg);
+  }
+  .project-select {
+    appearance: none;
+    -webkit-appearance: none;
     font-family: var(--sans);
-    padding: 4px 8px;
+    font-size: var(--fs-header);
+    font-weight: 600;
+    color: var(--text-h);
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 3px 26px 3px 9px; /* room for the caret */
+    max-width: 40ch;
+    cursor: pointer;
+  }
+  .project-picker .caret {
+    position: absolute;
+    right: 9px;
+    color: var(--muted);
+    font-size: 15px;
+    pointer-events: none; /* clicks fall through to the select */
+  }
+  .project-picker:hover .caret {
+    color: var(--accent);
   }
 
   .file-group-label {
@@ -751,40 +804,13 @@
     color: var(--error);
     border-color: var(--error);
   }
-  .report-tab {
-    font-style: italic;
-    color: var(--muted);
-  }
-  .report-tab.active {
-    font-style: normal;
-    color: inherit;
-  }
-
-  .view-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 16px 8px;
-    flex: none;
-  }
-  .view-lbl {
-    font-size: var(--fs-label);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-  }
-  .view-bar button {
-    font-size: var(--fs-body);
-    padding: 3px 10px;
-  }
-
   .editor {
     flex: 1;
     margin: 0 16px 16px;
     padding: 12px;
     border: 1px solid var(--border);
     border-radius: 6px;
-    background: var(--code-bg);
+    background: var(--panel); /* match the derivation card background */
     color: var(--text-h);
     font-size: var(--fs-body);
     line-height: 1.55;
@@ -794,13 +820,6 @@
     overflow: auto;
   }
 
-  .running {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--fs-body);
-    color: var(--muted);
-  }
   .progress {
     display: inline-block;
     width: 120px;
@@ -809,17 +828,26 @@
     background: var(--border);
     overflow: hidden;
   }
+  .progress.big {
+    width: 280px;
+    height: 12px;
+    border-radius: 6px;
+  }
   .progress-fill {
     display: block;
     height: 100%;
     background: var(--accent);
-    border-radius: 3px;
+    border-radius: inherit;
     transition: width 120ms linear;
   }
   .progress-text {
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  .run-prompt .progress-text {
+    margin: 0;
+    font-size: var(--fs-body);
   }
 
   .results {
@@ -831,6 +859,25 @@
     color: var(--muted);
   }
 
+  .run-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 56px 16px;
+    text-align: center;
+  }
+  .run-project {
+    font-size: var(--fs-header);
+    padding: 8px 22px;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-color: var(--accent-border);
+  }
+  .run-prompt .muted {
+    max-width: 30ch;
+  }
+
   .view-tabs {
     display: inline-flex;
     gap: 4px;
@@ -838,6 +885,9 @@
   .view-tabs button {
     font-size: var(--fs-body);
     padding: 4px 10px;
+  }
+  .save-result {
+    margin-left: 8px;
   }
 
   .grade-summary,

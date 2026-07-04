@@ -20,28 +20,32 @@ reflected on the next build — the glue only calls stable public functions
 
 ## Using it
 
-- **Left panel**, titled by the loaded project's name (`default` until you load one).
-  Mirrors the CLI's project/fallback model with two directories in the browser: a
-  pristine shipped `default` and a user overlay — editing or loading a file always
-  writes into the overlay, never the pristine copy. The 8 editable files split into
-  rows accordingly:
+- **Left panel**, headed by the **project switcher** — a dropdown (the title, with a
+  ▾) of every project you can load: the built-in `default`, the bundled examples
+  (e.g. *Latin → French*), and any folder you import. Mirrors the CLI's
+  project/fallback model with two directories in the browser: a pristine shipped
+  `default` and a user overlay — editing or loading a file always writes into the
+  overlay, never the pristine copy. The 8 editable files split into rows accordingly:
   - **Default** — files still falling back to the shipped default. Disappears once
     every file is overridden.
   - **Project** — files the current project supplies; each has a **×** to revert it
     to default.
-  - **Reports** — two read-only, regenerated-on-every-run files: `output.md` (the
-    same report the CLI's `--output` writes) and `derivation_table.csv` (one row per
-    word, one column per rule, holding the resulting form wherever that rule fired).
-    Both get the same table view as `letters.csv`.
 
-  **Example project…** (a picker, shown when any example is bundled) loads a
-  built-in project — currently *Latin → French* — straight from the app's static
-  assets, no local files needed. Selecting one replaces the overlay with that
-  project's inventory files; the rest fall back to default (per-file, like the
-  CLI). Picking the blank option reverts to the pristine default.
-  **Load file** / **Load project** write into the overlay from *local* files
-  (loading a project *replaces* it, not merges); **Save** downloads the active
-  file's current content. `letters.csv` and `derivation_table.csv` have a table view.
+  Switching projects replaces the overlay with that project's files (bundled
+  examples are fetched from the app's static assets; the rest fall back to default,
+  per-file, like the CLI). **Load file** overrides a single inventory file in the
+  current project; **Load project** imports a local folder as a new project and adds
+  it to the switcher; **Save** downloads the active file. `letters.csv` has a table
+  view. The generated reports are in the right pane, not here.
+
+- **Right panel** shows the results, with a view switcher: **Derivations** (the
+  firing-rule trace, each word a card with a per-card **Definition** toggle),
+  **Table** (`derivation_table.csv` — one row per word, one column per rule), and,
+  when the lexicon carries attested forms, **Grading** (the distance summary). A
+  **Save** button downloads the active view's report (`output.md` /
+  `derivation_table.csv` / `distances.md`). Small projects re-run automatically on
+  every edit; a large one (over 500 words or 100 rules) waits for a **Run project**
+  button instead.
 
   Example projects are built by `scripts/build-engine.mjs` into
   `public/projects/<dir>/` (only the inventory files each one overrides) plus a

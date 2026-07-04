@@ -96,7 +96,8 @@ def prepare_run():
     except ValueError as e: return json.dumps({"error":[str(e)]})
     _SESSION.clear()
     _SESSION.update(project=project, rules=rules, words=list(project.words.items()), acc=[])
-    return json.dumps({"words": len(_SESSION["words"])})
+    n_rules = sum(len(rules_at_time) for rules_at_time in project.rules.values())
+    return json.dumps({"words": len(_SESSION["words"]), "rules": n_rules})
 
 def derive_batch(start, count):
     if "project" not in _SESSION: return json.dumps([])  # session superseded/cleared — caller aborts

@@ -116,6 +116,18 @@ class TestLoadDiacriticInventory:
         inv = result.unwrap()
         assert "̩" in inv
 
+    def test_dotted_circle_placeholder_is_stripped(self, tmp_path, features):
+        # A diacritic may be written on the dotted-circle carrier (◌̩) for legibility;
+        # the carrier is dropped so it defines the bare combining mark.
+        path = tmp_path / "diacritics.toml"
+        path.write_text('"◌̩" = { tier = "segment", kind = "combining", bundle = "+syll" }')
+        result = load_diacritic_inventory(path, features)
+        assert result.is_ok()
+        inv = result.unwrap()
+        assert "̩" in inv  # bare mark, usable during segmentation
+        assert "◌̩" not in inv
+        assert not any("◌" in key for key in inv)
+
     def test_duplicate_symbol(self, tmp_path, features):
         toml_content = (
             '"̩" = { tier = "segment", kind = "combining", bundle = "+syll" }\n'

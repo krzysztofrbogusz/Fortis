@@ -14,6 +14,7 @@
 "akba"   = {gloss = "voicing assimilation", final = "agba"}
 "taki"   = {gloss = "i-umlaut", final = "teki"}
 "tag"    = {gloss = "final devoicing", final = "tak"}
+"seke"   = {gloss = "feature override", final = "sekə"}
 "asta"   = {gloss = "coda lenition, early", final = "ahta"}
 "aspa"   = {gloss = "coda lenition, late", final = "aspa"}
 "maha"   = "intervocalic loss"

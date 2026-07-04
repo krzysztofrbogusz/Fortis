@@ -12,6 +12,12 @@ from src.fortis.models.tiers import Tier
 from src.fortis.parsing.bundles import parse_feature_bundle
 from src.fortis.result import Err, Ok, Result, collect
 
+# The dotted-circle placeholder (U+25CC) that combining marks are conventionally
+# shown on so they're visible in isolation — ``◌̃`` for a combining tilde. It is a
+# display carrier, never part of the actual symbol, so it's stripped from a
+# diacritic key on load: ``◌̃`` and ``̃`` both define the same diacritic.
+_DOTTED_CIRCLE = "◌"
+
 # ---- Diacritic -----------------------------------------------------------------------------------
 
 
@@ -159,7 +165,10 @@ def load_diacritic_inventory(
 
     inventory = DiacriticInventory()
     for symbol, diacritic_def in data.items():
-        symbol = symbol.strip()
+        symbol = symbol.strip().replace(_DOTTED_CIRCLE, "")  # ◌̃ → ̃ (drop the display carrier)
+        if not symbol:
+            error_list.append("Diacritic has an empty symbol")
+            continue
         if symbol in inventory:
             error_list.append(f"Diacritic '{present_symbol(symbol)}' is already defined")
             continue
