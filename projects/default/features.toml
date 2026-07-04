@@ -18,8 +18,6 @@ oral = { kind = "unary", children = ["labial", "lingual", "dental"] }
     labial = { kind = "unary", short = "lab", children = ["rounded", "compressed"] }
         rounded = { kind = "unary", short = "rnd"}
         compressed = { kind = "unary", short = "cmpr"}
-    # dental = the passive articulator (at the teeth): combines with labial (f, v, ɱ)
-    # or with lingual (t̪, n̪) — hence a sibling of both, not a lingual child.
     dental = { kind = "unary", short = "dnt"}
     lingual = { kind = "unary", short = "ling", children = ["apical", "retroflex", "front", "back", "aperture", "advancement"] }
         apical = { kind = "unary", short = "api"}
