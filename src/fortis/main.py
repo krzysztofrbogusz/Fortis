@@ -150,10 +150,12 @@ def main(argv: list[str] | None = None) -> None:
     csv_path.write_text(_build_csv_report(derivations, rules, project), encoding="utf-8")
     print(f"wrote {csv_path}", file=sys.stderr)
     saved.append(csv_path)
+    write_done = time.perf_counter()
 
-    # If the lexicon carries attested forms (final and/or intermediate stages),
-    # grade the derivation against them and write a distance summary alongside.
-    if any(word.final is not None or word.stages for word in project.words.values()):
+    # Phase 4 — grading: if the lexicon carries attested forms (final and/or
+    # intermediate stages), grade the derivation against them and write a summary.
+    graded = any(word.final is not None or word.stages for word in project.words.values())
+    if graded:
         stages = grade_stages(derivations, project)
         where = f"`{args.project}`" if args.project is not None else "the shipped `projects/default`"
         dist_path = path.parent / "distances.md"
@@ -161,13 +163,19 @@ def main(argv: list[str] | None = None) -> None:
         print(f"wrote {dist_path}", file=sys.stderr)
         saved.append(dist_path)
         print(distance_summary_line(stages))
+    grade_done = time.perf_counter()
 
+    # Phase 5 — printing: print the per-word traces.
     for derivation in derivations:
         _print_derivation(derivation, project)
         print()
     print_done = time.perf_counter()
 
-    _print_run_summary(derivations, rules, saved, (start, init_done, derive_done, print_done))
+    phases = {"init": init_done - start, "apply": derive_done - init_done}
+    if graded:  # grading + writing distances.md; report writes count as printing
+        phases["grade"] = grade_done - write_done
+    phases["print"] = (write_done - derive_done) + (print_done - grade_done)
+    _print_run_summary(derivations, rules, saved, phases, print_done - start)
 
 
 _SUBRULE_SUFFIX = re.compile(r"#\d+$")
@@ -187,24 +195,22 @@ def _print_run_summary(
     derivations: list[Derivation],
     rules: RuleInventory,
     saved: list[Path],
-    marks: tuple[float, float, float, float],
+    phases: dict[str, float],
+    total: float,
 ) -> None:
     """Print the end-of-run summary to stderr: counts, timing, and saved files.
 
-    ``marks`` are the four ``perf_counter`` readings bounding the phases: start,
-    end of engine initiation, end of rule application, end of printing.
+    ``phases`` maps each phase name (init, apply, grade, print — grade only when
+    the run graded) to its elapsed seconds; ``total`` is the whole run's seconds.
     """
-    start, init_done, derive_done, print_done = marks
     words = len(derivations)
     applied = _applied_rule_count(derivations)
-    total = len(_rule_columns(rules))
+    total_rules = len(_rule_columns(rules))
+    breakdown = ", ".join(f"{name} {secs:.2f}s" for name, secs in phases.items())
     names = ", ".join(path.name for path in saved)
     print(
-        f"\n{words} words derived, {applied} of {total} rules applied\n"
-        f"elapsed {print_done - start:.2f}s "
-        f"(init {init_done - start:.2f}s, "
-        f"apply {derive_done - init_done:.2f}s, "
-        f"print {print_done - derive_done:.2f}s)\n"
+        f"\n{words} words derived, {applied} of {total_rules} rules applied\n"
+        f"elapsed {total:.2f}s ({breakdown})\n"
         f"saved {names}",
         file=sys.stderr,
     )

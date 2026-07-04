@@ -21,6 +21,12 @@ computed too, not annotated by hand: a sonority scale and (optionally)
 onset/coda constraints decide where the boundaries fall, and rules can refer
 to them directly.
 
+When the lexicon records the forms a word is *meant* to reach — its attested
+final reflex, and optionally its form at intermediate historical stages — Fortis
+grades its own output against them: a phone-level and a finer feature-weighted
+edit distance, per stage and for the final surface, so a rule set's accuracy can
+be tracked as it is built.
+
 Fortis makes no distinction between "historical sound change" and
 "synchronic phonology" — both are an ordered set of rules applied over
 time; whether that time span is three millennia or a single derivation is
@@ -86,15 +92,16 @@ python -m src.fortis.main --words my_words.toml --rules my_rules.toml
 python -m src.fortis.main --project projects/pie_to_germanic   # PIE → Proto-Germanic
 ```
 
-Every run also writes reports alongside the printed trace: a Markdown report
-(`output.md`) — the firing-rule trace plus, for tier operations, an
-association-change diagram (`│` kept · `╎` added · `╪` delinked) — and
-`derivation_table.csv`, one row per word and one column per rule, holding the
-word's resulting form wherever that rule fired (empty otherwise). If the lexicon
-carries attested forms (`final` and/or intermediate `stages`), a `distances.md`
-summary grades the derivation against them (phone and feature edit distance, per
-stage and final). All land in the `<project>/` directory; `--output` overrides
-the Markdown path (the other reports follow into the same directory):
+Every run also writes reports alongside the printed trace: `output.md` (the
+firing-rule trace per word) and `derivation_table.csv` (one row per word and one
+column per rule — each titled `<time>: <rule>` — holding the word's resulting
+form wherever that rule fired, empty otherwise). If the lexicon carries attested
+forms (`final` and/or intermediate `stages`), a `distances.md` summary grades the
+derivation against them (phone and feature edit distance, per stage and final). A
+run ends with a one-line summary on stderr — words derived, rules applied,
+per-phase timing, files saved — and shows a progress bar while deriving in a
+terminal. All reports land in the `<project>/` directory; `--output` overrides
+the Markdown path (the others follow into the same directory):
 
 ```
 python -m src.fortis.main --project projects/latin_to_french --output
@@ -105,16 +112,44 @@ python -m src.fortis.main --project projects/latin_to_french --output
 `web/` is a browser front end that runs the same Python engine used by the CLI —
 compiled to WebAssembly and executed in-browser via [Pyodide](https://pyodide.org),
 rather than a separate JavaScript reimplementation. Edit any of the 8 inventory
-files (or load your own project) and the derivations re-run, in both a historical
-trace view and an autosegmental association-diagram view; see
-[`web/README.md`](web/README.md) for the full picture, including the type scale
-and theming. To run it locally:
+files (or load your own project) and the derivations re-run in a trace view, with
+a **Grading** tab that scores them against the lexicon's attested forms when it
+has them; see [`web/README.md`](web/README.md) for the full picture, including
+the type scale and theming. To run it locally:
 
 ```
 cd web
 npm install
 npm run dev
 ```
+
+### Grading against attested forms
+
+A lexicon entry may record the form the engine should reproduce — its `final`
+reflex, and optionally its form at intermediate historical `stages` keyed by rule
+time. Both the table form (with targets) and the bare `word = "gloss"` form
+(ungraded) are accepted:
+
+```toml
+"ˈɑmɑt" = {gloss = "aime", final = "ɛm", 600 = "ˈãj̃məθ", 1400 = "ɛm"}
+"tag"   = "final devoicing"
+```
+
+Each derived form is compared to its target with two edit distances: a **phone**
+distance (a base segment plus its combining marks is one phone; an exact match is
+0) and a finer **feature** distance (a substitution costs the number of features
+that differ, so `ɑ̃` is one edit from `ɑ` but eleven from `t`; an adjacent-swap
+metathesis counts as one). Both are reported per word and in aggregate, per stage
+and for the final surface, in `distances.md`. To grade without a full run:
+
+```
+python -m src.fortis.analysis.main --project projects/latin_to_french
+```
+
+Intermediate `stages` are graded by matching the derived snapshot at rule-time T
+against the attested form at stage T, so those rows are only meaningful when the
+rule times are calibrated to the stage timescale — the `final` score never
+depends on that alignment.
 
 ## How it works
 
@@ -277,7 +312,7 @@ fortis/
 └── src/fortis/
     ├── config.py                # paths, value symbols, greek alphabet, special symbols
     ├── result.py                # Result / Ok / Err
-    ├── main.py                  # load → segment → derive → print the trace
+    ├── main.py                  # load → derive → write reports (+ distances.md) → print trace + run summary
     │
     ├── general/                 # generic helpers, zero domain knowledge
     │   ├── file_handling.py     #   load_toml_file, load_csv_file
@@ -313,16 +348,20 @@ fortis/
     │   ├── rules.py             #   rules.toml (bodies parsed via parsing.notation)
     │   └── project.py           #   load everything    → Project
     │
-    └── application/             # THE ENGINE            (depends on: models, parsing, loaders)
-        ├── combining.py         #   bundle algebra: combine, merge (node-delink), compare
-        ├── matching.py          #   pattern_matches; find_matches (sequence matcher); full_match
-        ├── applying.py          #   apply_match: rewrite a matched locus
-        ├── syllabifying.py      #   syllabify: sonority + onset/coda-pattern boundaries
-        ├── segmentation.py      #   string_to_sequence: IPA → feature bundles
-        ├── rendering.py         #   sequence_to_string, render_syllabified, describe_change
-        ├── diagram.py           #   render_change/render_autosegmental: tier association diagrams
-        ├── tiers.py             #   autosegmental tier ops: associate, cleanup/OCP, redock, spread/dock
-        └── deriving.py          #   apply_rule per mode; derive a word → Derivation
+    ├── application/             # THE ENGINE            (depends on: models, parsing, loaders)
+    │   ├── combining.py         #   bundle algebra: combine, merge (node-delink), compare
+    │   ├── matching.py          #   pattern_matches; find_matches (sequence matcher); full_match
+    │   ├── applying.py          #   apply_match: rewrite a matched locus
+    │   ├── syllabifying.py      #   syllabify: sonority + onset/coda-pattern boundaries
+    │   ├── segmentation.py      #   string_to_sequence: IPA → feature bundles
+    │   ├── rendering.py         #   sequence_to_string, render_syllabified, describe_change
+    │   ├── tiers.py             #   autosegmental tier ops: associate, cleanup/OCP, redock, spread/dock
+    │   └── deriving.py          #   apply_rule per mode; derive_all → [Derivation]; form_at_time
+    │
+    └── analysis/                # OUTPUT ANALYSIS       (depends on: models, application)
+        ├── grading.py           #   phone + feature edit distance vs attested target forms
+        ├── reporting.py         #   render the per-stage / final distance summary → distances.md
+        └── main.py              #   grader CLI: derive a project and grade it, no full run
 ```
 
 ## Current limitations and future directions
@@ -363,8 +402,10 @@ None of these are commitments, but plausible directions if the project
 grows: richer (weighted or optional) rule application for gradient change,
 some notion of morphological structure to support reduplication and
 affix-conditioned rules, metrical foot structure alongside the existing
-tone/stress tiers, and performance work on the browser build if it becomes
-more than a demo/playground.
+tone/stress tiers, richer grading (frequency-weighted accuracy, paradigm-aware
+attribution of errors to analogy rather than sound change, per-stage divergence
+localization), and performance work on the browser build if it becomes more than
+a demo/playground.
 
 ## License
 
