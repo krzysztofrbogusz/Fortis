@@ -22,6 +22,7 @@ import time
 from collections.abc import Sequence
 from pathlib import Path
 
+from src.fortis.analysis.diagnosis import diagnosis_summary_line, render_diagnosis
 from src.fortis.analysis.grading import grade_stages
 from src.fortis.analysis.reporting import distance_summary_line, render_distance_summary
 from src.fortis.analysis.warnings import (
@@ -169,6 +170,14 @@ def main(argv: list[str] | None = None) -> None:
         print(f"wrote {dist_path}", file=sys.stderr)
         saved.append(dist_path)
         print(distance_summary_line(stages))
+
+        # Diagnose where the final derivation goes wrong (confusions + context autopsy).
+        grades = next(s for s in stages if s.time is None).report.grades
+        diag_path = path.parent / "diagnosis.md"
+        diag_path.write_text(render_diagnosis(grades, project, where), encoding="utf-8")
+        print(f"wrote {diag_path}", file=sys.stderr)
+        saved.append(diag_path)
+        print(diagnosis_summary_line(grades))
     grade_done = time.perf_counter()
 
     # Phase 4b — syllabification warnings: words whose onset/coda patterns admitted no

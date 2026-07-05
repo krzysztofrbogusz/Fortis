@@ -95,9 +95,72 @@ def edit_distance(a: Sequence[str], b: Sequence[str], transposition_cost: int = 
     return d[n][m]
 
 
-def compare(derived: str, target: str) -> int:
+def compare(derived: str, target: str, transposition_cost: int = 1) -> int:
     """The phone edit distance between a derived form and a target form."""
-    return edit_distance(split_phones(derived), split_phones(target))
+    return edit_distance(split_phones(derived), split_phones(target), transposition_cost)
+
+
+@dataclass(frozen=True)
+class AlignOp:
+    """One step in a target→derived alignment, for error diagnosis.
+
+    ``kind`` is ``"match"`` (target phone reproduced), ``"sub"`` (a different phone
+    produced), ``"delete"`` (target phone with no derived counterpart), or
+    ``"insert"`` (a spurious derived phone with no target counterpart). ``target``
+    and ``derived`` hold the phones (``None`` on the side that is absent);
+    ``target_index`` is the phone's position in the target sequence (``None`` for an
+    insertion, which sits *between* target positions).
+    """
+
+    kind: str
+    target: str | None
+    derived: str | None
+    target_index: int | None
+
+
+def align(target: Sequence[str], derived: Sequence[str]) -> list[AlignOp]:
+    """Align a target phone sequence to a derived one, returning the edit ops.
+
+    A plain Levenshtein alignment (unit insert/delete/substitute costs) with a
+    *deterministic* traceback: on a tie the diagonal (match/substitution) is taken
+    before a deletion, and a deletion before an insertion. Substitution-on-the-
+    diagonal is preferred so a mismatch reads as one ``x→y`` confusion rather than a
+    delete-plus-insert pair — the reproducible policy the confusion tally depends on.
+
+    Unlike :func:`edit_distance` this carries no transposition discount, so a
+    metathesis reads here as an *adjacent pair of substitutions* (``x→y`` then
+    ``y→x``), not one reordering. Diagnosis wants the phone-for-phone confusions;
+    the transposition-aware distance stays the headline metric.
+    """
+    a, b = list(target), list(derived)
+    n, m = len(a), len(b)
+    d = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        d[i][0] = i
+    for j in range(1, m + 1):
+        d[0][j] = j
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            d[i][j] = min(
+                d[i - 1][j - 1] + (a[i - 1] != b[j - 1]),  # match/substitution
+                d[i - 1][j] + 1,  # deletion
+                d[i][j - 1] + 1,  # insertion
+            )
+    ops: list[AlignOp] = []
+    i, j = n, m
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and d[i][j] == d[i - 1][j - 1] + (a[i - 1] != b[j - 1]):
+            kind = "match" if a[i - 1] == b[j - 1] else "sub"
+            ops.append(AlignOp(kind, a[i - 1], b[j - 1], i - 1))
+            i, j = i - 1, j - 1
+        elif i > 0 and d[i][j] == d[i - 1][j] + 1:
+            ops.append(AlignOp("delete", a[i - 1], None, i - 1))
+            i -= 1
+        else:
+            ops.append(AlignOp("insert", None, b[j - 1], None))
+            j -= 1
+    ops.reverse()
+    return ops
 
 
 # Sentinel for a feature absent from a bundle, distinct from any real value so
@@ -181,7 +244,9 @@ def _segment(form: str, project: Project) -> list[FeatureBundle] | None:
         return None
 
 
-def feature_compare(derived: str, target: str, project: Project) -> int | None:
+def feature_compare(
+    derived: str, target: str, project: Project, transposition_cost: int = 1
+) -> int | None:
     """The feature edit distance between a derived and a target form.
 
     Both strings go through the same segmentation, so this is 0 exactly when the
@@ -190,7 +255,7 @@ def feature_compare(derived: str, target: str, project: Project) -> int | None:
     a, b = _segment(derived, project), _segment(target, project)
     if a is None or b is None:
         return None
-    return feature_edit_distance(a, b)
+    return feature_edit_distance(a, b, transposition_cost)
 
 
 @dataclass(frozen=True)
@@ -294,13 +359,14 @@ def grade_derivation(derivation: Derivation, project: Project) -> Grade | None:
 
 def _grade(gloss: str, ipa: str, derived: str, target: str, project: Project) -> Grade:
     """Build a :class:`Grade` from a rendered derived form and a target form."""
+    swap = project.settings.grading.transposition_cost
     return Grade(
         gloss=gloss,
         ipa=ipa,
         derived=derived,
         target=target,
-        distance=compare(derived, target),
-        feature_distance=feature_compare(derived, target, project),
+        distance=compare(derived, target, swap),
+        feature_distance=feature_compare(derived, target, project, swap),
     )
 
 

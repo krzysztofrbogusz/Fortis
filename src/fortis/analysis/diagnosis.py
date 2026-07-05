@@ -1,0 +1,373 @@
+"""Diagnose *where* a rule set goes wrong, not just *how much*.
+
+The grader (:mod:`src.fortis.analysis.grading`) scores each derived form against its
+attested target. This module reads the same graded forms but asks the follow-up
+question — *what is going wrong, and in what environment* — so a score becomes a
+lead on the next rule to fix. Two views, both built on the target→derived alignment
+in :func:`src.fortis.analysis.grading.align`:
+
+- **Confusions** — a ranked tally of the phone mismatches across the whole lexicon:
+  which target phone was reproduced as which other phone (or dropped, or a spurious
+  phone inserted). Answers "which phones am I getting wrong, and how often".
+
+- **Context autopsy** — for one *focus* target phone, the gold-form environments most
+  associated with getting that phone wrong, scored by the phi coefficient. Answers
+  "when I get /e/ wrong, what conditions it".
+
+The autopsy is deliberately **conditioned on a focus phone**. A global "does this
+context predict any error" correlation is confounded by phone difficulty: if /e/ is
+hard and happens to precede /r/, then "next=/r/" lights up as error-predicting when it
+is really a proxy for the focus phone. Conditioning on the focus phone — comparing the
+/e/ that came out right against the /e/ that came out wrong — removes that confound and
+matches how a linguist actually debugs a cascade.
+
+Two caveats the reports repeat:
+
+- The environment is read from the **gold** form, a proxy: the derived form's
+  environment may differ (and that difference is often the very cause). It is the
+  stable coordinate to condition on, not a claim about the derivation's own context.
+- Because the alignment carries no transposition discount, a metathesis reads as an
+  adjacent pair of substitutions, not one reordering.
+"""
+from __future__ import annotations
+
+import math
+from collections import Counter
+from dataclasses import dataclass, field
+
+from src.fortis.analysis.grading import Grade, align, split_phones
+from src.fortis.application.segmentation import string_to_sequence
+from src.fortis.application.tiers import lower_tiers
+from src.fortis.models.project import Project
+
+# The support floor, min-errors gate, per-phone row cap, and focus count are all
+# tunable per project via ``settings.toml`` (:class:`DiagnosisSettings`); the analysis
+# functions read them off ``project.settings.diagnosis``.
+
+# Word-boundary sentinel used as the neighbour of an edge phone.
+_BOUNDARY = "#"
+
+
+@dataclass(frozen=True)
+class Confusion:
+    """One aggregated phone mismatch across the graded lexicon.
+
+    ``expected`` is the target phone, ``got`` the phone produced in its place; a
+    ``None`` on either side marks the op that has no counterpart — ``got is None`` is
+    a deletion (target phone dropped), ``expected is None`` an insertion (spurious
+    derived phone). ``examples`` holds a few word labels showing the confusion.
+    """
+
+    expected: str | None
+    got: str | None
+    count: int
+    examples: tuple[str, ...]
+
+    @property
+    def kind(self) -> str:
+        """``"substitution"``, ``"deletion"``, or ``"insertion"``."""
+        if self.expected is None:
+            return "insertion"
+        if self.got is None:
+            return "deletion"
+        return "substitution"
+
+
+def confusions(grades: tuple[Grade, ...], limit: int | None = None) -> list[Confusion]:
+    """Tally every non-match alignment op across the graded words, most frequent first.
+
+    Each graded word's target is aligned to its derived form; substitutions,
+    deletions, and insertions are counted by their (expected, got) phone pair. Exact
+    words contribute nothing. Ties break by the string pair for a stable order.
+    """
+    counts: Counter[tuple[str | None, str | None]] = Counter()
+    examples: dict[tuple[str | None, str | None], list[str]] = {}
+    for grade in grades:
+        if grade.exact:
+            continue
+        label = grade.gloss or grade.ipa
+        for op in align(split_phones(grade.target), split_phones(grade.derived)):
+            if op.kind == "match":
+                continue
+            key = (op.target, op.derived)
+            counts[key] += 1
+            bucket = examples.setdefault(key, [])
+            if label not in bucket and len(bucket) < 3:
+                bucket.append(label)
+    ordered = sorted(
+        counts.items(),
+        key=lambda kv: (-kv[1], str(kv[0][0]), str(kv[0][1])),
+    )
+    result = [
+        Confusion(expected=exp, got=got, count=count, examples=tuple(examples[(exp, got)]))
+        for (exp, got), count in ordered
+    ]
+    return result if limit is None else result[:limit]
+
+
+@dataclass(frozen=True)
+class ContextAssociation:
+    """One environment predictor's association with getting a focus phone wrong.
+
+    ``predictor`` names the gold-form environment (e.g. ``"right=n"`` or
+    ``"left:voice=1"``). The 2×2 counts are over the focus phone's positions:
+    ``err_here``/``ok_here`` are error vs. correct *with* the predictor present,
+    ``err_away``/``ok_away`` without it. ``phi`` is the phi coefficient — positive
+    means the predictor co-occurs with error.
+    """
+
+    predictor: str
+    phi: float
+    err_here: int
+    ok_here: int
+    err_away: int
+    ok_away: int
+
+    @property
+    def support(self) -> int:
+        """Focus positions in which the predictor is present."""
+        return self.err_here + self.ok_here
+
+
+@dataclass(frozen=True)
+class FocusAutopsy:
+    """The conditioned context autopsy for one focus target phone.
+
+    ``errors``/``total`` are how often the focus phone came out wrong vs. how often
+    it occurred. ``associations`` are the environment predictors that clear the
+    support floor, most error-associated first.
+    """
+
+    phone: str
+    errors: int
+    total: int
+    associations: tuple[ContextAssociation, ...] = field(default_factory=tuple)
+
+
+def phi_coefficient(err_here: int, ok_here: int, err_away: int, ok_away: int) -> float:
+    """The phi coefficient for a 2×2 of (predictor present/absent) × (error/correct).
+
+    Ranges [-1, 1]; positive when the predictor co-occurs with error. Returns 0.0
+    when any margin is zero (the coefficient is undefined — no association to read).
+    """
+    numerator = err_here * ok_away - ok_here * err_away
+    margins = (
+        (err_here + ok_here)
+        * (err_away + ok_away)
+        * (err_here + err_away)
+        * (ok_here + ok_away)
+    )
+    return numerator / math.sqrt(margins) if margins else 0.0
+
+
+def _feature_map(phone: str, project: Project, cache: dict[str, dict | None]) -> dict | None:
+    """The specified features of a single phone, or ``None`` if it will not segment.
+
+    Featurises the phone on its own (not via the whole form), so it never depends on
+    the target/derived alignment lining up with a re-segmentation of the string.
+    """
+    if phone not in cache:
+        try:
+            bundles = lower_tiers(string_to_sequence(phone, project))
+        except ValueError:
+            cache[phone] = None
+        else:
+            bundle = bundles[0] if bundles else None
+            cache[phone] = (
+                None
+                if bundle is None
+                else {f: spec.value for f, spec in bundle.items() if spec.value is not None}
+            )
+    return cache[phone]
+
+
+def _predictors(
+    left: str, right: str, project: Project, cache: dict[str, dict | None]
+) -> set[str]:
+    """The environment predictors for a focus position with neighbours *left*/*right*.
+
+    Always the two neighbour identities (``left=<phone>``/``right=<phone>``); plus,
+    when a neighbour segments, one predictor per specified feature value
+    (``left:<feature>=<value>``). A boundary neighbour contributes only its identity.
+    """
+    predictors = {f"left={left}", f"right={right}"}
+    for side, phone in (("left", left), ("right", right)):
+        if phone == _BOUNDARY:
+            continue
+        features = _feature_map(phone, project, cache)
+        if features is None:
+            continue
+        for feature, value in features.items():
+            predictors.add(f"{side}:{feature}={value}")
+    return predictors
+
+
+def error_contexts(grades: tuple[Grade, ...], focus: str, project: Project) -> FocusAutopsy:
+    """The conditioned context autopsy for one focus target phone.
+
+    Over every graded word, each target position holding *focus* is a trial: an error
+    if the phone was substituted or deleted, correct if reproduced. Each trial's
+    gold-form neighbours yield a set of environment predictors; for every predictor a
+    2×2 of (present/absent) × (error/correct) gives a phi coefficient. Predictors
+    below the support floor are dropped; the rest are returned most-error-associated
+    first. Insertions have no focus target phone and never enter this analysis.
+    """
+    errors = 0
+    total = 0
+    err_with: Counter[str] = Counter()
+    ok_with: Counter[str] = Counter()
+    cache: dict[str, dict | None] = {}
+    for grade in grades:
+        target_phones = split_phones(grade.target)
+        for op in align(target_phones, split_phones(grade.derived)):
+            if op.target != focus or op.target_index is None:
+                continue
+            total += 1
+            is_error = op.kind != "match"
+            errors += is_error
+            i = op.target_index
+            left = target_phones[i - 1] if i > 0 else _BOUNDARY
+            right = target_phones[i + 1] if i + 1 < len(target_phones) else _BOUNDARY
+            for predictor in _predictors(left, right, project, cache):
+                (err_with if is_error else ok_with)[predictor] += 1
+    diagnosis = project.settings.diagnosis
+    associations: list[ContextAssociation] = []
+    if errors >= diagnosis.min_errors:
+        for predictor in err_with.keys() | ok_with.keys():
+            err_here = err_with[predictor]
+            ok_here = ok_with[predictor]
+            if err_here + ok_here < diagnosis.min_support:
+                continue
+            associations.append(
+                ContextAssociation(
+                    predictor=predictor,
+                    phi=phi_coefficient(err_here, ok_here, errors - err_here, (total - errors) - ok_here),
+                    err_here=err_here,
+                    ok_here=ok_here,
+                    err_away=errors - err_here,
+                    ok_away=(total - errors) - ok_here,
+                )
+            )
+    associations.sort(key=lambda a: (-a.phi, -a.err_here, a.predictor))
+    return FocusAutopsy(
+        phone=focus, errors=errors, total=total, associations=tuple(associations)
+    )
+
+
+def diagnose(
+    grades: tuple[Grade, ...], project: Project, top: int | None = None
+) -> list[FocusAutopsy]:
+    """Autopsy the focus phones behind the *top* most frequent substitution/deletion.
+
+    The confusion tally names the phones going wrong most; this conditions a context
+    autopsy on each distinct target phone among them (an insertion has no target phone
+    and is skipped). Autopsies with no surviving predictor are still returned so the
+    report can say a phone had no discernible conditioning. *top* defaults to the
+    project's ``diagnosis.focus_count`` setting.
+    """
+    if top is None:
+        top = project.settings.diagnosis.focus_count
+    focus_phones: list[str] = []
+    for confusion in confusions(grades):
+        if confusion.expected is not None and confusion.expected not in focus_phones:
+            focus_phones.append(confusion.expected)
+        if len(focus_phones) >= top:
+            break
+    return [error_contexts(grades, phone, project) for phone in focus_phones]
+
+
+def _confusion_label(value: str | None, *, missing: str) -> str:
+    """Render one side of a confusion, using *missing* for the absent side."""
+    return f"`{value}`" if value is not None else missing
+
+
+def diagnosis_summary_line(grades: tuple[Grade, ...]) -> str:
+    """A one-line headline for stderr."""
+    table = confusions(grades)
+    if not table:
+        return "no confusions — every graded word is exact"
+    sites = sum(c.count for c in table)
+    top = table[0]
+    exp = top.expected if top.expected is not None else "∅"
+    got = top.got if top.got is not None else "∅"
+    return (
+        f"{sites} error site(s), {len(table)} distinct confusion(s); "
+        f"most common {exp}→{got} ({top.count}×) — see diagnosis.md"
+    )
+
+
+def render_diagnosis(grades: tuple[Grade, ...], project: Project, where: str) -> str:
+    """The full ``diagnosis.md`` report: confusion tally then per-phone autopsy."""
+    lines = [
+        f"# Diagnosis — {where}",
+        "",
+        "*Where* the derivation goes wrong, from the same forms `distances.md` scores.",
+        "Environments are read from the **gold** form (a stable coordinate to condition",
+        "on — the derived form's own environment may differ, and often that difference is",
+        "the cause). A metathesis reads as an adjacent pair of substitutions.",
+        "",
+    ]
+    table = confusions(grades)
+    if not table:
+        lines.append("Every graded word is exact — no confusions to report.")
+        return "\n".join(lines).rstrip() + "\n"
+
+    lines += [
+        "## Confusions",
+        "",
+        "Phone mismatches across all graded words, most frequent first. `∅` on the",
+        "*got* side is a dropped phone; on the *expected* side, a spurious inserted one.",
+        "",
+        "| expected | got | count | kind | examples |",
+        "| --- | --- | ---: | --- | --- |",
+    ]
+    for c in table:
+        expected = _confusion_label(c.expected, missing="`∅`")
+        got = _confusion_label(c.got, missing="`∅`")
+        lines.append(
+            f"| {expected} | {got} | {c.count} | {c.kind} | {', '.join(c.examples)} |"
+        )
+    diagnosis = project.settings.diagnosis
+    lines += ["", "## Context autopsy", ""]
+    lines += _autopsy_intro(diagnosis.min_support)
+    for autopsy in diagnose(grades, project):
+        lines += _autopsy_section(autopsy, diagnosis.min_errors, diagnosis.report_top)
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _autopsy_intro(min_support: int) -> list[str]:
+    return [
+        "For each target phone that most often comes out wrong, the gold-form",
+        "environments most associated with the error, by phi coefficient (positive =",
+        f"more error-prone). A predictor is shown only if present in ≥{min_support} of the",
+        "phone's positions; the raw *err/ok* counts, present (here) vs. absent (away),",
+        "travel with each row so a thin cell is visible. `left`/`right` name the",
+        "neighbouring gold phone; `left:f=v` a feature of that neighbour.",
+        "",
+    ]
+
+
+def _autopsy_section(autopsy: FocusAutopsy, min_errors: int, report_top: int) -> list[str]:
+    rate = autopsy.errors / autopsy.total if autopsy.total else 0.0
+    header = [
+        f"### `{autopsy.phone}` — wrong {autopsy.errors}/{autopsy.total} ({rate:.0%})",
+        "",
+    ]
+    if autopsy.errors < min_errors:
+        return [*header, f"Too few errors to autopsy (< {min_errors}).", ""]
+    shown = [a for a in autopsy.associations if a.phi > 0][:report_top]
+    if not shown:
+        return [*header, "No environment predictor was positively associated with the error.", ""]
+    note = f"Top {len(shown)} of {len(autopsy.associations)} predictors above the support floor."
+    rows = [
+        note,
+        "",
+        "| context | phi | err/ok here | err/ok away |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for a in shown:
+        rows.append(
+            f"| `{a.predictor}` | {a.phi:+.2f} "
+            f"| {a.err_here}/{a.ok_here} | {a.err_away}/{a.ok_away} |"
+        )
+    return [*header, *rows, ""]

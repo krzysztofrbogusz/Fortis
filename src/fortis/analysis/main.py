@@ -15,6 +15,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from src.fortis.analysis.diagnosis import diagnosis_summary_line, render_diagnosis
 from src.fortis.analysis.grading import grade_stages
 from src.fortis.analysis.reporting import distance_summary_line, render_distance_summary
 from src.fortis.application.deriving import derive_all
@@ -88,6 +89,14 @@ def main(argv: list[str] | None = None) -> None:
     path.write_text(render_distance_summary(stages, where), encoding="utf-8")
     print(f"wrote {path}", file=sys.stderr)
     print(distance_summary_line(stages))
+
+    # Diagnose where the final derivation goes wrong, from the same graded forms.
+    final = next(s for s in stages if s.time is None)
+    grades = final.report.grades
+    diagnosis_path = path.parent / "diagnosis.md"
+    diagnosis_path.write_text(render_diagnosis(grades, project, where), encoding="utf-8")
+    print(f"wrote {diagnosis_path}", file=sys.stderr)
+    print(diagnosis_summary_line(grades))
 
 
 if __name__ == "__main__":
