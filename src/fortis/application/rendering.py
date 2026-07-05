@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from src.fortis.application.combining import differing, matches_exactly
 from src.fortis.application.syllabifying import SyllabificationError, syllabify, syllables
 from src.fortis.general.utils import IdentityCache
-from src.fortis.models.bundles import FeatureBundle
+from src.fortis.models.bundles import FeatureBundle, is_morpheme_boundary
 from src.fortis.models.inventories import Diacritic, DiacriticKind
 from src.fortis.models.project import Project
 from src.fortis.models.specs import FeatureSpec
@@ -134,9 +134,11 @@ def render_syllabified(
             if present:
                 bundle = sequence[carrier]
                 _find_diacritics(bundle, present, all_diacritics, before, combining, after)
-        # A boundary-marking before-mark stands in for the "." at an interior edge.
+        # A boundary-marking before-mark stands in for the "." at an interior edge; so does a
+        # morpheme boundary starting the syllable (``at-a``, not ``at-.a`` / ``at.-a``).
         marks_boundary = any(inventories.diacritics[s].marks_boundary for s in before)
-        if dots and syllable.start in interior and not marks_boundary:
+        starts_with_boundary = is_morpheme_boundary(sequence[syllable.start])
+        if dots and syllable.start in interior and not marks_boundary and not starts_with_boundary:
             parts.append(".")
         parts.append("".join(before))  # syllable-initial marks (e.g. stress)
         for i in range(syllable.start, syllable.end):
@@ -166,6 +168,8 @@ def render_segment(
     always renders the same, and the realized segments in play are a small, bounded set
     (unlike the transient ``Form``s those other caches guard against unbounded growth for).
     """
+    if is_morpheme_boundary(segment):
+        return "-"  # a morpheme boundary renders as its own symbol, never as a letter
     key = (id(inventories), frozenset((f, spec.value) for f, spec in segment.items()), exclude)
     cached = _render_segment_cache.get(key)
     if cached is not None:

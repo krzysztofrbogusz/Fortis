@@ -150,3 +150,12 @@ words       = ["vowel harmony (spreading)"]
 name        = "Vowel harmony (spreading)"
 definition  = "[+syllabic, <1: aperture: high>] -> [back: ~1, front: none, <1: rounded: ~2>, <1: labial: ~3>] / [+syllabic, back: ~1, rounded: ~2, labial: ~3] [-syllabic]* _"
 application = "left_to_right"
+
+# A morpheme boundary "-" (written in the word, e.g. at-a) is a real, deletable segment that
+# forces a syllable break: at-a syllabifies as at.a (t in the coda), where ata is a.ta (t in the
+# onset). This rule deletes the boundary; because the form re-syllabifies before every rule, the
+# trace shows the influence (at-a) and then, once "-" is gone, ordinary syllabification (a.ta).
+[morpheme_boundary_loss]
+words      = ["morpheme boundary"]
+name       = "Morpheme-boundary loss"
+definition = "- -> ∅"

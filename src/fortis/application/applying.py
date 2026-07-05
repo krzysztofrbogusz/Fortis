@@ -43,7 +43,7 @@ from src.fortis.application.combining import merge
 # is used purely for annotation here.
 from src.fortis.application.matching import Match, SyllableView
 from src.fortis.models.bindings import Bindings
-from src.fortis.models.bundles import FeatureBundle, ResultBundle
+from src.fortis.models.bundles import FeatureBundle, ResultBundle, morpheme_boundary_bundle
 from src.fortis.models.elements import (
     Bound,
     BundleElem,
@@ -53,6 +53,7 @@ from src.fortis.models.elements import (
     Group,
     LetterBundle,
     LetterRef,
+    MorphemeBoundary,
     Negated,
     Null,
     Quantified,
@@ -310,6 +311,9 @@ def _render_result_element(
 
         case Null():
             return []
+
+        case MorphemeBoundary():
+            return [morpheme_boundary_bundle()]  # insert a boundary: ∅ -> -
 
         case _:
             raise NotImplementedError(f"result element {element!r} is not yet supported")

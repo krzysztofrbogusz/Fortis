@@ -53,12 +53,12 @@ def split_phones(form: str) -> list[str]:
     """Split a rendered form into phones for edit-distance comparison.
 
     A phone is a base character plus any following attaching marks. Syllable
-    dots and whitespace are dropped (structural, not segmental), so ``a.vɑ̃`` and
-    ``avɑ̃`` both split to ``['a', 'v', 'ɑ̃']``.
+    dots, morpheme boundaries (``-``), and whitespace are dropped (structural, not
+    segmental), so ``a.vɑ̃`` and ``avɑ̃`` both split to ``['a', 'v', 'ɑ̃']``.
     """
     phones: list[str] = []
     for char in form:
-        if char == "." or char.isspace():
+        if char in ".-" or char.isspace():
             continue
         if phones and unicodedata.category(char) in _ATTACHING:
             phones[-1] += char
@@ -170,11 +170,11 @@ def feature_edit_distance(
 def _segment(form: str, project: Project) -> list[FeatureBundle] | None:
     """Segment a rendered form into feature bundles for the feature comparison.
 
-    Syllable dots and whitespace (structural, not segmental) are stripped first,
-    matching :func:`split_phones`. Returns ``None`` if the form uses a symbol the
-    project cannot segment.
+    Syllable dots, morpheme boundaries, and whitespace (structural, not segmental)
+    are stripped first, matching :func:`split_phones`. Returns ``None`` if the form
+    uses a symbol the project cannot segment.
     """
-    cleaned = "".join(form.replace(".", "").split())
+    cleaned = "".join(form.replace(".", "").replace("-", "").split())
     try:
         return lower_tiers(string_to_sequence(cleaned, project))
     except ValueError:

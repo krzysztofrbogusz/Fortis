@@ -32,4 +32,5 @@
 "pata"   = {gloss = "sound change over time", final = "paː", 100 = "pada", 200 = "pað̠a", 300 = "paː"}
 "otine"  = {gloss = "vowel harmony (agreement)", final = "otunɤ"}
 "utine"  = {gloss = "vowel harmony (spreading)", final = "utunɤ"}
+"at-a"   = {gloss = "morpheme boundary", final = "ata"}
 "táka" = {gloss = "tone spread", final = "ta˦ka˦"}

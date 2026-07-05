@@ -62,7 +62,12 @@ from dataclasses import dataclass, field, replace
 from src.fortis.application.combining import matches_exactly
 from src.fortis.general.utils import IdentityCache
 from src.fortis.models.bindings import Bindings
-from src.fortis.models.bundles import FeatureBundle, PatternBundle
+from src.fortis.models.bundles import (
+    MORPHEME_BOUNDARY,
+    FeatureBundle,
+    PatternBundle,
+    is_morpheme_boundary,
+)
 from src.fortis.models.elements import (
     Bound,
     BundleElem,
@@ -72,6 +77,7 @@ from src.fortis.models.elements import (
     Group,
     LetterBundle,
     LetterRef,
+    MorphemeBoundary,
     Negated,
     Null,
     Quantified,
@@ -525,9 +531,14 @@ def _match_element(
     the syllable-boundary positions (the ``$`` assertion); *syllables* supplies the
     per-position nucleus bundle for tier-aware matching of syllable-tier features.
     """
+    # A morpheme-boundary segment is opaque to phonology: only a MorphemeBoundary element
+    # (below) matches it. Every content element — pattern, letter, wildcard, negation —
+    # treats it as unmatchable, so a boundary breaks up adjacency until a rule deletes it.
+    at_boundary = pos < len(segments) and is_morpheme_boundary(segments[pos])
+
     match element:
         case BundleElem(bundle):
-            if pos < len(segments):
+            if pos < len(segments) and not at_boundary:
                 branch = bindings.copy()
                 syllable = syllables.at(pos) if syllables else None
                 feats = syllables.features if syllables else frozenset()
@@ -546,21 +557,27 @@ def _match_element(
                 yield pos, branch
 
         case LetterRef(symbol):
-            if pos < len(segments) and symbol in letters:
+            if pos < len(segments) and not at_boundary and symbol in letters:
                 feats = syllables.features if syllables else frozenset()
                 syl = syllables.at(pos) if syllables else None
                 if _letter_matches(letters[symbol].bundle, segments[pos], feats, syl):
                     yield pos + 1, bindings
 
         case LetterBundle(bundle):
-            if pos < len(segments):
+            if pos < len(segments) and not at_boundary:
                 feats = syllables.features if syllables else frozenset()
                 syl = syllables.at(pos) if syllables else None
                 if _letter_matches(bundle, segments[pos], feats, syl):
                     yield pos + 1, bindings
 
         case Wildcard():
-            if pos < len(segments):
+            if pos < len(segments) and not at_boundary:
+                yield pos + 1, bindings
+
+        case MorphemeBoundary():
+            # The one element that matches a boundary segment — consuming it, so a
+            # ``- -> ∅`` rule deletes it and a context ``-`` requires it be present.
+            if at_boundary:
                 yield pos + 1, bindings
 
         case WordBoundary():
@@ -594,8 +611,9 @@ def _match_element(
 
         case Negated(inner):
             # One segment that the inner element does NOT match. Bindings from the
-            # failed inner attempt are discarded (a negative match binds nothing).
-            if pos < len(segments):
+            # failed inner attempt are discarded (a negative match binds nothing). A
+            # boundary segment is opaque, so ``!X`` does not match it either.
+            if pos < len(segments) and not at_boundary:
                 if bindings.permissive_alpha:
                     # Pass 1 is alpha-blind, but "always matches" would wrongly force
                     # an alpha-bearing negation to *never* hold. The negation is
@@ -886,6 +904,8 @@ def _required_counts(sd: StructuralDescription, letters: LetterInventory) -> Cou
                     counts.update(_spec_demands(letters[symbol].bundle))
                 case RecallRef(ref) if required and ref in bindings:
                     counts.update(bindings[ref])
+                case MorphemeBoundary() if required:
+                    counts.update([(MORPHEME_BOUNDARY, 1)])  # needs a boundary segment present
                 case Bound(_, inner):
                     accumulate((inner,), required)
                 case Group(inner):

@@ -26,6 +26,7 @@ The grammar::
     element     := (INT EQ)? unit                            # Bound
     unit        := BANG? atom quantifier?
     atom        := BUNDLE | null | recall | NAME | group | BOUNDARY | FLOATING
+                   # BOUNDARY is #, $, or - (morpheme boundary)
     recall      := AT INT                                    # RecallRef
     null        := "∅" | "0"
     group       := LPAREN sequence (PIPE sequence)* RPAREN   # 1 alt -> Group, >1 -> Disjunction
@@ -63,6 +64,7 @@ from src.fortis.models.elements import (
     Group,
     LetterRef,
     ModifiedLetter,
+    MorphemeBoundary,
     Negated,
     Null,
     Quantified,
@@ -307,7 +309,13 @@ class _Parser:
                 return LetterRef(tok.text)
             case Token.BOUNDARY:
                 self._advance()
-                return WordBoundary() if tok.text == "#" else SyllableBoundary()
+                match tok.text:
+                    case "#":
+                        return WordBoundary()
+                    case "$":
+                        return SyllableBoundary()
+                    case _:
+                        return MorphemeBoundary()
             case Token.LPAREN:
                 return self._paren(bundle)
             case _:

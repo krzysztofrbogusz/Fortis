@@ -14,7 +14,7 @@ swap as one edit.
 | 100 | 1 | 1 | 1 | 0.000 | 0.000 |
 | 200 | 1 | 1 | 1 | 0.000 | 0.000 |
 | 300 | 1 | 1 | 1 | 0.000 | 0.000 |
-| final | 18 | 18 | 18 | 0.000 | 0.000 |
+| final | 19 | 19 | 19 | 0.000 | 0.000 |
 
 ## 100
 
@@ -30,4 +30,4 @@ All 1 graded words exact.
 
 ## final
 
-All 18 graded words exact.
+All 19 graded words exact.

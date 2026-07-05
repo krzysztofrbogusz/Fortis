@@ -193,6 +193,15 @@ Vowel harmony (spreading)
     u.ti.ne → u.tu.nɤ   (i→u, e→ɤ)
 ```
 
+## morpheme boundary
+
+`at-a` → `a.ta`
+
+```
+Morpheme-boundary loss
+    at-a → a.ta   (-→∅)
+```
+
 ## tone spread
 
 `táka` → `ta˦.ka˦`

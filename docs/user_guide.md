@@ -325,10 +325,13 @@ Three things follow. **`ˈe` is exactly `e^[stress: primary]`** (and `ˌe` is `e
 []     wildcard — matches any segment   (target, context, exception)
 #      word boundary                    (target, context, exception)
 $      syllable boundary                (target, context, exception)
+-      morpheme boundary                (any position — a real segment)
 ∅      null segment                     (target, result only)
 ```
 
 Boundaries (`#`, `$`) are positional assertions and do not count toward cardinality on either side. A boundary may not be the sole element on either side of a rule (`# → x` and `x → #` are both errors), but is otherwise valid in result position too, where it is a redundant marker, and inside a disjunction in any position. `∅` is **not** valid in context or exception positions.
+
+The **morpheme boundary `-`** is different from `#`/`$`: it is a real, one-wide segment (written directly in a word, e.g. `at-a`), not a zero-width assertion. It forces a syllable break at its position (see §7) and is opaque to phonology — no bundle, letter, wildcard, or negation matches it, so it breaks up adjacency; only a `-` element matches it. Being a real segment it **does** count toward cardinality, so `- → ∅` deletes a boundary and `∅ → - / a _ t` inserts one, exactly like any segment. Because the form re-syllabifies before every rule, deleting a `-` ends its influence from the next rule on. (`-` is only ever the arrow head in `->`, so a `-` meant as a boundary right before an arrow needs a space: `ab- ->`; a `-` value inside a bundle, `[-voice]`, is untouched.)
 
 ### 5.3 Quantifiers
 
@@ -553,6 +556,8 @@ Syllabification places syllable boundaries on a form without inserting or deleti
 - If an `onset` and/or `coda` **pattern** is defined in `syllable_parts.toml`, that pattern _defines_ legality instead: every split point is considered and the longest onset whose onset and coda each fully match their patterns wins — so a pattern may license a non-sonority-rising onset (e.g. _s_+stop). The patterns are ordinary element sequences (`[nasal]` is a mandatory single-nasal coda; `[nasal]?` an optional one; `[+cons][-syll, -cons]?` a consonant plus optional glide). A cluster with no pattern-legal division is reported as unsyllabifiable.
 
 Onset/coda patterns constrain only the interior division where there is a choice; word-edge onsets and codas are forced and not checked.
+
+A **morpheme boundary** `-` (§5.2) in an interior cluster overrides all of the above: it forces the syllable split at its own position — everything before it is the preceding syllable's coda, everything after it the following syllable's onset — so `at-a` is `at.a` (coda _t_), where `ata` is `a.ta` (onset _t_). Deleting the `-` with a rule restores ordinary syllabification on the next pass.
 
 The `$` assertion matches at any syllable boundary (interior or word edge). Syllable-tier diacritics (tone, stress) attach to the nucleus of their syllable during segmentation, and render back to IPA in `render_syllabified`: stress at the syllable's left edge (`ˈ`, `ˌ`) and tone as Chao tone letters at the right edge (a contour as a tone-letter sequence).
 

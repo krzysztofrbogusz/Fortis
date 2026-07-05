@@ -44,7 +44,7 @@ class Token(Enum):
     CARET = auto()  # ^   modifies the preceding letter with a following [ ... ] bundle
     BUNDLE = auto()  # [ ... ]  (text = inner, brackets stripped)
     FLOATING = auto()  # ⟨ ... ⟩  floating autosegment (text = inner, brackets stripped)
-    BOUNDARY = auto()  # # or $   (text = the symbol)
+    BOUNDARY = auto()  # #, $, or -   (text = the symbol)
     NAME = auto()  # a letter reference
 
 
@@ -140,8 +140,8 @@ def lex(source: str) -> list[TokenInfo]:
         The tokens in source order. Whitespace is consumed and not emitted.
 
     Raises:
-        LexError: On an unterminated or stray bracket, a lone ``-`` that is not
-            part of an arrow, or any other character that cannot start a token.
+        LexError: On an unterminated or stray bracket, or any other character that
+            cannot start a token. A lone ``-`` is a morpheme-boundary token.
     """
     tokens: list[TokenInfo] = []
     i = 0
@@ -164,7 +164,11 @@ def lex(source: str) -> list[TokenInfo]:
                 tokens.append(TokenInfo(Token.ARROW, "->", i))
                 i += 2
                 continue
-            raise LexError("expected '->' arrow after '-'", source, i)
+            # A lone ``-`` (not the head of ``->``) is a morpheme-boundary token. The ``->``
+            # check above wins, so a boundary right before an arrow needs a space (``ab- ->``).
+            tokens.append(TokenInfo(Token.BOUNDARY, "-", i))
+            i += 1
+            continue
 
         if ch == _BRACKET_OPEN:
             close = source.find(_BRACKET_CLOSE, i + 1)

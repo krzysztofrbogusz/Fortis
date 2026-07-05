@@ -100,6 +100,18 @@ type Boundary = SyllableBoundary | WordBoundary
 
 
 @dataclass(frozen=True)
+class MorphemeBoundary:
+    """The morpheme-boundary token ``-``: a real, deletable one-wide segment.
+
+    Unlike :class:`WordBoundary`/:class:`SyllableBoundary` (zero-width assertions), a
+    morpheme boundary occupies a position on the segmental tier. It forces a syllable
+    break, and an ordinary rule can match and delete it (``- -> ∅``) or insert one
+    (``∅ -> -``). It is matched only against a boundary segment — no phonological
+    pattern matches it — so it counts toward a side's cardinality like any segment.
+    """
+
+
+@dataclass(frozen=True)
 class Null:
     """The null segment, for insertion and deletion."""
 
@@ -157,6 +169,7 @@ type Element = (
     | Wildcard
     | SyllableBoundary
     | WordBoundary
+    | MorphemeBoundary
     | Null
     | Group
     | Disjunction

@@ -41,3 +41,23 @@ class ResultBundle(_SpecDict, dict[str, ResultSpec]):
 
     Used in rule result position.
     """
+
+
+# A morpheme boundary (the ``-`` token) is a real, deletable segment on the segmental tier,
+# not a phonological one. It is marked by this reserved key — deliberately un-typeable as a
+# real feature name (a feature name may not contain control characters), so no inventory ever
+# declares it, no pattern references it, and it never matches phonological material. Only a
+# ``-`` rule element matches it, and the syllabifier reads it to force a syllable break. The
+# key rides along through ``combine``/tier-lowering (a plain ``{**bundle}`` copy) so a boundary
+# stays recognisable after those transforms.
+MORPHEME_BOUNDARY = "\x00morpheme-boundary"
+
+
+def morpheme_boundary_bundle() -> FeatureBundle:
+    """A fresh bundle marking one morpheme-boundary segment."""
+    return FeatureBundle({MORPHEME_BOUNDARY: FeatureSpec(feature=MORPHEME_BOUNDARY, value=1)})
+
+
+def is_morpheme_boundary(bundle: FeatureBundle) -> bool:
+    """Whether *bundle* is a morpheme-boundary marker rather than a phonological segment."""
+    return MORPHEME_BOUNDARY in bundle

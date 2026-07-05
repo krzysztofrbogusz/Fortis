@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from src.fortis.application.matching import full_match, pattern_matches
 from src.fortis.general.utils import IdentityCache
-from src.fortis.models.bundles import FeatureBundle, PatternBundle
+from src.fortis.models.bundles import FeatureBundle, PatternBundle, is_morpheme_boundary
 from src.fortis.models.inventories import (
     LetterInventory,
     SonoritiesInventory,
@@ -217,6 +217,13 @@ def _syllabify_uncached(
     levels = [_sonority(seg, sonorities) for seg in segments]
     boundaries = {0, len(segments)}  # word edges are syllable edges
     for left, right in zip(nuclei, nuclei[1:], strict=False):
+        # A morpheme boundary in the cluster forces the split at its own position,
+        # overriding sonority/MOP: material before it is the left syllable's coda, material
+        # after it the right syllable's onset. (So ``at-a`` is ``at.a``, not ``a.ta``.)
+        morpheme_splits = [j for j in range(left + 1, right) if is_morpheme_boundary(segments[j])]
+        if morpheme_splits:
+            boundaries.update(morpheme_splits)
+            continue
         cluster_levels = levels[left + 1 : right]
         cluster_segs = segments[left + 1 : right]
         start = _split(cluster_levels, cluster_segs, onset_part, coda_part, letters)

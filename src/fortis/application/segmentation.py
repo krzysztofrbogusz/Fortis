@@ -5,7 +5,7 @@ from src.fortis.application.matching import pattern_matches
 from src.fortis.application.tiers import associate_tiers
 from src.fortis.config import config
 from src.fortis.models.autosegment import Autoseg, AutosegmentalTier
-from src.fortis.models.bundles import FeatureBundle
+from src.fortis.models.bundles import FeatureBundle, morpheme_boundary_bundle
 from src.fortis.models.form import Form
 from src.fortis.models.project import Project
 from src.fortis.models.tier_declaration import TierInventory
@@ -83,6 +83,14 @@ def string_to_sequence(raw_string: str, project: Project) -> Form:
             position = (len(segments) - 1, "after") if segments else (0, "before")
             float_markers.append((tone, position))
             i += close + 1
+            continue
+
+        # 0b. A morpheme boundary ``-`` — a real, deletable segment that forces a syllable
+        #     break. It is its own segment, carries no phonological features, and is only
+        #     ever matched by a ``-`` rule element.
+        if remaining.startswith("-"):
+            segments.append(morpheme_boundary_bundle())
+            i += 1
             continue
 
         # 1. Before diacritics (accumulated in buffers)
