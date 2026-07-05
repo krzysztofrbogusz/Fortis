@@ -152,6 +152,7 @@ def _autopsy_json(aus, top):
     return [{"phone": a.phone, "errors": a.errors, "total": a.total,
              "supportFloor": a.support_floor,
              "predictors": [{"predictor": x.predictor, "phi": round(x.phi, 2),
+                             "fscore": round(x.fscore, 2),
                              "errHere": x.err_here, "okHere": x.ok_here,
                              "errAway": x.err_away, "okAway": x.ok_away}
                             for x in a.associations if x.phi > 0][:top]}

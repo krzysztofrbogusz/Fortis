@@ -118,11 +118,14 @@ class ContextAssociation:
     ``"left:voice=1"``). The 2×2 counts are over the focus phone's positions:
     ``err_here``/``ok_here`` are error vs. correct *with* the predictor present,
     ``err_away``/``ok_away`` without it. ``phi`` is the phi coefficient — positive
-    means the predictor co-occurs with error.
+    means the predictor co-occurs with error. ``fscore`` is the F1 of treating the
+    predictor as a *prediction* of error (precision × recall); shown alongside phi,
+    but ranking is by phi, which is chance-corrected where F1 is not.
     """
 
     predictor: str
     phi: float
+    fscore: float
     err_here: int
     ok_here: int
     err_away: int
@@ -166,6 +169,25 @@ def phi_coefficient(err_here: int, ok_here: int, err_away: int, ok_away: int) ->
         * (ok_here + ok_away)
     )
     return numerator / math.sqrt(margins) if margins else 0.0
+
+
+def f_score(err_here: int, ok_here: int, err_away: int) -> float:
+    """F1 of treating "predictor present" as a prediction of "error".
+
+    Precision = errors among the predictor's positions (``err_here / support``);
+    recall = the predictor's share of all errors (``err_here / all errors``); F1 is
+    their harmonic mean. Returns 0.0 when the predictor covers no error (either
+    numerator, hence the sum, is zero). Unlike phi it is not chance-corrected — a
+    predictor present almost everywhere can post a high F1 at phi ≈ 0 — so it is a
+    companion measure, not the ranking key.
+    """
+    precision_denom = err_here + ok_here
+    recall_denom = err_here + err_away
+    if err_here == 0 or precision_denom == 0 or recall_denom == 0:
+        return 0.0
+    precision = err_here / precision_denom
+    recall = err_here / recall_denom
+    return 2 * precision * recall / (precision + recall)
 
 
 def _feature_map(phone: str, project: Project, cache: dict[str, dict | None]) -> dict | None:
@@ -253,6 +275,7 @@ def error_contexts(grades: tuple[Grade, ...], focus: str, project: Project) -> F
                 ContextAssociation(
                     predictor=predictor,
                     phi=phi_coefficient(err_here, ok_here, errors - err_here, (total - errors) - ok_here),
+                    fscore=f_score(err_here, ok_here, errors - err_here),
                     err_here=err_here,
                     ok_here=ok_here,
                     err_away=errors - err_here,
@@ -538,8 +561,9 @@ def _autopsy_intro(min_support: int, min_support_percent: int) -> list[str]:
         "more error-prone). A predictor is shown only if it clears the support floor —",
         f"max({min_support}, {min_support_percent}% of the phone's occurrences), so the bar rises",
         "with a bigger word base; the raw *err/ok* counts, present (here) vs. absent (away),",
-        "travel with each row so a thin cell is visible. `left`/`right` name the",
-        "neighbouring attested phone; `left:f=v` a feature of that neighbour.",
+        "travel with each row so a thin cell is visible. **F** is the F1 of the predictor as",
+        "an error signal — a companion to phi (rows rank by phi, which is chance-corrected).",
+        "`left`/`right` name the neighbouring attested phone; `left:f=v` a feature of that neighbour.",
         "",
     ]
 
@@ -562,12 +586,12 @@ def _autopsy_section(autopsy: FocusAutopsy, min_errors: int, report_top: int) ->
     rows = [
         note,
         "",
-        "| context | phi | err/ok here | err/ok away |",
-        "| --- | ---: | ---: | ---: |",
+        "| context | phi | F | err/ok here | err/ok away |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
     for a in shown:
         rows.append(
-            f"| `{a.predictor}` | {a.phi:+.2f} "
+            f"| `{a.predictor}` | {a.phi:+.2f} | {a.fscore:.2f} "
             f"| {a.err_here}/{a.ok_here} | {a.err_away}/{a.ok_away} |"
         )
     return [*header, *rows, ""]

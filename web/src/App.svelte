@@ -630,13 +630,14 @@
               {#if a.predictors.length}
                 <table class="grade-misses">
                   <thead>
-                    <tr><th>context</th><th>phi</th><th>err/ok here</th><th>err/ok away</th></tr>
+                    <tr><th>context</th><th>phi</th><th>F</th><th>err/ok here</th><th>err/ok away</th></tr>
                   </thead>
                   <tbody>
                     {#each a.predictors as p}
                       <tr>
                         <td class="form">{p.predictor}</td>
                         <td>{p.phi >= 0 ? "+" : ""}{p.phi.toFixed(2)}</td>
+                        <td>{p.fscore.toFixed(2)}</td>
                         <td>{p.errHere}/{p.okHere}</td>
                         <td>{p.errAway}/{p.okAway}</td>
                       </tr>

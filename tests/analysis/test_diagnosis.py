@@ -13,6 +13,7 @@ from src.fortis.analysis.diagnosis import (
     diagnosis_summary_line,
     error_contexts,
     errors_by_time,
+    f_score,
     phi_coefficient,
     render_diagnosis,
     render_timeline,
@@ -105,6 +106,26 @@ class TestPhiCoefficient:
         assert phi_coefficient(5, 5, 0, 0) == 0.0
 
 
+class TestFScore:
+    def test_perfect(self):
+        # predictor present ⟺ error: precision = recall = 1 → F1 = 1.
+        assert f_score(err_here=4, ok_here=0, err_away=0) == 1.0
+
+    def test_harmonic_mean(self):
+        # precision 4/(4+4)=0.5, recall 4/(4+4)=0.5 → F1 = 0.5.
+        assert f_score(err_here=4, ok_here=4, err_away=4) == 0.5
+
+    def test_zero_when_predictor_covers_no_error(self):
+        assert f_score(err_here=0, ok_here=5, err_away=3) == 0.0
+
+    def test_high_f_at_low_phi_is_possible(self):
+        # Predictor present in 90% of sites, same 10% error rate present vs absent:
+        # phi is exactly 0 (independence), but F1 stays healthy on recall alone —
+        # the reason ranking is by phi, not F.
+        assert f_score(err_here=9, ok_here=81, err_away=1) > 0.15
+        assert phi_coefficient(9, 81, 1, 9) == 0.0
+
+
 class TestErrorContexts:
     """A conditioned autopsy fixture with counts known by hand.
 
@@ -130,6 +151,7 @@ class TestErrorContexts:
         autopsy = error_contexts(self._grades(), "t", project)
         left_a = next(a for a in autopsy.associations if a.predictor == "left=a")
         assert left_a.phi == 1.0
+        assert left_a.fscore == 1.0  # every /t/-after-/a/ is an error, and covers all errors
         assert (left_a.err_here, left_a.ok_here) == (3, 0)
         assert (left_a.err_away, left_a.ok_away) == (0, 2)
         assert left_a.support == 3
