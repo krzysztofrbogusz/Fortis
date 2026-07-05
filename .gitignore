@@ -9,5 +9,18 @@ wheels/
 # Virtual environments
 .venv
 
+# Generated analysis reports — written into the project dir on every CLI run and
+# fully reproducible, so they are not tracked (this excludes only these reserved
+# report names; inventory files like letters.csv and docs like SOURCE.md stay).
+projects/**/output.md
+projects/**/output.csv
+projects/**/derivation_table.csv
+projects/**/distances.md
+projects/**/diagnosis.md
+projects/**/timeline.md
+projects/**/blame.md
+projects/**/whatif.md
+projects/**/warnings.md
+
 # Other
 .DS_Store
