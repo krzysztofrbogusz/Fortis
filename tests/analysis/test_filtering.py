@@ -1,10 +1,10 @@
-"""Tests for the target filter (src/fortis/analysis/filtering.py)."""
+"""Tests for the pattern filter (src/fortis/analysis/filtering.py)."""
 
 from pathlib import Path
 
 import pytest
 
-from src.fortis.analysis.filtering import filter_by_target, filter_note
+from src.fortis.analysis.filtering import filter_by_pattern, filter_summary_line
 from src.fortis.application.deriving import derive_all
 from src.fortis.loaders.project import load_project
 
@@ -19,39 +19,42 @@ def derivs(latin):
     return derive_all(latin)
 
 
-class TestFilterByTarget:
-    def test_selects_words_whose_target_matches(self, derivs, latin):
-        result = filter_by_target(derivs, "ʁ", latin).unwrap()
-        assert 0 < len(result.matched) < result.considered  # a proper subset
-        assert all("ʁ" in d.word.final for d in result.matched)  # every match contains ʁ
+class TestFilterByPattern:
+    def test_matches_transient_forms_not_just_the_target(self, derivs, latin):
+        # /d͡ʒ/ is an Old French affricate that arises mid-derivation and resolves to /ʒ/,
+        # so words match on a DERIVED form even though their target has no d͡ʒ — the whole
+        # point of matching every form, not just the target.
+        result = filter_by_pattern(derivs, "d͡ʒ", latin).unwrap()
+        assert len(result.matched) > 0
+        assert all(m.locations for m in result.matched)
+        assert any(all(loc.label != "target" for loc in m.locations) for m in result.matched)
+
+    def test_locations_are_one_per_phase(self, derivs, latin):
+        # A pattern persisting across several rules at one time collapses to one entry.
+        result = filter_by_pattern(derivs, "d͡ʒ", latin).unwrap()
+        for m in result.matched:
+            labels = [loc.label for loc in m.locations]
+            assert len(labels) == len(set(labels))
+
+    def test_considered_is_every_word(self, derivs, latin):
+        # Every word has a derivation, so all are considered (not only those with a target).
+        assert filter_by_pattern(derivs, "ʁ", latin).unwrap().considered == len(derivs)
 
     def test_feature_pattern_matches(self, derivs, latin):
-        # /t̪/ before a high vowel — the notation a rule target uses.
-        result = filter_by_target(derivs, "t̪ [aperture: high]", latin).unwrap()
+        result = filter_by_pattern(derivs, "t̪ [aperture: high]", latin).unwrap()
         assert len(result.matched) > 0
 
-    def test_considered_is_words_with_a_target(self, derivs, latin):
-        result = filter_by_target(derivs, "ʁ", latin).unwrap()
-        assert result.considered == sum(1 for d in derivs if d.word.final is not None)
-
-    def test_zero_match_is_ok_not_error(self, derivs, latin):
-        # /q/ is a valid symbol but no target has it — an empty result, not an error.
-        result = filter_by_target(derivs, "q", latin).unwrap()
-        assert result.matched == () and result.considered > 0
-
     def test_parse_error_is_err(self, derivs, latin):
-        assert filter_by_target(derivs, "[bad", latin).is_err()
+        assert filter_by_pattern(derivs, "[bad", latin).is_err()
 
     def test_empty_pattern_is_err(self, derivs, latin):
-        assert filter_by_target(derivs, "", latin).is_err()
+        assert filter_by_pattern(derivs, "", latin).is_err()
 
     def test_unknown_symbol_is_err_not_silent_zero(self, derivs, latin):
-        # The failure mode to avoid: a symbol that resolves to nothing must error,
-        # not silently match zero words (which reads as "clean").
-        assert filter_by_target(derivs, "×", latin).is_err()
+        assert filter_by_pattern(derivs, "×", latin).is_err()
 
 
-class TestFilterNote:
-    def test_note_reports_counts(self, derivs, latin):
-        note = filter_note(filter_by_target(derivs, "ʁ", latin).unwrap())
-        assert "filter `ʁ`" in note and "words" in note
+class TestFilterSummaryLine:
+    def test_line_reports_counts(self, derivs, latin):
+        line = filter_summary_line(filter_by_pattern(derivs, "ʁ", latin).unwrap())
+        assert "filter `ʁ`" in line and "matched" in line

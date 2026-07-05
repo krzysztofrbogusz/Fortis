@@ -181,12 +181,18 @@ how many words it improves, regresses, or leaves unchanged:
 python -m src.fortis.analysis.main --project projects/latin_to_french --try 'eː → ɛː / _ t'
 ```
 
-To scope any of these to a sub-population, `--filter 'PATTERN'` restricts every
-report to the words whose **attested target** matches a sequence pattern (the same
-notation a rule target uses — feature bundles, letters, quantifiers):
+To trace a configuration through the derivation, `--filter 'PATTERN'` on the engine
+run synthesises every word the pattern touches in **any** form — its input, an
+intermediate derived form, the surface, the attested target, or a stage — into
+`filtered_output.md` (each matched word's trace, labelled by where it matched, over a
+subset grading + confusion header) and `filtered_table.csv`. Because a pattern is often
+transient (it arises at one rule and resolves at a later one), most matched words derive
+correctly: this answers *which* words pass through a shape and *where*, not which are
+wrong. The pattern is the same notation a rule target uses (feature bundles, letters,
+quantifiers):
 
 ```
-python -m src.fortis.analysis.main --project projects/latin_to_french --filter 't̪ [aperture: high]'
+python -m src.fortis.main --project projects/latin_to_french --filter 'd͡ʒ'
 ```
 
 The thresholds these analyses use (the autopsy's support floor, how many phones

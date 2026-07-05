@@ -45,6 +45,25 @@ def test_main_writes_distances_with_target(project, tmp_path):
     assert "# Distances" in distances.read_text(encoding="utf-8")
 
 
+def test_main_filter_writes_synthesis(project, tmp_path):
+    # --filter synthesises the words a pattern touches (any form) into two extra files.
+    ipa = next(iter(project.words))
+    (tmp_path / "words.toml").write_text(f'"{ipa}" = "x"\n', encoding="utf-8")
+    main(["--project", str(tmp_path), "--filter", "[+syllabic]"])  # any vowel — always present
+    filtered = tmp_path / "filtered_output.md"
+    assert filtered.exists() and (tmp_path / "filtered_table.csv").exists()
+    assert "# Filtered" in filtered.read_text(encoding="utf-8")
+
+
+def test_main_filter_bad_pattern_exits(project, tmp_path):
+    import pytest
+
+    ipa = next(iter(project.words))
+    (tmp_path / "words.toml").write_text(f'"{ipa}" = "x"\n', encoding="utf-8")
+    with pytest.raises(SystemExit):
+        main(["--project", str(tmp_path), "--filter", "[bad"])
+
+
 def _derive(word, rules, project):
     return derive(
         Word(ipa=word),

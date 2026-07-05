@@ -24,6 +24,7 @@ from pathlib import Path
 
 from src.fortis.analysis.blame import blame_all, blame_summary_line, render_blame
 from src.fortis.analysis.diagnosis import (
+    confusions,
     diagnose_stages,
     diagnosis_summary_line,
     errors_by_time,
@@ -31,7 +32,8 @@ from src.fortis.analysis.diagnosis import (
     render_timeline,
     timeline_summary_line,
 )
-from src.fortis.analysis.grading import grade_stages
+from src.fortis.analysis.filtering import MatchedWord, FilterResult, filter_by_pattern, filter_summary_line
+from src.fortis.analysis.grading import grade, grade_derivation, grade_stages
 from src.fortis.analysis.reporting import distance_summary_line, render_distance_summary
 from src.fortis.analysis.warnings import (
     render_warnings,
@@ -46,6 +48,7 @@ from src.fortis.loaders.project import load_project
 from src.fortis.models.derivation import Derivation, DerivationStep
 from src.fortis.models.project import Project
 from src.fortis.models.rules import RuleInventory
+from src.fortis.result import Err, Ok
 
 # Sentinel: no ``--output`` path given (the default) ⇒ write to ``<project>/output.md``.
 _AUTO_OUTPUT = object()
@@ -110,6 +113,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
             "written, alongside the printed trace and a derivation_table.csv report (one "
             "row per word, one column per rule) (default path: <project>/output.md)"
         ),
+    )
+    parser.add_argument(
+        "--filter",
+        dest="filter",
+        metavar="PATTERN",
+        help="after the run, synthesise the words a sequence pattern touches in ANY form "
+        "(input, intermediate, surface, target, stage) into filtered_output.md + "
+        "filtered_table.csv, e.g. 't̪ [aperture: high]'",
     )
     return parser.parse_args(argv)
 
@@ -218,6 +229,27 @@ def main(argv: list[str] | None = None) -> None:
         print(warnings_summary_line(warnings), file=sys.stderr)
     elif warn_path.exists():
         warn_path.unlink()  # a prior run warned but this one doesn't — clear the stale report
+
+    # Phase 4c — filter: a post-run pass. --filter synthesises the words a pattern touches
+    # in ANY form (input → intermediate → surface → target → stage) into two extra files.
+    if args.filter is not None:
+        match filter_by_pattern(derivations, args.filter, project):
+            case Err(errs):
+                for error in errs:
+                    print(f"error: --filter: {error}", file=sys.stderr)
+                raise SystemExit(1)
+            case Ok(result):
+                ftable_path = path.parent / "filtered_table.csv"
+                ftable_path.write_text(
+                    _build_csv_report([m.derivation for m in result.matched], rules, project),
+                    encoding="utf-8",
+                )
+                foutput_path = path.parent / "filtered_output.md"
+                foutput_path.write_text(_build_filtered_report(result, project, where), encoding="utf-8")
+                for report_path in (ftable_path, foutput_path):
+                    print(f"wrote {report_path}", file=sys.stderr)
+                    saved.append(report_path)
+                print(filter_summary_line(result))
 
     # Phase 5 — printing: print the per-word traces.
     for derivation in derivations:
@@ -343,6 +375,80 @@ def _render_derivation_md(derivation: Derivation, project: Project) -> list[str]
         lines += ["```", *trace, "```", ""]
 
     return lines
+
+
+def _filtered_word_md(matched: MatchedWord, project: Project) -> list[str]:
+    """One matched word for filtered_output.md: its grade, where it matched, and trace."""
+    derivation = matched.derivation
+    surface = render_syllabified(
+        lower_tiers(derivation.surface), derivation.surface_boundaries, project
+    )
+    lines = [f"### {derivation.word.gloss or derivation.word.ipa}", "", f"`{derivation.word.ipa}` → `{surface}`", ""]
+    graded = grade_derivation(derivation, project)
+    if graded is not None:
+        verdict = "exact" if graded.exact else f"distance {graded.distance}"
+        lines.append(f"target `{graded.target}` — {verdict}.")
+    lines.append("matched at: " + ", ".join(f"`{loc.label}`" for loc in matched.locations))
+    lines.append("")
+    trace = _trace_lines(derivation.steps, project)
+    if trace:
+        lines += ["```", *trace, "```", ""]
+    return lines
+
+
+def _build_filtered_report(result: FilterResult, project: Project, where: str) -> str:
+    """The ``filtered_output.md`` synthesis: where the pattern appears, then each trace.
+
+    Trace-centric: a matched word usually derives correctly (the pattern arose and
+    resolved), so the payload is *which* words pass through it and *where* — a subset
+    grading + confusion header, then every matched word's derivation.
+    """
+    lines = [
+        f"# Filtered — {where} · filter `{result.pattern}`",
+        "",
+        f"Matched **{len(result.matched)} of {result.considered}** words where `{result.pattern}`",
+        "appears in some form — the input, an intermediate derived form, the surface, the",
+        "attested target, or a stage. Most matched words derive correctly; this shows *which*",
+        "words pass through the pattern and *where*, with each word's trace below.",
+        "",
+    ]
+    if not result.matched:
+        return "\n".join([*lines, "No word matched."]).rstrip() + "\n"
+
+    lines += ["## Where matched", "", "| word | matched at |", "| --- | --- |"]
+    for matched in result.matched:
+        labels = ", ".join(f"`{loc.label}`" for loc in matched.locations)
+        lines.append(f"| {matched.derivation.word.gloss or matched.derivation.word.ipa} | {labels} |")
+    lines.append("")
+
+    report = grade([matched.derivation for matched in result.matched], project)
+    if report.graded:
+        lines += [
+            "## Subset grading",
+            "",
+            f"{report.exact}/{report.graded} exact ({report.accuracy:.1%}), mean phone "
+            f"{report.mean_distance:.3f}, mean feature {report.mean_feature_distance:.3f}.",
+            "",
+        ]
+        table = confusions(report.grades)
+        if table:
+            lines += [
+                "Confusions among the matched words (counts only — the subset is too small",
+                "for the phi autopsy):",
+                "",
+                "| expected | got | count | examples |",
+                "| --- | --- | ---: | --- |",
+            ]
+            for c in table:
+                exp = f"`{c.expected}`" if c.expected is not None else "`∅`"
+                got = f"`{c.got}`" if c.got is not None else "`∅`"
+                lines.append(f"| {exp} | {got} | {c.count} | {', '.join(c.examples)} |")
+            lines.append("")
+
+    lines += ["## Derivations", ""]
+    for matched in result.matched:
+        lines += _filtered_word_md(matched, project)
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def _rule_columns(rules: RuleInventory) -> list[tuple[str, str]]:
