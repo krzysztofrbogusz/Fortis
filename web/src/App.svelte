@@ -77,6 +77,43 @@
     localStorage.setItem("theme", theme);
   });
 
+  // Adjustable split between the left (inventories) and right (results) panes: the left pane's
+  // width as a percent, dragged via the divider and clamped so neither pane collapses.
+  let panelsEl; // the flex row that holds both panes, for the drag's coordinate frame
+  let splitPct = $state(clampSplit(Number(localStorage.getItem("splitPct"))));
+  $effect(() => localStorage.setItem("splitPct", String(splitPct)));
+
+  function clampSplit(pct) {
+    return Number.isFinite(pct) && pct > 0 ? Math.min(80, Math.max(20, pct)) : 50;
+  }
+
+  function startResize(event) {
+    if (window.matchMedia("(max-width: 800px)").matches) return; // stacked: no horizontal drag
+    event.preventDefault();
+    const rect = panelsEl.getBoundingClientRect();
+    const onMove = (e) => {
+      splitPct = clampSplit(((e.clientX - rect.left) / rect.width) * 100);
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none"; // no text selection mid-drag
+  }
+
+  function keyResize(event) {
+    if (event.key === "ArrowLeft") splitPct = clampSplit(splitPct - 2);
+    else if (event.key === "ArrowRight") splitPct = clampSplit(splitPct + 2);
+    else if (event.key === "Home") splitPct = 50;
+    else return;
+    event.preventDefault();
+  }
+
   onMount(async () => {
     try {
       await initEngine((m) => (status = m));
@@ -338,7 +375,12 @@
     </div>
   {/if}
 
-  <main class="panels" class:disabled={!ready}>
+  <main
+    class="panels"
+    class:disabled={!ready}
+    bind:this={panelsEl}
+    style="--split-left: {splitPct}%"
+  >
     <!-- LEFT: inventories -->
     <section class="panel left">
       <div class="panel-head">
@@ -431,7 +473,23 @@
       />
     </section>
 
-    <div class="divider"></div>
+    <!-- A focusable separator is a valid ARIA window-splitter widget; the lint rules
+         treat `separator` as non-interactive, which does not fit this use. -->
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <div
+      class="divider"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize panels — drag, or use arrow keys"
+      aria-valuenow={Math.round(splitPct)}
+      aria-valuemin="20"
+      aria-valuemax="80"
+      tabindex="0"
+      onpointerdown={startResize}
+      onkeydown={keyResize}
+      ondblclick={() => (splitPct = 50)}
+    ></div>
 
     <!-- RIGHT: results -->
     <section class="panel right">
@@ -731,15 +789,33 @@
     min-height: 0;
   }
   .left {
-    flex: 1 1 50%;
+    flex: 0 0 var(--split-left, 50%);
   }
   .right {
-    flex: 1 1 50%;
+    flex: 1 1 0;
   }
   .divider {
-    width: 1px;
-    background: var(--border);
     flex: none;
+    position: relative;
+    width: 9px; /* a wide, easy-to-grab hit area around a 1px visual line */
+    background: transparent;
+    cursor: col-resize;
+    touch-action: none; /* a pointer drag resizes, never scrolls, on touch */
+  }
+  .divider::before {
+    content: "";
+    position: absolute;
+    inset: 0 4px; /* the 1px line, centred in the 9px handle */
+    background: var(--border);
+    transition: background 0.12s;
+  }
+  .divider:hover::before,
+  .divider:focus-visible::before {
+    inset: 0 3px; /* thickens to 3px on hover/focus */
+    background: var(--accent-border);
+  }
+  .divider:focus-visible {
+    outline: none;
   }
 
   .panel-head {
@@ -1152,9 +1228,21 @@
     .panels {
       flex-direction: column;
     }
+    /* Stacked: the horizontal split no longer applies — share the height evenly. */
+    .left,
+    .right {
+      flex: 1 1 50%;
+    }
     .divider {
       width: auto;
-      height: 1px;
+      height: 9px;
+      cursor: default;
+    }
+    .divider::before {
+      inset: 4px 0; /* the line runs horizontally when stacked */
+    }
+    .divider:hover::before {
+      inset: 3px 0;
     }
   }
 
