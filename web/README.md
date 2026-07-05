@@ -25,7 +25,8 @@ reflected on the next build — the glue only calls stable public functions
   (e.g. *Latin → French*), and any folder you import. Mirrors the CLI's
   project/fallback model with two directories in the browser: a pristine shipped
   `default` and a user overlay — editing or loading a file always writes into the
-  overlay, never the pristine copy. The 8 editable files split into rows accordingly:
+  overlay, never the pristine copy. The 9 editable files (the eight inventories
+  plus `settings.toml`) split into rows accordingly:
   - **Default** — files still falling back to the shipped default. Disappears once
     every file is overridden.
   - **Project** — files the current project supplies; each has a **×** to revert it
@@ -41,11 +42,13 @@ reflected on the next build — the glue only calls stable public functions
 - **Right panel** shows the results, with a view switcher: **Derivations** (the
   firing-rule trace, each word a card with a per-card **Definition** toggle),
   **Table** (`derivation_table.csv` — one row per word, one column per rule), and,
-  when the lexicon carries attested forms, **Grading** (the distance summary). A
-  **Save** button downloads the active view's report (`output.md` /
-  `derivation_table.csv` / `distances.md`). Small projects re-run automatically on
-  every edit; a large one (over 500 words or 100 rules) waits for a **Run project**
-  button instead.
+  when the lexicon carries attested forms, **Grading** (the distance summary),
+  **Diagnosis** (phone confusions + context autopsy), **Timeline** (errors by
+  rule-time + a per-stage diagnosis), and **Blame** (each wrong word attributed to
+  the rule that produced it). A **Save** button downloads the active view's report
+  (`output.md` / `derivation_table.csv` / `distances.md` / `diagnosis.md` /
+  `timeline.md` / `blame.md`). Small projects re-run automatically on every edit; a
+  large one (over 500 words or 100 rules) waits for a **Run project** button instead.
 
   Example projects are built by `scripts/build-engine.mjs` into
   `public/projects/<dir>/` (only the inventory files each one overrides) plus a

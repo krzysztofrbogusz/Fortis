@@ -601,8 +601,23 @@ Alongside the printed trace, every CLI run writes into the project directory:
   marks is one phone; an exact match is 0) and a finer **feature** distance (a
   substitution costs the number of features that differ, so `ɑ̃` is one edit from
   `ɑ` but eleven from `t`; an adjacent-segment swap counts as one). Both are
-  reported per word and in aggregate, for each stage and the final surface. The
-  standalone grader `python -m src.fortis.analysis.main` writes the same file.
+  reported per word and in aggregate, for each stage and the final surface.
+- **`diagnosis.md`** — when there are wrong words: a ranked tally of the phone
+  confusions across the lexicon (which target phone came out as which), and a
+  context **autopsy** that, for the phones most often wrong, finds the
+  attested-form environments most associated with the error (by phi coefficient).
+- **`timeline.md`** — the temporal views: each wrong phone bucketed by the
+  rule-time that produced it (traced by stable segment id), and the diagnosis
+  re-run at each attested stage.
+- **`blame.md`** — each wrong word attributed to the rule that produced the wrong
+  phone, with a per-step trajectory toward each era's attested form.
+
+The thresholds these analyses use are tunable per project in an optional
+`settings.toml` (the autopsy's support floor and how many phones to autopsy, the
+edit distance's metathesis cost); an absent file, or key, uses the built-in
+defaults. The standalone grader `python -m src.fortis.analysis.main` writes the
+same reports; its `--try 'RULE'` (optionally `--at TIME`) additionally previews a
+candidate rule against the lexicon and writes `whatif.md`.
 
 A run ends with a one-line summary on stderr — words derived, rules applied,
 per-phase timing, and the files saved.

@@ -96,8 +96,12 @@ Every run also writes reports alongside the printed trace: `output.md` (the
 firing-rule trace per word) and `derivation_table.csv` (one row per word and one
 column per rule — each titled `<time>: <rule>` — holding the word's resulting
 form wherever that rule fired, empty otherwise). If the lexicon carries attested
-forms (`final` and/or intermediate `stages`), a `distances.md` summary grades the
-derivation against them (phone and feature edit distance, per stage and final). A
+forms (`final` and/or intermediate `stages`), four more reports analyse the
+result: `distances.md` grades it (phone and feature edit distance, per stage and
+final); `diagnosis.md` shows which phones are confused and in what environment;
+`timeline.md` shows when in the cascade errors enter and re-runs the diagnosis at
+each attested stage; and `blame.md` attributes each wrong word to the rule that
+produced it (see [Diagnosing a rule set](#diagnosing-a-rule-set)). A
 run ends with a one-line summary on stderr — words derived, rules applied,
 per-phase timing, files saved — and shows a progress bar while deriving in a
 terminal. All reports land in the `<project>/` directory; `--output` overrides
@@ -111,11 +115,12 @@ python -m src.fortis.main --project projects/latin_to_french --output
 
 `web/` is a browser front end that runs the same Python engine used by the CLI —
 compiled to WebAssembly and executed in-browser via [Pyodide](https://pyodide.org),
-rather than a separate JavaScript reimplementation. Edit any of the 8 inventory
-files (or load your own project) and the derivations re-run in a trace view, with
-a **Grading** tab that scores them against the lexicon's attested forms when it
-has them; see [`web/README.md`](web/README.md) for the full picture, including
-the type scale and theming. To run it locally:
+rather than a separate JavaScript reimplementation. Edit any of the 9 project
+files (the eight inventories plus `settings.toml`, or load your own project) and
+the derivations re-run in a trace view, with **Grading**, **Diagnosis**,
+**Timeline**, and **Blame** tabs that score and analyse them against the lexicon's
+attested forms when it has them; see [`web/README.md`](web/README.md) for the full
+picture, including the type scale and theming. To run it locally:
 
 ```
 cd web
@@ -150,6 +155,36 @@ Intermediate `stages` are graded by matching the derived snapshot at rule-time T
 against the attested form at stage T, so those rows are only meaningful when the
 rule times are calibrated to the stage timescale — the `final` score never
 depends on that alignment.
+
+### Diagnosing a rule set
+
+Grading says _how_ wrong a derivation is; three further analyses say _what_ and
+_where_, all from the same attested targets and written on every run when the
+lexicon has them:
+
+- **`diagnosis.md`** — a ranked tally of the phone confusions across the lexicon
+  (which target phone came out as which), and a **context autopsy** that, for the
+  phones most often wrong, finds the attested-form environments most associated
+  with the error (by phi coefficient).
+- **`timeline.md`** — _when_ errors enter: each wrong phone attributed to the
+  rule-time that produced it (via the blame provenance below), plus the full
+  diagnosis re-run at each attested stage.
+- **`blame.md`** — each wrong word attributed to the specific rule that produced
+  the wrong phone, tracing (by stable segment id) which rule last set it, with a
+  per-step trajectory toward each era's attested form.
+
+To preview a change before committing it, `--try 'RULE'` splices a candidate rule
+into the cascade (optionally at `--at TIME`), re-derives, and writes `whatif.md` —
+how many words it improves, regresses, or leaves unchanged:
+
+```
+python -m src.fortis.analysis.main --project projects/latin_to_french --try 'eː → ɛː / _ t'
+```
+
+The thresholds these analyses use (the autopsy's support floor, how many phones
+to autopsy, the edit distance's metathesis cost) are tunable per project in an
+optional `settings.toml`; a project that omits it, or any key, gets the built-in
+defaults.
 
 ## How it works
 
@@ -304,7 +339,7 @@ fortis/
 │   ├── default/                 # shipped project — user-authored data, fallback base for all others
 │   │   ├── features.toml  letters.csv  diacritics.toml
 │   │   ├── sonorities.toml  syllable_parts.toml  tiers.toml
-│   │   └── words.toml  rules.toml
+│   │   └── words.toml  rules.toml  settings.toml   # settings.toml: tunable analysis params (optional)
 │   └── ...                      # other projects, e.g. latin_to_french, pie_to_germanic
 ├── docs/                        # user_guide.md (full reference), default_system.md (the shipped inventory)
 ├── web/                         # browser playground (Pyodide) — see web/README.md
@@ -312,7 +347,7 @@ fortis/
 └── src/fortis/
     ├── config.py                # paths, value symbols, greek alphabet, special symbols
     ├── result.py                # Result / Ok / Err
-    ├── main.py                  # load → derive → write reports (+ distances.md) → print trace + run summary
+    ├── main.py                  # load → derive → write reports (+ distances/diagnosis/timeline/blame) → print trace + run summary
     │
     ├── general/                 # generic helpers, zero domain knowledge
     │   ├── file_handling.py     #   load_toml_file, load_csv_file
@@ -329,6 +364,7 @@ fortis/
     │   ├── rules.py             #   ApplicationMode, StructuralDescription, Rule, RuleInventory
     │   ├── features.py          #   FeatureKind, Feature, FeatureInventory
     │   ├── inventories.py       #   Letter/Diacritic/Sonority/SyllablePart/Word + inventories
+    │   ├── settings.py          #   Settings (tunable analysis parameters, from settings.toml)
     │   ├── project.py           #   Project (every inventory bundled together)
     │   ├── derivation.py        #   DerivationStep, Derivation
     │   ├── segment.py  form.py  #   Segment (bundle + stable id), Form (segments + tiers)
@@ -344,7 +380,7 @@ fortis/
     ├── loaders/                 # FILE → models         (depends on: models, parsing)
     │   ├── features.py          #   features.toml      → FeatureInventory
     │   ├── letters.py           #   letters.csv        → LetterInventory
-    │   ├── diacritics.py  sonorities.py  syllable_parts.py  tiers.py  words.py
+    │   ├── diacritics.py  sonorities.py  syllable_parts.py  tiers.py  words.py  settings.py
     │   ├── rules.py             #   rules.toml (bodies parsed via parsing.notation)
     │   └── project.py           #   load everything    → Project
     │
@@ -360,8 +396,12 @@ fortis/
     │
     └── analysis/                # OUTPUT ANALYSIS       (depends on: models, application)
         ├── grading.py           #   phone + feature edit distance vs attested target forms
+        ├── diagnosis.py         #   confusions + context autopsy; errors-by-time; per-stage
+        ├── blame.py             #   attribute each wrong word to the rule that produced it
+        ├── whatif.py            #   preview a candidate rule's grade delta before committing
+        ├── warnings.py          #   syllabification-fallback warnings
         ├── reporting.py         #   render the per-stage / final distance summary → distances.md
-        └── main.py              #   grader CLI: derive a project and grade it, no full run
+        └── main.py              #   grader CLI: grade + diagnose + blame a project, no full run
 ```
 
 ## Current limitations and future directions
@@ -402,10 +442,11 @@ None of these are commitments, but plausible directions if the project
 grows: richer (weighted or optional) rule application for gradient change,
 some notion of morphological structure to support reduplication and
 affix-conditioned rules, metrical foot structure alongside the existing
-tone/stress tiers, richer grading (frequency-weighted accuracy, paradigm-aware
-attribution of errors to analogy rather than sound change, per-stage divergence
-localization), and performance work on the browser build if it becomes more than
-a demo/playground.
+tone/stress tiers, further grading work (frequency-weighted accuracy, and
+attribution of errors to morphological analogy rather than sound change — the
+segmental confusion diagnosis, per-stage divergence, and rule-level blame under
+[Diagnosing a rule set](#diagnosing-a-rule-set) are already in place), and
+performance work on the browser build if it becomes more than a demo/playground.
 
 ## License
 
