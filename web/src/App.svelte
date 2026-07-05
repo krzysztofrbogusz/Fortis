@@ -35,9 +35,12 @@
   let openDefs = $state({}); // per-card: index → whether that card's rule definitions are shown
   let result = $state(null); // { derivations } | { error }
   let grading = $state(null); // grading summary from the last run, or null when there's no target
+  let diagnosis = $state(null); // diagnosis snapshot (confusions + autopsy), or null when all exact
+  let timeline = $state(null); // temporal views (errors by rule-time + per-stage), or null when all exact
+  let blame = $state(null); // per-word blame, or null when all exact
   let warnings = $state([]); // syllabification-fallback warnings from the last run
   let tableCsv = $state(""); // derivation_table.csv content, for the right-pane Table view
-  let resultView = $state("derivations"); // right-pane view: derivations | table | grading | warnings
+  let resultView = $state("derivations"); // right-pane view: derivations | table | grading | diagnosis | blame | warnings
 
   // A project with more than this many words OR rules is too costly to re-run on
   // every edit; it waits for the "Run project" button instead of auto-running.
@@ -194,6 +197,12 @@
       const fin = finalizeRun();
       grading = fin?.grading ?? null;
       if (!grading && resultView === "grading") resultView = "derivations"; // no target ⇒ leave the (now hidden) tab
+      diagnosis = fin?.diagnosis ?? null;
+      if (!diagnosis && resultView === "diagnosis") resultView = "derivations"; // all exact ⇒ leave the tab
+      timeline = fin?.timeline ?? null;
+      if (!timeline && resultView === "timeline") resultView = "derivations"; // all exact ⇒ leave the tab
+      blame = fin?.blame ?? null;
+      if (!blame && resultView === "blame") resultView = "derivations"; // all exact ⇒ leave the tab
       warnings = fin?.warnings ?? [];
       if (!warnings.length && resultView === "warnings") resultView = "derivations"; // none ⇒ leave the tab
       tableCsv = readFile("derivation_table.csv"); // for the Table view
@@ -243,6 +252,9 @@
     derivations: "output.md",
     table: "derivation_table.csv",
     grading: "distances.md",
+    diagnosis: "diagnosis.md",
+    timeline: "timeline.md",
+    blame: "blame.md",
     warnings: "warnings.md",
   };
 
@@ -518,6 +530,30 @@
                     onclick={() => (resultView = "grading")}>Grading</button
                   >
                 {/if}
+                {#if diagnosis}
+                  <button
+                    class:active={resultView === "diagnosis"}
+                    onclick={() => (resultView = "diagnosis")}
+                    title="Confusions and context autopsy — what goes wrong at the end"
+                    >Diagnosis</button
+                  >
+                {/if}
+                {#if timeline}
+                  <button
+                    class:active={resultView === "timeline"}
+                    onclick={() => (resultView = "timeline")}
+                    title="Errors by rule-time and per-stage diagnosis — when errors enter"
+                    >Timeline</button
+                  >
+                {/if}
+                {#if blame}
+                  <button
+                    class:active={resultView === "blame"}
+                    onclick={() => (resultView = "blame")}
+                    title="Each wrong word attributed to the rule that produced it"
+                    >Blame</button
+                  >
+                {/if}
                 {#if warnings.length}
                   <button
                     class:active={resultView === "warnings"}
@@ -565,6 +601,54 @@
         <CsvTable content={tableCsv} />
       {:else}
       <div class="results ipa">
+        <!-- Shared by the Diagnosis and Timeline views (final + per-stage). -->
+        {#snippet confusionTable(confs)}
+          <table class="grade-summary">
+            <thead>
+              <tr><th>expected</th><th>got</th><th>count</th><th>kind</th><th>examples</th></tr>
+            </thead>
+            <tbody>
+              {#each confs as c}
+                <tr>
+                  <td class="form">{c.expected ?? "∅"}</td>
+                  <td class="form">{c.got ?? "∅"}</td>
+                  <td>{c.count}</td>
+                  <td>{c.kind}</td>
+                  <td class="muted">{c.examples.join(", ")}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        {/snippet}
+        {#snippet autopsyBlock(autopsy)}
+          {#each autopsy as a}
+            <details class="grade-detail">
+              <summary>
+                <span class="form tgt">{a.phone}</span>
+                <span class="muted">wrong {a.errors}/{a.total} · support ≥{a.supportFloor}</span>
+              </summary>
+              {#if a.predictors.length}
+                <table class="grade-misses">
+                  <thead>
+                    <tr><th>context</th><th>phi</th><th>err/ok here</th><th>err/ok away</th></tr>
+                  </thead>
+                  <tbody>
+                    {#each a.predictors as p}
+                      <tr>
+                        <td class="form">{p.predictor}</td>
+                        <td>{p.phi >= 0 ? "+" : ""}{p.phi.toFixed(2)}</td>
+                        <td>{p.errHere}/{p.okHere}</td>
+                        <td>{p.errAway}/{p.okAway}</td>
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              {:else}
+                <p class="muted">No environment predictor was positively associated with the error.</p>
+              {/if}
+            </details>
+          {/each}
+        {/snippet}
         {#if resultView === "grading" && grading}
           <table class="grade-summary">
             <thead>
@@ -622,6 +706,104 @@
               {:else}
                 <p class="muted">All {s.graded} graded words exact.</p>
               {/if}
+            </details>
+          {/each}
+        {:else if resultView === "diagnosis" && diagnosis}
+          <p class="caveat">
+            <em>What</em> goes wrong at the end, from the same graded forms. Environments are
+            read from the <strong>gold</strong> form; a metathesis reads as an adjacent
+            substitution pair. <em>When</em> errors enter is in the Timeline tab.
+          </p>
+          <h3 class="section-head">Confusions</h3>
+          {@render confusionTable(diagnosis.confusions)}
+
+          <h3 class="section-head">Context autopsy</h3>
+          {@render autopsyBlock(diagnosis.autopsy)}
+        {:else if resultView === "timeline" && timeline}
+          <h3 class="section-head">Errors by rule-time</h3>
+          <p class="caveat">
+            Each wrong phone attributed (via blame provenance) to the rule-time that produced
+            it — where errors <em>enter</em>. <code>t=∅</code> groups phones no single rule owns.
+          </p>
+          <table class="grade-summary">
+            <thead><tr><th>rule-time</th><th>wrong</th><th>top confusions</th></tr></thead>
+            <tbody>
+              {#each timeline.byTime as b}
+                <tr>
+                  <td class="tgt">{b.time == null ? "∅" : "t=" + b.time}</td>
+                  <td>{b.count}</td>
+                  <td class="form"
+                    >{b.confusions
+                      .slice(0, 4)
+                      .map((c) => `${c.expected ?? "∅"}→${c.got ?? "∅"} ×${c.count}`)
+                      .join(", ")}</td
+                  >
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+
+          <h3 class="section-head">Per-stage diagnosis</h3>
+          <p class="caveat">
+            The confusions and autopsy at each attested stage. Trust an intermediate stage
+            only where its attested forms are notationally comparable to the engine’s output.
+          </p>
+          {#each timeline.stages as s}
+            <details class="grade-detail">
+              <summary>
+                <span class="tgt">stage {s.label}</span>
+                <span class="muted">{s.confusions.length} confusion(s)</span>
+              </summary>
+              {#if s.confusions.length}
+                {@render confusionTable(s.confusions)}
+                {@render autopsyBlock(s.autopsy)}
+              {:else}
+                <p class="muted">All graded words at this stage are exact.</p>
+              {/if}
+            </details>
+          {/each}
+        {:else if resultView === "blame" && blame}
+          <p class="caveat">
+            Each wrong word attributed to the rule that produced the wrong phone (the last
+            firing rule that set its segment). <strong>omission</strong> = no rule touched it;
+            <strong>unattributed</strong> = the surface didn’t map one phone per segment. The
+            stage line and trajectory are context — trust the stage only where the attested
+            forms are notationally comparable to the engine’s output.
+          </p>
+          {#each blame.words as w}
+            <details class="grade-detail">
+              <summary>
+                <span class="tgt">{w.word}</span>
+                <span class="form">{w.surface}</span>
+                <span class="muted">for</span>
+                <span class="form">{w.target}</span>
+                <span class="muted">· d{w.distance}</span>
+              </summary>
+              <p class="residuals">
+                {#each w.residuals as r, i}<span class="form">{r.expected ?? "∅"}</span>→<span class="form">{r.got ?? "∅"}</span> <span class="muted">({r.culprit ? r.culprit + (r.time != null ? ", t=" + r.time : "") : r.attributed ? r.kind : "unattributed"})</span>{#if i < w.residuals.length - 1}<span class="muted">; </span>{/if}{/each}
+              </p>
+              {#if w.stage}
+                <p class="muted stage-line">
+                  first diverges at stage t={w.stage.time}: attested
+                  <span class="form">{w.stage.attested}</span>, derived
+                  <span class="form">{w.stage.derived}</span>
+                </p>
+              {/if}
+              <table class="grade-misses">
+                <thead>
+                  <tr><th>step</th><th>t</th><th>form</th><th>dist</th></tr>
+                </thead>
+                <tbody>
+                  {#each w.trajectory as p}
+                    <tr class:regressed={p.regressed}>
+                      <td>{p.label}{p.regressed ? " ⤴" : ""}</td>
+                      <td>{p.time ?? ""}</td>
+                      <td class="form">{p.form}</td>
+                      <td>{p.distance}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
             </details>
           {/each}
         {:else if resultView === "warnings" && warnings.length}
@@ -1130,6 +1312,30 @@
   }
   .grade-detail .grade-misses {
     margin-top: 6px;
+  }
+
+  /* Diagnosis + Blame tabs (reuse the grade-* tables above) */
+  .section-head {
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-h);
+    margin: 12px 0 8px;
+  }
+  .residuals {
+    font-size: var(--fs-body);
+    line-height: 1.8;
+    margin: 6px 0 4px;
+  }
+  .residuals .form {
+    color: var(--text-h);
+  }
+  .stage-line {
+    font-size: var(--fs-body);
+    margin: 0 0 8px;
+  }
+  .grade-misses tr.regressed td:first-child {
+    font-weight: 600;
+    color: var(--text-h);
   }
 
   .card {

@@ -99,6 +99,33 @@ try {
   log(`11. warnings path: ${ws.length} warning(s) through Pyodide, warnings.md written`);
   py.runPython(`reset_overlay()`);
 
+  // 12. Diagnosis + blame populated: a word with a deliberately-wrong `final` makes one
+  //     graded miss, so finalize_run's diagnosis (confusions + autopsy) and blame branches
+  //     both fill and round-trip through the real Pyodide path.
+  py.globals.set("_wd2", '"apa" = { gloss = "wrong", final = "xxx" }\n"ata" = { gloss = "ok", final = "ata" }\n');
+  py.runPython(`write_file("words.toml", _wd2)`);
+  const diag = JSON.parse(py.runPython("run_derivations()").toString());
+  if (diag.error) throw new Error("diagnosis run failed: " + JSON.stringify(diag.error));
+  if (!diag.diagnosis || !diag.diagnosis.confusions.length)
+    throw new Error("expected a populated diagnosis, got: " + JSON.stringify(diag.diagnosis));
+  if (!diag.timeline || !Array.isArray(diag.timeline.byTime) || !Array.isArray(diag.timeline.stages))
+    throw new Error("timeline missing byTime/stages: " + JSON.stringify(diag.timeline));
+  if (!diag.timeline.stages.some((s) => s.label === "final"))
+    throw new Error("per-stage timeline missing the final stage");
+  if (!diag.blame || !diag.blame.words.length)
+    throw new Error("expected a populated blame, got: " + JSON.stringify(diag.blame));
+  const blamedWord = diag.blame.words[0];
+  if (!blamedWord.residuals.length || !blamedWord.trajectory.length)
+    throw new Error("blame word missing residuals/trajectory: " + JSON.stringify(blamedWord));
+  const diagMd = py.runPython(`read_file("diagnosis.md")`).toString();
+  const timelineMd = py.runPython(`read_file("timeline.md")`).toString();
+  const blameMd = py.runPython(`read_file("blame.md")`).toString();
+  if (!diagMd.startsWith("# Diagnosis")) throw new Error("diagnosis.md not written: " + diagMd.slice(0, 80));
+  if (!timelineMd.startsWith("# Timeline")) throw new Error("timeline.md not written: " + timelineMd.slice(0, 80));
+  if (!blameMd.startsWith("# Blame")) throw new Error("blame.md not written: " + blameMd.slice(0, 80));
+  log(`12. diagnosis + timeline + blame (${diag.blame.words.length} word(s)) through Pyodide, reports written`);
+  py.runPython(`reset_overlay()`);
+
   log("SMOKE TEST PASSED");
 } catch (e) {
   const m = (e && e.message) ? e.message : String(e);
