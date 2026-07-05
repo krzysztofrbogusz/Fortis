@@ -35,12 +35,13 @@ class TestOverrides:
     def test_all_keys(self, tmp_path):
         text = (
             "[grading]\ntransposition_cost = 2\n"
-            "[diagnosis]\nmin_support = 4\nmin_errors = 1\nreport_top = 10\nfocus_count = 3\n"
+            "[diagnosis]\nmin_support = 4\nmin_support_percent = 25\n"
+            "min_errors = 1\nreport_top = 10\nfocus_count = 3\n"
         )
         settings = load_settings(_write(tmp_path, text)).unwrap()
         assert settings.grading.transposition_cost == 2
         assert settings.diagnosis == DiagnosisSettings(
-            min_support=4, min_errors=1, report_top=10, focus_count=3
+            min_support=4, min_support_percent=25, min_errors=1, report_top=10, focus_count=3
         )
 
 

@@ -107,15 +107,17 @@ class AlignOp:
     ``kind`` is ``"match"`` (target phone reproduced), ``"sub"`` (a different phone
     produced), ``"delete"`` (target phone with no derived counterpart), or
     ``"insert"`` (a spurious derived phone with no target counterpart). ``target``
-    and ``derived`` hold the phones (``None`` on the side that is absent);
-    ``target_index`` is the phone's position in the target sequence (``None`` for an
-    insertion, which sits *between* target positions).
+    and ``derived`` hold the phones (``None`` on the side that is absent).
+    ``target_index``/``derived_index`` are the phone's positions in the target and
+    derived sequences — each ``None`` on the side that is absent (``target_index`` for
+    an insertion, ``derived_index`` for a deletion).
     """
 
     kind: str
     target: str | None
     derived: str | None
     target_index: int | None
+    derived_index: int | None = None
 
 
 def align(target: Sequence[str], derived: Sequence[str]) -> list[AlignOp]:
@@ -151,13 +153,13 @@ def align(target: Sequence[str], derived: Sequence[str]) -> list[AlignOp]:
     while i > 0 or j > 0:
         if i > 0 and j > 0 and d[i][j] == d[i - 1][j - 1] + (a[i - 1] != b[j - 1]):
             kind = "match" if a[i - 1] == b[j - 1] else "sub"
-            ops.append(AlignOp(kind, a[i - 1], b[j - 1], i - 1))
+            ops.append(AlignOp(kind, a[i - 1], b[j - 1], i - 1, j - 1))
             i, j = i - 1, j - 1
         elif i > 0 and d[i][j] == d[i - 1][j] + 1:
-            ops.append(AlignOp("delete", a[i - 1], None, i - 1))
+            ops.append(AlignOp("delete", a[i - 1], None, i - 1, None))
             i -= 1
         else:
-            ops.append(AlignOp("insert", None, b[j - 1], None))
+            ops.append(AlignOp("insert", None, b[j - 1], None, j - 1))
             j -= 1
     ops.reverse()
     return ops

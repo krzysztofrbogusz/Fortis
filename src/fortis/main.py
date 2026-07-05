@@ -22,7 +22,15 @@ import time
 from collections.abc import Sequence
 from pathlib import Path
 
-from src.fortis.analysis.diagnosis import diagnosis_summary_line, render_diagnosis
+from src.fortis.analysis.blame import blame_all
+from src.fortis.analysis.diagnosis import (
+    diagnose_stages,
+    diagnosis_summary_line,
+    errors_by_time,
+    render_diagnosis,
+    render_timeline,
+    timeline_summary_line,
+)
 from src.fortis.analysis.grading import grade_stages
 from src.fortis.analysis.reporting import distance_summary_line, render_distance_summary
 from src.fortis.analysis.warnings import (
@@ -178,6 +186,17 @@ def main(argv: list[str] | None = None) -> None:
         print(f"wrote {diag_path}", file=sys.stderr)
         saved.append(diag_path)
         print(diagnosis_summary_line(grades))
+
+        # Temporal views split into timeline.md (errors by rule-time + per-stage diagnosis).
+        buckets = errors_by_time(blame_all(derivations, project))
+        stage_diag = diagnose_stages(derivations, project)
+        timeline_path = path.parent / "timeline.md"
+        timeline_path.write_text(
+            render_timeline(buckets, stage_diag, project, where), encoding="utf-8"
+        )
+        print(f"wrote {timeline_path}", file=sys.stderr)
+        saved.append(timeline_path)
+        print(timeline_summary_line(buckets))
     grade_done = time.perf_counter()
 
     # Phase 4b — syllabification warnings: words whose onset/coda patterns admitted no

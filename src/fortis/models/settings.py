@@ -25,9 +25,13 @@ class GradingSettings:
 class DiagnosisSettings:
     """Knobs for the error diagnosis (:mod:`src.fortis.analysis.diagnosis`)."""
 
-    # A context predictor is trusted in the autopsy only if present in at least this many
-    # of the focus phone's positions (phi is near ±1 at a two-or-three-count cell).
+    # A context predictor is trusted in the autopsy only if it clears the support floor:
+    # present in at least ``max(min_support, ceil(min_support_percent% of the focus phone's
+    # occurrences))`` positions. ``min_support`` is the absolute floor (phi is near ±1 at a
+    # two-or-three-count cell); ``min_support_percent`` scales the floor with the word base,
+    # so a predictor covering a trivial fraction of a common phone is dropped as noise.
     min_support: int = 3
+    min_support_percent: int = 10
     # A focus phone is autopsied only if it came out wrong at least this many times.
     min_errors: int = 2
     # How many predictors to show per phone in the report (the most error-associated).

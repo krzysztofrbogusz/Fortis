@@ -15,9 +15,18 @@ import argparse
 import sys
 from pathlib import Path
 
-from src.fortis.analysis.diagnosis import diagnosis_summary_line, render_diagnosis
+from src.fortis.analysis.blame import blame_all, blame_summary_line, render_blame
+from src.fortis.analysis.diagnosis import (
+    diagnose_stages,
+    diagnosis_summary_line,
+    errors_by_time,
+    render_diagnosis,
+    render_timeline,
+    timeline_summary_line,
+)
 from src.fortis.analysis.grading import grade_stages
 from src.fortis.analysis.reporting import distance_summary_line, render_distance_summary
+from src.fortis.analysis.whatif import render_whatif, try_rule, whatif_summary_line
 from src.fortis.application.deriving import derive_all
 from src.fortis.config import config
 from src.fortis.loaders.project import load_project
@@ -62,6 +71,24 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         metavar="FILE",
         help="path for the Markdown report (default: <project>/distances.md)",
     )
+    parser.add_argument(
+        "--blame",
+        action="store_true",
+        help="attribute each wrong word to the rule that produced it (writes blame.md)",
+    )
+    parser.add_argument(
+        "--try",
+        dest="candidate",
+        metavar="RULE",
+        help="preview a candidate rule (e.g. 'eː → ɛː / _ t') against the lexicon (writes whatif.md)",
+    )
+    parser.add_argument(
+        "--at",
+        dest="at",
+        type=int,
+        metavar="TIME",
+        help="time to insert the --try rule at (default: untimed, after all timed rules)",
+    )
     return parser.parse_args(argv)
 
 
@@ -90,13 +117,41 @@ def main(argv: list[str] | None = None) -> None:
     print(f"wrote {path}", file=sys.stderr)
     print(distance_summary_line(stages))
 
-    # Diagnose where the final derivation goes wrong, from the same graded forms.
+    # Diagnose where the final derivation goes wrong (the snapshot), from the same graded forms.
     final = next(s for s in stages if s.time is None)
     grades = final.report.grades
     diagnosis_path = path.parent / "diagnosis.md"
     diagnosis_path.write_text(render_diagnosis(grades, project, where), encoding="utf-8")
     print(f"wrote {diagnosis_path}", file=sys.stderr)
     print(diagnosis_summary_line(grades))
+
+    # The temporal views: errors bucketed by the rule-time that produced them (blame
+    # provenance) and the full diagnosis recomputed at each attested stage.
+    buckets = errors_by_time(blame_all(derivations, project))
+    stage_diag = diagnose_stages(derivations, project)
+    timeline_path = path.parent / "timeline.md"
+    timeline_path.write_text(render_timeline(buckets, stage_diag, project, where), encoding="utf-8")
+    print(f"wrote {timeline_path}", file=sys.stderr)
+    print(timeline_summary_line(buckets))
+
+    if args.blame:
+        blames = blame_all(derivations, project)
+        blame_path = path.parent / "blame.md"
+        blame_path.write_text(render_blame(blames, where), encoding="utf-8")
+        print(f"wrote {blame_path}", file=sys.stderr)
+        print(blame_summary_line(blames))
+
+    if args.candidate is not None:
+        result = try_rule(project, args.candidate, args.at)
+        if result.is_err():
+            for error in result.unwrap_err():
+                print(f"error: --try rule: {error}", file=sys.stderr)
+            raise SystemExit(1)
+        whatif = result.unwrap()
+        whatif_path = path.parent / "whatif.md"
+        whatif_path.write_text(render_whatif(whatif, where), encoding="utf-8")
+        print(f"wrote {whatif_path}", file=sys.stderr)
+        print(whatif_summary_line(whatif))
 
 
 if __name__ == "__main__":

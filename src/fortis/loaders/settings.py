@@ -24,7 +24,13 @@ from src.fortis.result import Err, Ok, Result
 # and the range check. Kept in step with the dataclass fields in models/settings.py.
 _SCHEMA: dict[str, dict[str, int]] = {
     "grading": {"transposition_cost": 0},
-    "diagnosis": {"min_support": 1, "min_errors": 1, "report_top": 0, "focus_count": 0},
+    "diagnosis": {
+        "min_support": 1,
+        "min_support_percent": 0,
+        "min_errors": 1,
+        "report_top": 0,
+        "focus_count": 0,
+    },
 }
 _TYPES = {"grading": GradingSettings, "diagnosis": DiagnosisSettings}
 

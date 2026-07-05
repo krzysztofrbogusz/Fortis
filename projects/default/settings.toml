@@ -8,9 +8,13 @@
 transposition_cost = 1
 
 [diagnosis]
-# A context predictor enters the autopsy only if present in at least this many of a
-# focus phone's positions — the phi coefficient is unstable at tiny cell counts.
+# A context predictor enters the autopsy only if it clears the support floor:
+# max(min_support, min_support_percent% of the focus phone's occurrences). The absolute
+# floor guards the phi coefficient against tiny cell counts; the percentage scales the
+# floor with the word base, so a predictor covering a trivial slice of a common phone is
+# dropped as noise rather than topping the ranking.
 min_support = 3
+min_support_percent = 10
 # A focus phone is autopsied only once it has come out wrong at least this many times.
 min_errors = 2
 # How many predictors to show per phone in diagnosis.md (the most error-associated).
