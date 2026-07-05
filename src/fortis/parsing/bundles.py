@@ -1,7 +1,6 @@
 """Bundle and value parsing — concrete and pattern material from strings."""
 from __future__ import annotations
 
-from collections import UserDict
 from collections.abc import Callable
 from typing import Protocol
 
@@ -167,7 +166,7 @@ class _HasFeature(Protocol):
     feature: str
 
 
-def _parse_bundle[S: _HasFeature, B: UserDict](
+def _parse_bundle[S: _HasFeature, B: dict](
     raw_string: str,
     features: FeatureInventory,
     factory: Callable[[], B],

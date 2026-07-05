@@ -44,7 +44,13 @@ from dataclasses import replace
 
 from src.fortis.application.applying import apply_match
 from src.fortis.application.combining import combine, matches_exactly, merge
-from src.fortis.application.matching import Match, SyllableView, find_matches, pattern_matches
+from src.fortis.application.matching import (
+    Match,
+    SyllableView,
+    cannot_match,
+    find_matches,
+    pattern_matches,
+)
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.application.syllabifying import (
     SyllabificationError,
@@ -95,6 +101,7 @@ from src.fortis.models.tiers import Tier
 from src.fortis.models.values import AutosegRecall
 
 _derivation_geometry_cache = IdentityCache(maxsize=8)
+_nuclei_cache = IdentityCache(maxsize=8)  # see _syllable_context
 
 
 def _syllable_features(features: FeatureInventory) -> frozenset[str]:
@@ -347,7 +354,22 @@ def _syllable_context(
     nucleus_part = syllable_parts.get_nucleus(time)
     if nucleus_part is None or nucleus_part.definition is None:
         return boundaries, None
-    nuclei = nuclei_by_position(form, boundaries, nucleus_part.definition)
+    if cache:
+        # A rule sweep rebuilds this for the same unchanged form across every rule
+        # that doesn't fire — cached by the bundle list's identity, like syllabify.
+        # The definition is stored in the entry and verified by ``is``.
+        definition, nuclei = _nuclei_cache.get_or_compute(
+            form,
+            boundaries,
+            lambda: (
+                nucleus_part.definition,
+                nuclei_by_position(form, boundaries, nucleus_part.definition),
+            ),
+        )
+        if definition is not nucleus_part.definition:
+            nuclei = nuclei_by_position(form, boundaries, nucleus_part.definition)
+    else:
+        nuclei = nuclei_by_position(form, boundaries, nucleus_part.definition)
     return boundaries, SyllableView(
         nuclei=nuclei, features=syllable_features, floating=floating,
         node_descendants=node_descendants,
@@ -396,8 +418,11 @@ def apply_rule(
 ) -> Form:
     """Apply *rule* to *form* once, per its application mode.
 
-    Returns a new form; *form* is never mutated. A rule whose loci do not
-    match returns an unchanged copy. The form is re-syllabified for every rule, so
+    *form* is never mutated. A rule whose loci do not match returns *form* itself
+    (the same object) — callers can test firing cheaply with ``is`` before
+    comparing content, and the identity caches downstream (tier lowering,
+    syllabification, word supply) stay warm across a sweep of non-firing rules.
+    The form is re-syllabified for every rule, so
     ``$`` and syllable-tier matching always reflect the current form; an
     unsyllabifiable form (under onset/coda constraints) yields no structure rather
     than aborting, and a rule that consults neither ``$`` nor a syllable-tier
@@ -408,8 +433,13 @@ def apply_rule(
     syllable_features = _syllable_features(features)
     match rule.application:
         case ApplicationMode.simultaneous:
+            bundles = lower_tiers(form)
+            # Pre-check before syllabifying: a word that provably lacks the rule's
+            # material has no locus, so the (costlier) syllable context is skipped.
+            if cannot_match(rule.sd, bundles, letters, syllable_features):
+                return form
             boundaries, view = _syllable_context(
-                lower_tiers(form), sonorities, syllable_parts, rule.time, letters,
+                bundles, sonorities, syllable_parts, rule.time, letters,
                 syllable_features, _node_descendants(features), _floating_autosegs(form),
             )
             return _apply_simultaneous(
@@ -613,9 +643,14 @@ def _apply_simultaneous(
     tiers: TierInventory,
     syllable_features: frozenset[str],
 ) -> Form:
-    """Find every locus against the original form, then splice all rewrites at once."""
+    """Find every locus against the original form, then splice all rewrites at once.
+
+    No locus ⇒ *form* itself is returned (see ``apply_rule`` on the identity contract).
+    """
     bundles = lower_tiers(form)
     selected = _select_non_overlapping(find_matches(sd, bundles, letters, boundaries, syllables))
+    if not selected:
+        return form
     out = form.copy()
     # Splice right-to-left so each replacement's indices stay valid, computing every
     # replacement from the ORIGINAL form (no application sees another's output).
@@ -650,10 +685,15 @@ def _apply_directional(
 
     Because the form mutates as it is rewritten, it is re-syllabified before each
     scan so the ``$`` assertion and syllable-tier matching reflect the current form.
+    No rewrite ⇒ *form* itself is returned (see ``apply_rule`` on the identity contract).
     """
+    # Pre-check on the untouched form (identity-cache friendly) before copying it.
+    if cannot_match(sd, lower_tiers(form), letters, syllable_features):
+        return form
     work = form.copy()
     node_descendants = _node_descendants(features)  # invariant for the rule; not per-locus
     cursor = len(work.segments) if reverse else 0
+    rewrote = False
     while True:
         # work mutates in place each iteration (see the docstring above), so its identity
         # is reused across content changes — bypass the identity cache, which would
@@ -693,6 +733,7 @@ def _apply_directional(
             )
             _carry_stranded_melody(work, work, match.start, match.end, stranded, tiers)
         work.segments[match.start : match.end] = new_segments
+        rewrote = True
 
         no_op = match.end == match.start and not replacement
         if reverse:
@@ -702,7 +743,7 @@ def _apply_directional(
             # Advance past the rewritten output; bump only a true no-op (a deletion
             # makes progress by shrinking the form, so it must not bump).
             cursor = match.start + 1 if no_op else match.start + len(replacement)
-    return work
+    return work if rewrote else form
 
 
 def _fired(before: list[FeatureBundle], after: list[FeatureBundle]) -> bool:
@@ -755,7 +796,9 @@ def derive(
                 continue  # a word-scoped rule that does not list this word
             before = current  # Form
             after = apply_rule(rule, current, letters, features, sonorities, syllable_parts, tiers)
-            if _fired(lower_tiers(before), lower_tiers(after)):
+            # `after is before` ⇔ no locus (apply_rule's identity contract); _fired then
+            # separates real change from a vacuous match on the rare new forms only.
+            if after is not before and _fired(lower_tiers(before), lower_tiers(after)):
                 # Maintain the tiers: prune dead links + OCP, then re-dock suprasegmentals
                 # onto their syllable's nucleus (the old consolidate's spatial job).
                 after = _maintain_tiers(

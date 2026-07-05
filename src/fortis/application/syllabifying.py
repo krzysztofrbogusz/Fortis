@@ -70,8 +70,27 @@ def syllables(
     return out
 
 
+_sonority_cache = IdentityCache(maxsize=4096)
+
+
 def _sonority(segment: FeatureBundle, sonorities: SonoritiesInventory) -> int:
-    """The sonority level of *segment* by first-match; least sonorous if unmatched."""
+    """The sonority level of *segment* by first-match; least sonorous if unmatched.
+
+    Cached by *segment*'s identity: bundles are immutable in practice and shared
+    between successive forms (a rewrite splices new segments but keeps the rest),
+    so the same bundle object is re-scored across every rule of a derivation. The
+    inventory is stored in the entry and verified by ``is``; a mismatch (a
+    different scale under a reused id) just recomputes.
+    """
+    cached_scale, level = _sonority_cache.get_or_compute(
+        segment, None, lambda: (sonorities, _sonority_uncached(segment, sonorities))
+    )
+    if cached_scale is sonorities:
+        return level
+    return _sonority_uncached(segment, sonorities)
+
+
+def _sonority_uncached(segment: FeatureBundle, sonorities: SonoritiesInventory) -> int:
     for sonority in sonorities.values():
         if sonority.bundle is not None and pattern_matches(sonority.bundle, segment):
             return sonority.level

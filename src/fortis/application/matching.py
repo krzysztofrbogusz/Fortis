@@ -900,6 +900,39 @@ def _required_counts(sd: StructuralDescription, letters: LetterInventory) -> Cou
     return counts
 
 
+_required_demands_cache = IdentityCache(maxsize=4096)
+
+
+def _required_demands(
+    sd: StructuralDescription, letters: LetterInventory, syllable_features: frozenset[str]
+) -> tuple[tuple[tuple[str, object], int], ...]:
+    """``_required_counts`` as cached ``(demand, count)`` pairs, syllable demands dropped.
+
+    Syllable-tier demands are excluded here (not in ``cannot_match``'s loop): those
+    features are checked against the syllable nucleus, not the segment bundle, so
+    the per-segment supply can't account for them. Pure in the arguments — *sd* and
+    *letters* are built once and reused for a whole run — so cached by *sd*'s
+    identity (with *syllable_features*, hashable, in the key), and *letters* stored
+    in the entry and verified by ``is`` (an ``id``-only key could go stale if a
+    collected inventory's id were reused; a mismatch just recomputes).
+    """
+
+    def compute():  # noqa: ANN202 — (letters, pairs); letters verified by identity below
+        pairs = tuple(
+            (demand, count)
+            for demand, count in _required_counts(sd, letters).items()
+            if demand[0] not in syllable_features
+        )
+        return (letters, pairs)
+
+    cached_letters, demands = _required_demands_cache.get_or_compute(
+        sd, syllable_features, compute
+    )
+    if cached_letters is letters:
+        return demands
+    return compute()[1]
+
+
 _word_supply_cache = IdentityCache(maxsize=8)
 
 
@@ -923,7 +956,7 @@ def _word_supply_uncached(segments: list[FeatureBundle]) -> Counter:
     return supply
 
 
-def _cannot_match(
+def cannot_match(
     sd: StructuralDescription,
     segments: list[FeatureBundle],
     letters: LetterInventory,
@@ -936,11 +969,10 @@ def _cannot_match(
     account for them.
     """
     supply = _word_supply(segments)
-    return any(
-        supply[demand] < count
-        for demand, count in _required_counts(sd, letters).items()
-        if demand[0] not in syllable_features
-    )
+    for demand, count in _required_demands(sd, letters, syllable_features):
+        if supply.get(demand, 0) < count:
+            return True
+    return False
 
 
 def _bound_refs(elements: tuple[Element, ...]) -> set[int]:
@@ -978,6 +1010,9 @@ def _recall_refs(elements: tuple[Element, ...]) -> set[int]:
             case Quantified(inner, _) | Negated(inner):
                 refs |= _recall_refs((inner,))
     return refs
+
+
+_case_b_cache = IdentityCache(maxsize=4096)  # pure in the sd; see _required_demands
 
 
 def _target_recalls_a_context_binding(sd: StructuralDescription) -> bool:
@@ -1022,10 +1057,12 @@ def find_matches(
     """
     letters = letters if letters is not None else LetterInventory()
     syllable_features = syllables.features if syllables else frozenset()
-    if _cannot_match(sd, segments, letters, syllable_features):
+    if cannot_match(sd, segments, letters, syllable_features):
         return []  # the word lacks material the rule provably needs — skip the search
     matches: list[Match] = []
-    case_b = _target_recalls_a_context_binding(sd)
+    case_b = _case_b_cache.get_or_compute(
+        sd, None, lambda: _target_recalls_a_context_binding(sd)
+    )
 
     for start in range(len(segments) + 1):
         # Pass 1: target alone, alpha-permissive — captures the structural span and

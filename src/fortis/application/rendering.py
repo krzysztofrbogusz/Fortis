@@ -78,6 +78,9 @@ def _trim_common(
     return before[head : len(before) - tail], after[head : len(after) - tail]
 
 
+_syllable_features_cache = IdentityCache(maxsize=8)  # see render_syllabified
+
+
 def _render_or_null(sequence: list[FeatureBundle], inventories: Project) -> str:
     """Render *sequence*, or ``∅`` if it is empty (a fully deleted/inserted side)."""
     return sequence_to_string(sequence, inventories) if sequence else "∅"
@@ -106,8 +109,14 @@ def render_syllabified(
     repositioning is kept — used by ``sequence_to_string`` for a flat, re-segmentable
     string that still places stress/tone correctly.
     """
-    syllable_features = frozenset(
-        name for name, feature in inventories.features.items() if feature.tier == Tier.syllable
+    # Fixed for the run's feature inventory; cached by its identity (hot: every
+    # trace line, report row, and CSV cell renders through here).
+    syllable_features = _syllable_features_cache.get_or_compute(
+        inventories.features,
+        None,
+        lambda: frozenset(
+            name for name, feature in inventories.features.items() if feature.tier == Tier.syllable
+        ),
     )
     all_diacritics = inventories.diacritics
     nucleus_part = inventories.syllable_parts.get_nucleus(inventories.time)
