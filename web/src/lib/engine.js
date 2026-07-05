@@ -40,7 +40,7 @@ export const OUTPUT_FILES = ["output.md", "derivation_table.csv"];
 // DEFAULT, exactly like load_project() with no project_dir). Editing or
 // loading a file always writes into OVERLAY, never DEFAULT.
 const HELPER = `
-import json, re
+import json, re, time
 from pathlib import Path
 from src.fortis.loaders.project import load_project
 from src.fortis.application.deriving import derive, resolve_rule_letters
@@ -225,9 +225,11 @@ def finalize_run():
     (O/"output.md").write_text(_build_report(acc, project, None), encoding="utf-8")
     (O/"derivation_table.csv").write_text(_build_csv_report(acc, rules, project), encoding="utf-8")
 
+    _t0 = time.perf_counter()
     grading = _grade_summary(acc, project)
     # Diagnosis (snapshot) + timeline + blame share the final grades / wrong words.
     grades = grade(acc, project).grades
+    _t_grade = time.perf_counter()
     blames = blame_all(acc, project)
     buckets = errors_by_time(blames)
     stage_diag = diagnose_stages(acc, project)
@@ -243,10 +245,12 @@ def finalize_run():
     _write_or_clear(O/"warnings.md", render_warnings(warns, "the current project") if warns else None)
     warnings = [{"word": w.gloss or w.ipa, "stage": w.stage,
                  "clusters": list(w.clusters), "syllabified": w.syllabified} for w in warns]
+    _t_end = time.perf_counter()
     _LAST.update(project=project, rules=rules, derivations=list(acc))  # for the Filter tab
     _SESSION.clear()
     return json.dumps({"grading": grading, "diagnosis": diagnosis, "timeline": timeline,
-                       "blame": blame, "warnings": warnings})
+                       "blame": blame, "warnings": warnings,
+                       "gradeMs": round((_t_grade - _t0) * 1000), "analysisMs": round((_t_end - _t_grade) * 1000)})
 
 def run_filter(pattern):
     # Interactive filter over the last completed run — matches the pattern against every
@@ -314,7 +318,8 @@ def run_derivations():
     fin = json.loads(finalize_run())
     return json.dumps({"derivations": out, "grading": fin.get("grading"),
                        "diagnosis": fin.get("diagnosis"), "timeline": fin.get("timeline"),
-                       "blame": fin.get("blame"), "warnings": fin.get("warnings")})
+                       "blame": fin.get("blame"), "warnings": fin.get("warnings"),
+                       "gradeMs": fin.get("gradeMs"), "analysisMs": fin.get("analysisMs")})
 `;
 
 let py = null; // the Pyodide interpreter, set once initialised

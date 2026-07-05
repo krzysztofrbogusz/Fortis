@@ -110,6 +110,8 @@ try {
     throw new Error("expected a populated diagnosis, got: " + JSON.stringify(diag.diagnosis));
   if (!diag.timeline || !Array.isArray(diag.timeline.byTime) || !Array.isArray(diag.timeline.stages))
     throw new Error("timeline missing byTime/stages: " + JSON.stringify(diag.timeline));
+  if (typeof diag.gradeMs !== "number" || typeof diag.analysisMs !== "number")
+    throw new Error("run missing grade/analysis timing: " + JSON.stringify({g: diag.gradeMs, a: diag.analysisMs}));
   if (!diag.timeline.stages.some((s) => s.label === "final"))
     throw new Error("per-stage timeline missing the final stage");
   if (!diag.blame || !diag.blame.words.length)

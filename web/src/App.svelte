@@ -49,6 +49,7 @@
   let scopeData = $state(null); // the last run_scope result, or null
   let scopeError = $state(null); // scope parse/resolve errors, or null
   let scopeBusy = $state(false); // a scope run is in flight
+  let timing = $state(null); // {words, deriveMs, gradeMs, analysisMs} from the last run
   let tableCsv = $state(""); // derivation_table.csv content, for the right-pane Table view
   let resultView = $state("derivations"); // right-pane view: derivations | table | grading | diagnosis | blame | warnings
 
@@ -166,6 +167,7 @@
     grading = null; // and the previous grading summary
     warnings = []; // and the previous warnings
     tableCsv = ""; // and the previous derivation table
+    timing = null; // and the previous run's timing
     openDefs = {}; // reset per-card definition toggles (indices map to new words after a run)
     await paint(); // paint the (updated) left pane + cleared right pane before the first batch blocks
     if (myToken !== runToken) return; // superseded while painting — a newer run owns the session now
@@ -188,6 +190,7 @@
       // short, roughly fixed slice of wall-clock time (so the bar stays smooth
       // and the thread never freezes for long, whatever the machine's speed).
       let batch = 4;
+      const runStart = performance.now();
       for (let i = 0; i < total; ) {
         const t0 = performance.now();
         const slice = deriveBatch(i, batch);
@@ -204,7 +207,11 @@
           if (myToken !== runToken) return;
         }
       }
+      const deriveMs = performance.now() - runStart;
+      progressText = "analysing…"; // grading + diagnosis + timeline + blame can be slow
+      await paint();
       const fin = finalizeRun();
+      timing = { words: total, deriveMs, gradeMs: fin?.gradeMs ?? 0, analysisMs: fin?.analysisMs ?? 0 };
       grading = fin?.grading ?? null;
       if (!grading && resultView === "grading") resultView = "derivations"; // no target ⇒ leave the (now hidden) tab
       diagnosis = fin?.diagnosis ?? null;
@@ -737,6 +744,12 @@
             </details>
           {/each}
         {/snippet}
+        {#if timing}
+          <p class="muted timing-line">
+            {timing.words} words · derive {(timing.deriveMs / 1000).toFixed(1)}s · grade
+            {(timing.gradeMs / 1000).toFixed(1)}s · analysis {(timing.analysisMs / 1000).toFixed(1)}s
+          </p>
+        {/if}
         {#if resultView === "grading" && grading}
           <table class="grade-summary">
             <thead>
@@ -1572,6 +1585,12 @@
   .run-filter:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+
+  .timing-line {
+    font-size: var(--fs-body);
+    margin: 0 0 12px;
+    font-variant-numeric: tabular-nums;
   }
 
   .card {
