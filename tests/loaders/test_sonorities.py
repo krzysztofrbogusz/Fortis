@@ -4,6 +4,8 @@ from src.fortis.loaders.sonorities import (
     load_bundle,
     load_level,
     load_sonorities_inventory,
+    load_sonorities_inventory_csv,
+    load_sonorities_inventory_toml,
     load_sonority,
 )
 
@@ -86,3 +88,80 @@ class TestLoadSonoritiesInventory:
         path.write_text(toml_content)
         result = load_sonorities_inventory(path, features)
         assert result.is_err()
+
+
+class TestLoadSonoritiesInventoryCsv:
+    def test_from_file_preserves_order(self, tmp_path, features):
+        # Row order is first-match order — vowel outranks the rest.
+        csv_content = (
+            "name,level,bundle\n"
+            "vowel,7,\"syllabic: +, consonantal: -\"\n"
+            "nasal,3,\"sonorant: +, nasal: +\"\n"
+            "stop,1,sonorant: -\n"
+        )
+        path = tmp_path / "sonorities.csv"
+        path.write_text(csv_content)
+        result = load_sonorities_inventory(path, features)  # dispatches to CSV by extension
+        assert result.is_ok(), result.unwrap_err() if result.is_err() else None
+        inv = result.unwrap()
+        assert list(inv.data.keys()) == ["vowel", "nasal", "stop"]
+        assert inv["vowel"].level == 7
+
+    def test_empty_bundle_is_catch_all(self, tmp_path, features):
+        path = tmp_path / "sonorities.csv"
+        path.write_text("name,level,bundle\nother,1,\n")
+        inv = load_sonorities_inventory(path, features).unwrap()
+        assert inv["other"].bundle is None
+
+    def test_duplicate_level_is_an_error(self, tmp_path, features):
+        path = tmp_path / "sonorities.csv"
+        path.write_text("name,level,bundle\na,1,sonorant: -\nb,1,sonorant: +\n")
+        result = load_sonorities_inventory(path, features)
+        assert result.is_err()
+
+    def test_bad_level_is_an_error(self, tmp_path, features):
+        path = tmp_path / "sonorities.csv"
+        path.write_text("name,level,bundle\na,high,sonorant: -\n")
+        result = load_sonorities_inventory(path, features)
+        assert result.is_err()
+
+    def test_missing_required_column(self, tmp_path, features):
+        path = tmp_path / "sonorities.csv"
+        path.write_text("name,bundle\na,sonorant: -\n")  # no 'level'
+        result = load_sonorities_inventory(path, features)
+        assert result.is_err()
+        assert any("'level' column" in e for e in result.unwrap_err())
+
+    def test_unknown_column_is_an_error(self, tmp_path, features):
+        path = tmp_path / "sonorities.csv"
+        path.write_text("name,level,bundle,colour\na,1,sonorant: -,blue\n")
+        result = load_sonorities_inventory(path, features)
+        assert result.is_err()
+        assert any("unknown column" in e and "colour" in e for e in result.unwrap_err())
+
+
+class TestSonorityCsvTomlEquivalence:
+    def test_round_trip_is_identical(self, tmp_path, features):
+        toml_content = (
+            'vowel = { level = 7, bundle = "syllabic: +, consonantal: -" }\n'
+            'nasal = { level = 3, bundle = "sonorant: +, nasal: +" }\n'
+            'stop = { level = 1, bundle = "sonorant: -" }\n'
+        )
+        csv_content = (
+            "name,level,bundle\n"
+            "vowel,7,\"syllabic: +, consonantal: -\"\n"
+            "nasal,3,\"sonorant: +, nasal: +\"\n"
+            "stop,1,sonorant: -\n"
+        )
+        (tmp_path / "sonorities.toml").write_text(toml_content)
+        (tmp_path / "sonorities.csv").write_text(csv_content)
+        it = load_sonorities_inventory_toml(tmp_path / "sonorities.toml", features).unwrap()
+        ic = load_sonorities_inventory_csv(tmp_path / "sonorities.csv", features).unwrap()
+
+        def flat(inv):
+            return [
+                (s, x.level, (dict(x.bundle) if x.bundle else None))
+                for s, x in inv.data.items()
+            ]
+
+        assert flat(it) == flat(ic)

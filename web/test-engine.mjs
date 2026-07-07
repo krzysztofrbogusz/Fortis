@@ -62,6 +62,40 @@ try {
     throw new Error("write_file affected files other than words.toml: " + JSON.stringify(afterWrite));
   log("7. write_file(words.toml): promoted to project, everything else still default");
 
+  // Lexicon format resolution: only the effective words file shows. The default project
+  // carries words.toml, so words.csv is "absent" (hidden). Writing words.csv makes it the
+  // active lexicon and forces words.toml absent — the two never both show a tab.
+  const lex = statusPy(["words.toml", "words.csv"]);
+  if (lex["words.csv"] !== "absent")
+    throw new Error("expected words.csv absent when the project uses words.toml: " + JSON.stringify(lex));
+  py.runPython(`remove_file("words.toml"); write_file("words.csv", "word,gloss,final\\nka,c,ka\\n")`);
+  const lex2 = statusPy(["words.toml", "words.csv"]);
+  if (lex2["words.csv"] !== "project" || lex2["words.toml"] !== "absent")
+    throw new Error("expected words.csv active, words.toml absent: " + JSON.stringify(lex2));
+  py.runPython(`remove_file("words.csv"); write_file("words.toml", read_file("words.toml"))`); // restore
+  log("8b. lexicon resolution: words.toml/words.csv never both visible");
+
+  // Same dual-format resolution for rules: the default project ships rules.toml, so rules.csv
+  // is "absent" (hidden). Writing rules.csv makes it active and forces rules.toml absent.
+  const rul = statusPy(["rules.toml", "rules.csv"]);
+  if (rul["rules.csv"] !== "absent")
+    throw new Error("expected rules.csv absent when the project uses rules.toml: " + JSON.stringify(rul));
+  py.runPython(`remove_file("rules.toml"); write_file("rules.csv", "id,time,definition\\nr,0,a -> b\\n")`);
+  const rul2 = statusPy(["rules.toml", "rules.csv"]);
+  if (rul2["rules.csv"] !== "project" || rul2["rules.toml"] !== "absent")
+    throw new Error("expected rules.csv active, rules.toml absent: " + JSON.stringify(rul2));
+  py.runPython(`remove_file("rules.csv"); write_file("rules.toml", read_file("rules.toml"))`); // restore
+  log("8c. rules resolution: rules.toml/rules.csv never both visible");
+
+  // Diacritics and sonorities are dual-format too: their .csv is hidden while the project
+  // uses the shipped .toml, and never both show a tab.
+  for (const base of ["diacritics", "sonorities"]) {
+    const st = statusPy([`${base}.toml`, `${base}.csv`]);
+    if (st[`${base}.csv`] !== "absent")
+      throw new Error(`expected ${base}.csv absent when the project uses ${base}.toml: ` + JSON.stringify(st));
+  }
+  log("8d. diacritics/sonorities resolution: .toml/.csv never both visible");
+
   const rerun = JSON.parse(py.runPython("run_derivations()").toString());
   if (rerun.error) throw new Error("run_derivations() failed with a project file present: " + JSON.stringify(rerun.error));
   log("8. run_derivations() still succeeds with one project file (per-file fallback for the rest)");
@@ -92,7 +126,7 @@ try {
   if (warned.error) throw new Error("warnings run failed: " + JSON.stringify(warned.error));
   const ws = warned.warnings || [];
   const astra = ws.find((w) => w.syllabified === "as.tra");
-  if (!astra || !astra.clusters.includes("str") || !astra.stage)
+  if (!astra || !astra.clusters.includes("str") || astra.form !== "astra" || astra.word !== "astra")
     throw new Error("expected a populated 'astra' warning, got: " + JSON.stringify(ws));
   const warnMd = py.runPython(`read_file("warnings.md")`).toString();
   if (!warnMd.includes("as.tra")) throw new Error("warnings.md not written: " + warnMd.slice(0, 80));

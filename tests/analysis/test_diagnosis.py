@@ -69,8 +69,9 @@ class TestConfusions:
             _grade("taba", "tapa", "three"),
         )
         table = confusions(grades)
-        assert table[0] == Confusion("t", "d", 2, ("one", "two"))
-        assert Confusion("p", "b", 1, ("three",)) in table
+        # each example label is "word form • gloss"
+        assert table[0] == Confusion("t", "d", 2, ("kada • one", "mada • two"))
+        assert Confusion("p", "b", 1, ("taba • three",)) in table
 
     def test_exact_words_contribute_nothing(self):
         assert confusions((_grade("kata", "kata"),)) == []
@@ -228,7 +229,7 @@ class TestErrorsByTime:
         assert [b.time for b in buckets] == [600, 1000, None]  # 600 has 2, worst first
         t600 = buckets[0]
         assert t600.count == 2
-        assert t600.confusions[0] == Confusion("a", "e", 2, ("one", "two"))
+        assert t600.confusions[0] == Confusion("a", "e", 2, ("one • one", "two • two"))
 
     def test_unattributed_and_omission_group_under_none(self):
         # culprit None (deletion, omission, unattributed) all bucket to time None.

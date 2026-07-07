@@ -30,6 +30,25 @@
   src: url('../fonts/Charis-BoldItalic.woff2') format('woff2');
 }
 
+/* Noto Sans Mono — the monospace face. Chosen over the OS default because it carries full
+   IPA coverage (combining diacritics, tie-bars), so mono-rendered transcriptions don't fall
+   back to a substitute glyph. Shipped as TTF (no woff2 tooling available offline); Vite
+   bundles + hashes them like the Charis files. */
+@font-face {
+  font-family: 'Noto Sans Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/NotoSansMono-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/NotoSansMono-Bold.ttf') format('truetype');
+}
+
 :root {
   --text: #4b4753;
   --text-h: #08060d;
@@ -46,7 +65,7 @@
   --shadow: rgba(0, 0, 0, 0.08) 0 4px 12px -4px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --mono: 'Noto Sans Mono', ui-monospace, 'SF Mono', Consolas, monospace;
   --ipa: 'Charis SIL', serif;
 
   /* Type scale. Meta = --fs-body at --muted color, not a separate size. */

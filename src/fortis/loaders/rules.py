@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -163,26 +164,34 @@ def load_rule(
 
 
 def load_rule_inventory(path: Path, features: FeatureInventory) -> Result[RuleInventory, list[str]]:
-    """Load all rules from a TOML file.
+    """Load the rule inventory from a TOML or CSV file, dispatched by extension.
 
-    Rules are grouped by their ``time`` field — multiple rules at the same
-    time are stored as a tuple in file order.
+    Both formats carry the same schema (a rule's id, optional ``time``/``name``/
+    ``description``/``application``/``words``, and a required ``definition``). A ``.csv``
+    path is read as a rules table (:func:`load_rule_inventory_csv`); any other path is read
+    as TOML (:func:`load_rule_inventory_toml`).
 
     Args:
-        path: Path to the TOML file.
+        path: Path to the rules file (``.csv`` for CSV, else TOML).
         features: Feature inventory for bundle parsing inside definitions.
     """
+    if path.suffix.lower() == ".csv":
+        return load_rule_inventory_csv(path, features)
+    return load_rule_inventory_toml(path, features)
+
+
+def _assemble_inventory(
+    ordered: list[tuple[str, dict[str, Any]]], features: FeatureInventory
+) -> Result[RuleInventory, list[str]]:
+    """Build a validated :class:`RuleInventory` from ``(rule_id, rule_def)`` pairs in file order.
+
+    Shared by the TOML and CSV loaders: each pair goes through :func:`load_rule` (so both
+    formats inherit identical per-rule validation), and the resulting rules are grouped by
+    ``time`` preserving order.
+    """
     error_list: list[str] = []
-
-    match load_toml_file(path):
-        case Err(err):
-            return Err([err])
-        case Ok(result):
-            data = result
-
-    # Collect rules, preserving file order
     rules_by_time: dict[int | None, list[Rule]] = {}
-    for rule_id, rule_def in data.items():
+    for rule_id, rule_def in ordered:
         rule_id = rule_id.strip()
         match load_rule(rule_id, rule_def, features):
             case Err(errs):
@@ -201,6 +210,122 @@ def load_rule_inventory(path: Path, features: FeatureInventory) -> Result[RuleIn
         inventory[time] = tuple(rules)
 
     return validate_rule_inventory(inventory).map(lambda _: inventory)
+
+
+def load_rule_inventory_toml(
+    path: Path, features: FeatureInventory
+) -> Result[RuleInventory, list[str]]:
+    """Load all rules from a TOML file.
+
+    Rules are grouped by their ``time`` field — multiple rules at the same
+    time are stored as a tuple in file order.
+
+    Args:
+        path: Path to the TOML file.
+        features: Feature inventory for bundle parsing inside definitions.
+    """
+    match load_toml_file(path):
+        case Err(err):
+            return Err([err])
+        case Ok(result):
+            data = result
+
+    return _assemble_inventory(list(data.items()), features)
+
+
+# Columns the CSV loader understands; anything else is an error. ``definition`` is required,
+# ``id`` names the rule; the rest are optional and mirror the TOML fields.
+_RULE_COLUMNS = ("id", "time", "name", "description", "definition", "application", "words")
+# List-valued cells (``definition`` sub-steps, ``words`` scope) are ';'-separated. '|' is
+# reserved by alternation inside definitions (e.g. ``(j|w)``), so ';' is the safe delimiter.
+_LIST_SEP = ";"
+
+
+def load_rule_inventory_csv(
+    path: Path, features: FeatureInventory
+) -> Result[RuleInventory, list[str]]:
+    """Load all rules from a CSV file — the same schema as the TOML form, one rule per row.
+
+    A header row names the columns; they are read **by name**, so any order works. The
+    canonical order mirrors a rule table top-to-bottom::
+
+        id, time, name, description, definition, application, words
+
+    Columns in detail:
+
+    - ``id`` — the rule slug (labels its derivation step); required and unique per row.
+    - ``time`` — an optional integer stage time. Empty ⇒ untimed (applied after all timed
+      rules, in file order), exactly as an omitted TOML ``time``.
+    - ``name`` / ``description`` — optional prose; empty cells are treated as absent.
+    - ``definition`` — required. A multi-part rule is written as ``;``-separated sub-steps in
+      the one cell (they share the row's time/name/description and mint ``id#1``, ``id#2``, …),
+      matching a TOML list ``definition``.
+    - ``application`` — optional mode (``simultaneous`` default, ``iterative``, …).
+    - ``words`` — optional ``;``-separated word-scope, each matched against a word's ipa or
+      gloss. Empty ⇒ the rule applies to every word.
+
+    Fields are read with the ``csv`` module, so a value containing a comma must be quoted.
+    A gloss used as a word-scope cannot itself contain ``;`` (the list delimiter).
+
+    Args:
+        path: Path to the CSV file.
+        features: Feature inventory for bundle parsing inside definitions.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        return Err([f"could not read '{path}': {error}"])
+
+    reader = csv.DictReader(text.splitlines())
+    if reader.fieldnames is None:
+        return Err([f"'{path}' is empty (no header row)"])
+    unknown = [name for name in reader.fieldnames if name not in _RULE_COLUMNS]
+    if unknown:
+        return Err([f"'{path}' has unknown column(s): {', '.join(unknown)}"])
+    if "id" not in reader.fieldnames:
+        return Err([f"'{path}' must have an 'id' column (the rule slug)"])
+    if "definition" not in reader.fieldnames:
+        return Err([f"'{path}' must have a 'definition' column"])
+
+    error_list: list[str] = []
+    ordered: list[tuple[str, dict[str, Any]]] = []
+    for line, row in enumerate(reader, start=2):  # line 1 is the header
+        rule_id = (row.get("id") or "").strip()
+        if not rule_id:
+            error_list.append(f"line {line}: empty rule id")
+            continue
+
+        rule_def: dict[str, Any] = {}
+
+        time_cell = (row.get("time") or "").strip()
+        if time_cell:
+            try:
+                rule_def["time"] = int(time_cell)
+            except ValueError:
+                rule_def["time"] = time_cell  # non-integer → load_time reports it uniformly
+
+        # Omit an empty definition entirely so load_rule reports "missing" (not "empty list").
+        definition_cell = (row.get("definition") or "").strip()
+        if definition_cell:
+            rule_def["definition"] = [
+                part.strip() for part in definition_cell.split(_LIST_SEP) if part.strip()
+            ]
+
+        for field in ("name", "description", "application"):
+            value = (row.get(field) or "").strip()
+            if value:
+                rule_def[field] = value
+
+        words_cell = (row.get("words") or "").strip()
+        if words_cell:
+            rule_def["words"] = [w.strip() for w in words_cell.split(_LIST_SEP) if w.strip()]
+
+        ordered.append((rule_id, rule_def))
+
+    if error_list:
+        return Err(error_list)
+
+    return _assemble_inventory(ordered, features)
 
 
 # ---- Validation ------------------------------------------------------------------------

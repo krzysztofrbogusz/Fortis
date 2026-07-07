@@ -68,14 +68,58 @@
 
   let docsOpen = $state(false); // the Docs floating window
   let docsTab = $state("guide"); // active docs tab: "guide" | "system"
+  let docsBodyEl = $state(null); // the scrollable docs pane, for in-page ToC jumps
+
+  // GitHub-style heading slug, matching the anchors the docs' Table of Contents links to.
+  const slugify = (text) =>
+    text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+  // marked doesn't emit heading ids, so the ToC's #anchors have no targets. Inject an id
+  // (the slug of each heading's text) into every rendered <h1>…<h6> so the jumps resolve.
+  const addHeadingIds = (html) =>
+    html.replace(/<(h[1-6])>(.*?)<\/\1>/gs, (_m, tag, inner) => {
+      const text = inner.replace(/<[^>]+>/g, ""); // plain text for the slug
+      return `<${tag} id="${slugify(text)}">${inner}</${tag}>`;
+    });
   const docsHtml = $derived(
-    marked.parse(docsTab === "guide" ? userGuideMd : defaultSystemMd),
+    addHeadingIds(marked.parse(docsTab === "guide" ? userGuideMd : defaultSystemMd)),
   );
+
+  // Intercept ToC clicks: scroll the target heading into view within the docs pane (a plain
+  // #hash would jump the whole SPA, not this scroll container).
+  function docsAnchorClick(event) {
+    const anchor = event.target.closest?.('a[href^="#"]');
+    if (!anchor || !docsBodyEl) return;
+    const id = decodeURIComponent(anchor.getAttribute("href").slice(1));
+    const target = id && docsBodyEl.querySelector(`#${CSS.escape(id)}`);
+    if (target) {
+      event.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   let debounceTimer = null;
 
-  const defaultFiles = $derived(files.filter((f) => fileSource[f] !== "project"));
+  // "absent" files (in neither overlay nor default — e.g. words.csv when the project uses
+  // words.toml) are hidden, so the two lexicon formats never both show a tab.
+  const defaultFiles = $derived(files.filter((f) => fileSource[f] === "default"));
   const projectFiles = $derived(files.filter((f) => fileSource[f] === "project"));
+
+  // Hover tooltips: what each inventory file is.
+  const FILE_HELP = {
+    "features.toml": "The feature system — every phonological feature, its tier and values",
+    "letters.csv": "The letter/segment inventory — IPA symbols and their feature bundles",
+    "diacritics.toml": "Diacritics — marks that modify a segment (nasalization, length, …)",
+    "diacritics.csv": "Diacritics (CSV) — marks that modify a segment (nasalization, length, …)",
+    "sonorities.toml": "The sonority scale used for syllabification",
+    "sonorities.csv": "The sonority scale used for syllabification (CSV)",
+    "syllable_parts.toml": "Onset / nucleus / coda constraints for syllabification",
+    "tiers.toml": "Autosegmental tiers (tone, stress) and their behaviour",
+    "words.toml": "The lexicon — input IPA plus attested target and stage forms",
+    "words.csv": "The lexicon (CSV) — input IPA plus attested target and stage forms",
+    "rules.toml": "The ordered, time-keyed sound-change rules",
+    "rules.csv": "The ordered, time-keyed sound-change rules (CSV)",
+    "settings.toml": "Tunable analysis parameters (grading, diagnosis, induction)",
+  };
 
   // Everything the project switcher lists: the built-in default, the bundled
   // examples, and any locally-imported folders (added by loadProject).
@@ -151,6 +195,22 @@
   function selectFile(name) {
     active = name;
     content = readFile(name);
+  }
+
+  // After a project switch, keep `active` on a visible file: if it went absent (e.g. the
+  // project uses words.csv but `active` was words.toml), hop to the sibling format (words or
+  // rules) if it is visible, else fall back to the first visible file.
+  const DUAL_FORMAT = { // each file's sibling in the other (toml/csv) format
+    "words.toml": "words.csv", "words.csv": "words.toml",
+    "rules.toml": "rules.csv", "rules.csv": "rules.toml",
+    "diacritics.toml": "diacritics.csv", "diacritics.csv": "diacritics.toml",
+    "sonorities.toml": "sonorities.csv", "sonorities.csv": "sonorities.toml",
+  };
+  function visibleActive() {
+    if (fileSource[active] && fileSource[active] !== "absent") return active;
+    const sibling = DUAL_FORMAT[active];
+    if (sibling && fileSource[sibling] && fileSource[sibling] !== "absent") return sibling;
+    return files.find((f) => fileSource[f] && fileSource[f] !== "absent") ?? files[0];
   }
 
   // Yield to the browser so a state change (the progress bar) actually paints
@@ -240,6 +300,44 @@
     refreshStatus();
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => rerun(), 400); // auto-run only if under the size limit
+  }
+
+  // Comment-muting overlay for the .toml editor: a highlight <pre> mirrors the textarea's
+  // text (comment lines dimmed) behind its transparent-text caret. The two are kept in
+  // metric + scroll lock-step so the coloured mirror sits exactly under what you type.
+  let taEl = $state(null); // the textarea
+  let hlEl = $state(null); // the highlight mirror
+  // Split a TOML line into its code and trailing-comment halves at the first `#` that is NOT
+  // inside a string — TOML uses `#` as the word-boundary marker inside rule definitions
+  // (e.g. `definition = "a -> e / _ #"`), which must not be dimmed as a comment.
+  function splitComment(line) {
+    let inString = null; // '"' or "'" while inside a string, else null
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inString) {
+        if (ch === "\\" && inString === '"') i++; // skip an escaped char in a basic string
+        else if (ch === inString) inString = null;
+      } else if (ch === '"' || ch === "'") {
+        inString = ch;
+      } else if (ch === "#") {
+        return { code: line.slice(0, i), comment: line.slice(i) };
+      }
+    }
+    return { code: line, comment: "" };
+  }
+  const editorLines = $derived(content.split("\n").map(splitComment));
+  function syncScroll() {
+    if (hlEl && taEl) {
+      hlEl.scrollTop = taEl.scrollTop;
+      hlEl.scrollLeft = taEl.scrollLeft;
+    }
+  }
+
+  // The editable CSV table edits `.csv` inventories (letters.csv, a CSV words file) in place;
+  // it hands back the whole re-serialized file, which we save and re-run like any text edit.
+  function onCsvEdit(csv) {
+    content = csv;
+    onEdit();
   }
 
   function runProject() {
@@ -380,7 +478,7 @@
       }
       if (myToken !== runToken) return; // superseded during the fetch
       refreshStatus();
-      selectFile(active);
+      selectFile(visibleActive());
       await rerun(); // bumps runToken and takes over the busy flag from here
     } catch (e) {
       if (myToken === runToken) {
@@ -388,7 +486,7 @@
         picked = "";
         resetOverlay();
         refreshStatus();
-        selectFile(active);
+        selectFile(visibleActive());
       }
     } finally {
       if (myToken === runToken) busy = false; // if rerun ran it owns busy; else clear on our error
@@ -428,7 +526,11 @@
         <strong>Fortis</strong>
         <span class="tag">phonology engine</span>
       </div>
-      <button class="docs-btn" onclick={() => (docsOpen = true)}>Docs</button>
+      <button
+        class="docs-btn"
+        title="Open the notation and engine documentation"
+        onclick={() => (docsOpen = true)}>Docs</button
+      >
     </div>
     <div class="state">
       {#if initError}
@@ -439,14 +541,20 @@
         <span class="ok-dot"></span> Engine ready
       {/if}
       <div class="theme-toggle">
-        <button class:active={theme === "light"} onclick={() => (theme = "light")}
-          >Light</button
+        <button
+          class:active={theme === "light"}
+          title="Light theme"
+          onclick={() => (theme = "light")}>Light</button
         >
-        <button class:active={theme === "dark"} onclick={() => (theme = "dark")}
-          >Dark</button
+        <button
+          class:active={theme === "dark"}
+          title="Dark theme"
+          onclick={() => (theme = "dark")}>Dark</button
         >
-        <button class:active={theme === "system"} onclick={() => (theme = "system")}
-          >System</button
+        <button
+          class:active={theme === "system"}
+          title="Follow the system theme"
+          onclick={() => (theme = "system")}>System</button
         >
       </div>
     </div>
@@ -483,13 +591,19 @@
           <span class="caret" aria-hidden="true">▾</span>
         </div>
         <div class="actions">
-          <button disabled={!ready} onclick={() => fileInput.click()}
-            >Load file</button
+          <button
+            disabled={!ready}
+            title="Override one inventory file in this project from a local file"
+            onclick={() => fileInput.click()}>Load file</button
           >
-          <button disabled={!ready} onclick={() => projectInput.click()}
-            >Load project</button
+          <button
+            disabled={!ready}
+            title="Import a local folder as a new project"
+            onclick={() => projectInput.click()}>Load project</button
           >
-          <button disabled={!ready} onclick={saveActiveFile}>Save</button>
+          <button disabled={!ready} title="Download the active file" onclick={saveActiveFile}
+            >Save</button
+          >
         </div>
       </div>
 
@@ -501,6 +615,7 @@
               class="tab"
               class:active={f === active}
               disabled={!ready}
+              title={FILE_HELP[f]}
               onclick={() => selectFile(f)}>{f}</button
             >
           {/each}
@@ -516,6 +631,7 @@
                 class="tab"
                 class:active={f === active}
                 disabled={!ready}
+                title={FILE_HELP[f]}
                 onclick={() => selectFile(f)}>{f}</button
               >
               <button
@@ -529,8 +645,24 @@
         </div>
       {/if}
 
-      {#if active === "letters.csv"}
-        <CsvTable {content} />
+      {#if active?.endsWith(".csv")}
+        <CsvTable {content} onchange={onCsvEdit} />
+      {:else if active?.endsWith(".toml")}
+        <!-- Highlight overlay: the mirror colours comment lines; the textarea on top holds
+             the caret and real text (rendered transparent so only the mirror shows). -->
+        <div class="editor-wrap">
+          <pre class="editor editor-hl ipa" aria-hidden="true" bind:this={hlEl}>{#each editorLines as l, i}{#if i > 0}{"\n"}{/if}{l.code}<span
+                class="comment">{l.comment}</span>{/each}</pre>
+          <textarea
+            class="editor editor-input ipa"
+            spellcheck="false"
+            disabled={!ready}
+            bind:value={content}
+            oninput={onEdit}
+            onscroll={syncScroll}
+            bind:this={taEl}
+          ></textarea>
+        </div>
       {:else}
         <textarea
           class="editor ipa"
@@ -585,15 +717,18 @@
               <div class="view-tabs">
                 <button
                   class:active={resultView === "derivations"}
+                  title="Each word's step-by-step derivation from input to surface form"
                   onclick={() => (resultView = "derivations")}>Derivations</button
                 >
                 <button
                   class:active={resultView === "table"}
+                  title="Every word's form at each stage, in one table (derivation_table.csv)"
                   onclick={() => (resultView = "table")}>Table</button
                 >
                 {#if grading}
                   <button
                     class:active={resultView === "grading"}
+                    title="Exact-match accuracy and edit distance vs the attested targets"
                     onclick={() => (resultView = "grading")}>Grading</button
                   >
                 {/if}
@@ -665,13 +800,20 @@
       {:else if needsRun}
         <div class="results ipa">
           <div class="run-prompt">
-            <button class="run-project" disabled={!ready || busy} onclick={runProject}
-              >Run project</button
+            <button
+              class="run-project"
+              disabled={!ready || busy}
+              title="Derive the whole lexicon and regenerate the reports"
+              onclick={runProject}>Run project</button
             >
             {#if pendingSize}
               <p class="muted">
                 {pendingSize.words} words × {pendingSize.rules} rules — too large to run on
                 every edit. Click to run.
+              </p>
+              <p class="muted cli-hint">
+                Running the project through the CLI offers a 10× or greater speedup over
+                in-browser derivation.
               </p>
             {/if}
           </div>
@@ -690,7 +832,7 @@
                 <span class="form">{s.before}</span>
                 <span class="arrow">→</span>
                 <span class="form">{s.after}</span>
-                {#if s.change}<span class="change">({s.change})</span>{/if}
+                {#if s.change}<span class="change">(<span class="change-text">{s.change}</span>)</span>{/if}
               </div>
             {/each}
           </div>
@@ -724,7 +866,13 @@
               {#if a.predictors.length}
                 <table class="grade-misses">
                   <thead>
-                    <tr><th>context</th><th>phi</th><th>F</th><th>err/ok here</th><th>err/ok away</th></tr>
+                    <tr>
+                      <th title="The attested-form environment tested as a predictor of this error (e.g. right=n)">environment</th>
+                      <th title="Phi coefficient: chance-corrected association between the environment and the error (positive ⇒ it co-occurs with error). Predictors rank by this.">assoc. (φ)</th>
+                      <th title="F₁ of treating the environment as a prediction of error (precision × recall). Shown alongside φ; not the ranking metric.">F₁</th>
+                      <th title="Errors vs. correct outcomes in positions where the environment IS present">err/ok · with</th>
+                      <th title="Errors vs. correct outcomes in positions where it is absent">err/ok · without</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {#each a.predictors as p}
@@ -754,8 +902,10 @@
           <table class="grade-summary">
             <thead>
               <tr>
-                <th>stage</th><th>graded</th><th>exact</th><th>≤1</th>
-                <th>mean d</th><th>mean fd</th>
+                <th>stage</th><th>graded</th><th>exact</th>
+                <th title="Words within edit distance 1 of the target (an exact match, or one insertion/deletion/substitution away)">within 1</th>
+                <th title="Mean phone edit distance: Levenshtein distance over segments, averaged across graded words">mean phone dist</th>
+                <th title="Mean feature distance: per-segment featural difference, averaged across graded words">mean feature dist</th>
               </tr>
             </thead>
             <tbody>
@@ -776,7 +926,7 @@
             <p class="caveat">
               <strong>Token-weighted</strong> (by <code>frequency</code>, total weight
               {grading.weighted.weight}): final {(grading.weighted.accuracy * 100).toFixed(1)}%
-              exact, mean d {grading.weighted.meanPhone.toFixed(3)}, mean fd
+              exact, mean phone dist {grading.weighted.meanPhone.toFixed(3)}, mean feature dist
               {grading.weighted.meanFeature.toFixed(3)}. Confusions and the autopsy stay
               unweighted token counts.
             </p>
@@ -891,7 +1041,7 @@
                 <span class="muted">· d{w.distance}</span>
               </summary>
               <p class="residuals">
-                {#each w.residuals as r, i}<span class="form">{r.expected ?? "∅"}</span>→<span class="form">{r.got ?? "∅"}</span> <span class="muted">({r.culprit ? r.culprit + (r.time != null ? ", t=" + r.time : "") : r.attributed ? r.kind : "unattributed"})</span>{#if i < w.residuals.length - 1}<span class="muted">; </span>{/if}{/each}
+                {#each w.residuals as r, i}<span class="form">{r.expected ?? "∅"}</span>→<span class="form">{r.got ?? "∅"}</span> <span class="muted">({r.culprit ? r.culprit + (r.time != null ? ", t=" + r.time : "") : r.attributed ? r.kind : "unattributed"})</span>{#if i < w.residuals.length - 1}<span class="muted">;{" "}</span>{/if}{/each}
               </p>
               {#if w.stage}
                 <p class="muted stage-line">
@@ -900,7 +1050,7 @@
                   <span class="form">{w.stage.derived}</span>
                 </p>
               {/if}
-              <table class="grade-misses">
+              <table class="grade-misses blame-traj">
                 <thead>
                   <tr><th>step</th><th>t</th><th>form</th><th>target</th><th>d</th><th>fd</th></tr>
                 </thead>
@@ -927,13 +1077,14 @@
           </p>
           <table class="grade-summary">
             <thead>
-              <tr><th>word</th><th>form</th><th>cluster(s)</th><th>syllabified as</th></tr>
+              <tr><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr>
             </thead>
             <tbody>
               {#each warnings as w}
                 <tr>
                   <td class="tgt">{w.word}</td>
-                  <td>{w.stage}</td>
+                  <td class="gloss-cell">{w.gloss}</td>
+                  <td class="form">{w.form}</td>
                   <td class="form">{w.clusters.join(", ")}</td>
                   <td class="form">{w.syllabified}</td>
                 </tr>
@@ -951,6 +1102,7 @@
             <button
               class="run-filter"
               disabled={filterBusy || !filterPattern.trim()}
+              title="Find the words this pattern touches in any form"
               onclick={runFilterAction}>{filterBusy ? "Running…" : "Run filter"}</button
             >
           </div>
@@ -971,7 +1123,7 @@
               {#if filterData.grading}
                 Subset grading: {filterData.grading.exact}/{filterData.grading.graded} exact ({(
                   filterData.grading.accuracy * 100
-                ).toFixed(1)}%), mean d {filterData.grading.meanPhone.toFixed(3)}.
+                ).toFixed(1)}%), mean phone dist {filterData.grading.meanPhone.toFixed(3)}.
               {/if}
             </p>
             {#if filterData.confusions.length}
@@ -1006,6 +1158,7 @@
             <button
               class="run-filter"
               disabled={scopeBusy || !scopePattern.trim()}
+              title="Grade and diagnose only the words whose attested forms match this pattern"
               onclick={runScopeAction}>{scopeBusy ? "Running…" : "Run scope"}</button
             >
           </div>
@@ -1026,7 +1179,7 @@
               {#if scopeData.grading}
                 {scopeData.grading.exact}/{scopeData.grading.graded} exact ({(
                   scopeData.grading.accuracy * 100
-                ).toFixed(1)}%), mean d {scopeData.grading.meanPhone.toFixed(3)}.
+                ).toFixed(1)}%), mean phone dist {scopeData.grading.meanPhone.toFixed(3)}.
               {/if}
             </p>
             {#if scopeData.diagnosis}
@@ -1080,7 +1233,7 @@
                     <span class="form">{s.before}</span>
                     <span class="arrow">→</span>
                     <span class="form">{s.after}</span>
-                    {#if s.change}<span class="change">({s.change})</span>{/if}
+                    {#if s.change}<span class="change">(<span class="change-text">{s.change}</span>)</span>{/if}
                   </div>
                 {/each}
               </div>
@@ -1120,7 +1273,8 @@
           >×</button
         >
       </div>
-      <div class="docs-body">{@html docsHtml}</div>
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+      <div class="docs-body" bind:this={docsBodyEl} onclick={docsAnchorClick}>{@html docsHtml}</div>
     </div>
   </div>
 {/if}
@@ -1376,6 +1530,43 @@
     white-space: pre;
     overflow: auto;
   }
+  /* Comment-highlight overlay (.toml editor). The wrap owns the frame; the textarea and its
+     mirror <pre> stack inside it, sharing identical metrics so the coloured mirror lines up
+     under the caret. */
+  .editor-wrap {
+    position: relative;
+    flex: 1;
+    margin: 0 16px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .editor-wrap .editor {
+    position: absolute;
+    inset: 0;
+    flex: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .editor-input {
+    z-index: 1;
+    color: transparent;
+    caret-color: var(--text-h);
+  }
+  .editor-hl {
+    z-index: 0;
+    pointer-events: none;
+    scrollbar-width: none; /* the textarea owns the visible scrollbar; the mirror is synced */
+  }
+  .editor-hl::-webkit-scrollbar {
+    display: none;
+  }
+  .editor-hl .comment {
+    color: var(--muted);
+  }
 
   .progress {
     display: inline-block;
@@ -1434,6 +1625,9 @@
   .run-prompt .muted {
     max-width: 30ch;
   }
+  .run-prompt .cli-hint {
+    margin-top: -4px;
+  }
 
   .view-tabs {
     display: inline-flex;
@@ -1482,6 +1676,11 @@
   .grade-misses td:first-child {
     text-align: left;
   }
+  /* Gloss is a translation, not IPA — render it in the sans face, muted. */
+  .grade-summary td.gloss-cell {
+    font-family: var(--sans);
+    color: var(--muted);
+  }
   .grade-summary thead th,
   .grade-misses thead th {
     color: var(--muted);
@@ -1496,6 +1695,19 @@
   }
   .grade-misses td.form {
     color: var(--text-h);
+  }
+  /* Blame trajectory: the t/form/target/d/fd columns hug their content; the first `step`
+     column absorbs the remaining width and wraps long rule labels instead of forcing the
+     table wide. */
+  .blame-traj td:not(:first-child),
+  .blame-traj th:not(:first-child) {
+    width: 1%;
+    white-space: nowrap;
+  }
+  .blame-traj td:first-child,
+  .blame-traj th:first-child {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .caveat {
@@ -1688,6 +1900,11 @@
   }
   .change {
     color: var(--muted);
+    font-family: var(--mono);
+  }
+  /* Shrink only the change description, not its surrounding parentheses. */
+  .change-text {
+    font-size: 0.85em;
   }
 
   .surface {

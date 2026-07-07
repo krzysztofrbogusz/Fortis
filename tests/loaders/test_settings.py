@@ -2,7 +2,12 @@
 
 from src.fortis.config import config
 from src.fortis.loaders.settings import load_settings
-from src.fortis.models.settings import DiagnosisSettings, GradingSettings, Settings
+from src.fortis.models.settings import (
+    DiagnosisSettings,
+    GradingSettings,
+    InductionSettings,
+    Settings,
+)
 
 
 def _write(tmp_path, text):
@@ -37,12 +42,26 @@ class TestOverrides:
             "[grading]\ntransposition_cost = 2\n"
             "[diagnosis]\nmin_support = 4\nmin_support_percent = 25\n"
             "min_errors = 1\nreport_top = 10\nfocus_count = 3\n"
+            "[induction]\nmin_improved_words = 3\ntop_confusions = 7\n"
+            "contexts_per_confusion = 40\nplacement_candidates = 6\n"
+            "max_rules_per_interval = 80\nalignment_distance_cap = 5\nfinal_weight = 0.5\n"
         )
         settings = load_settings(_write(tmp_path, text)).unwrap()
         assert settings.grading.transposition_cost == 2
         assert settings.diagnosis == DiagnosisSettings(
             min_support=4, min_support_percent=25, min_errors=1, report_top=10, focus_count=3
         )
+        assert settings.induction == InductionSettings(
+            min_improved_words=3, top_confusions=7, contexts_per_confusion=40,
+            placement_candidates=6, max_rules_per_interval=80, alignment_distance_cap=5,
+            final_weight=0.5,
+        )
+
+    def test_final_weight_accepts_int(self, tmp_path):
+        # A bare integer is promoted to float for the one float-valued key.
+        settings = load_settings(_write(tmp_path, "[induction]\nfinal_weight = 2\n")).unwrap()
+        assert settings.induction.final_weight == 2.0
+        assert isinstance(settings.induction.final_weight, float)
 
 
 class TestValidation:
@@ -70,6 +89,15 @@ class TestValidation:
     def test_negative_transposition_cost_rejected(self, tmp_path):
         err = load_settings(_write(tmp_path, "[grading]\ntransposition_cost = -1\n")).unwrap_err()
         assert any("must be ≥ 0" in e for e in err)
+
+    def test_final_weight_bool_rejected(self, tmp_path):
+        # bool is an int subclass; `true` must NOT become 1.0 on a float-valued key.
+        err = load_settings(_write(tmp_path, "[induction]\nfinal_weight = true\n")).unwrap_err()
+        assert any("must be a number" in e for e in err)
+
+    def test_induction_below_minimum_rejected(self, tmp_path):
+        err = load_settings(_write(tmp_path, "[induction]\ntop_confusions = 0\n")).unwrap_err()
+        assert any("must be ≥ 1" in e for e in err)
 
     def test_errors_accumulate(self, tmp_path):
         err = load_settings(

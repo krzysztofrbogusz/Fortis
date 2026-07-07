@@ -10,16 +10,22 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, "..");
 
-// The 8 editable inventory filenames (must match FILES in src/lib/engine.js).
+// The editable inventory filenames (must match FILES in src/lib/engine.js). A project
+// carries its lexicon as either words.toml or words.csv; each example ships whichever it
+// has (the `provided` filter below drops the absent one).
 const INVENTORY = [
   "features.toml",
   "letters.csv",
   "diacritics.toml",
+  "diacritics.csv",
   "sonorities.toml",
+  "sonorities.csv",
   "syllable_parts.toml",
   "tiers.toml",
   "words.toml",
+  "words.csv",
   "rules.toml",
+  "rules.csv",
 ];
 
 // Example projects offered in the web app's picker. Each ships only the

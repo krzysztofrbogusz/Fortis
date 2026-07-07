@@ -41,8 +41,38 @@ class DiagnosisSettings:
 
 
 @dataclass(frozen=True)
+class InductionSettings:
+    """Knobs for supervised rule induction (:mod:`src.fortis.induction`).
+
+    These steer the *search*, not the objective: the MDL bits constants that price fit
+    against rule cost (``B_rule``, ``b_tag``) are module constants in
+    :mod:`src.fortis.induction.objective`, deliberately *not* settings — moving
+    them changes the objective itself, a research act rather than per-project tuning.
+    """
+
+    # A candidate must strictly improve at least this many words to be accepted, on top of
+    # the MDL criterion — a floor against a rule that only helps one incidental word.
+    min_improved_words: int = 2
+    # How many of the top residual confusions to expand into candidates per iteration.
+    top_confusions: int = 5
+    # Candidate cap per confusion (contexts × class/indel variants).
+    contexts_per_confusion: int = 25
+    # Candidates (ranked by append-ΔL) that get the full placement search.
+    placement_candidates: int = 5
+    # Iteration cap per interval, a runaway-loop backstop.
+    max_rules_per_interval: int = 60
+    # Words beyond this alignment distance don't feed the correspondence tallies (their
+    # alignments are unreliable); they still count in the loss.
+    alignment_distance_cap: int = 4
+    # Weight on the final checkpoint relative to intermediate stages; lower it for a project
+    # whose intermediate notation is only loosely comparable to the engine's output.
+    final_weight: float = 1.0
+
+
+@dataclass(frozen=True)
 class Settings:
     """A project's tunable parameters, grouped by the layer they steer."""
 
     grading: GradingSettings = field(default_factory=GradingSettings)
     diagnosis: DiagnosisSettings = field(default_factory=DiagnosisSettings)
+    induction: InductionSettings = field(default_factory=InductionSettings)

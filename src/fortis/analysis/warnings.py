@@ -31,6 +31,7 @@ class SyllabificationWarning:
     ipa: str
     gloss: str
     stage: str  # "input" or "surface" — which form needed the fallback
+    form: str  # the exact (unsyllabified) form this warning fired on
     clusters: tuple[str, ...]  # the offending cluster(s), rendered
     syllabified: str  # the resulting (fallback) syllabification
 
@@ -57,6 +58,7 @@ def _stage_warning(
         ipa=ipa,
         gloss=gloss,
         stage=stage,
+        form=render_syllabified(bundles, boundaries, project, dots=False),
         clusters=tuple(_cluster_text(bundles, s, e, project) for s, e in spans),
         syllabified=render_syllabified(bundles, boundaries, project),
     )
@@ -122,11 +124,10 @@ def render_warnings(warnings: list[SyllabificationWarning], where: str) -> str:
         lines.append("No syllabification fell back — every word matched the onset/coda patterns.")
         return "\n".join(lines).rstrip() + "\n"
     lines += [
-        "| word | form | cluster(s) | syllabified as |",
-        "| --- | --- | --- | --- |",
+        "| word | gloss | form | cluster | syllabified as |",
+        "| --- | --- | --- | --- | --- |",
     ]
     for w in warnings:
-        name = w.gloss or w.ipa
         clusters = ", ".join(f"`{c}`" for c in w.clusters)
-        lines.append(f"| {name} | {w.stage} | {clusters} | `{w.syllabified}` |")
+        lines.append(f"| `{w.ipa}` | {w.gloss} | `{w.form}` | {clusters} | `{w.syllabified}` |")
     return "\n".join(lines).rstrip() + "\n"

@@ -1,7 +1,13 @@
 <script>
-  // Read-only table view of a CSV (RFC4180 quoting: quoted fields may contain
-  // commas, newlines, and doubled `""` for a literal quote).
-  let { content = "" } = $props();
+  // A CSV table view. Read-only by default; pass an `onchange` callback to make it editable.
+  //  - Click a cell to select it; arrow keys / Tab move the selection.
+  //  - Enter or F2 (or just start typing) edits the selected cell; Enter/Tab commit and move,
+  //    Escape cancels.
+  //  - The `⋮` handle on each row/column opens a menu (add before/after, remove) or is dragged
+  //    to reorder — a line marks exactly where it will land, and the moving row/column dims.
+  // RFC4180 quoting: a quoted field may contain commas, newlines, and doubled `""`.
+  let { content = "", onchange = null } = $props();
+  const editable = $derived(typeof onchange === "function");
 
   function parseCsv(text) {
     const rows = [];
@@ -41,33 +47,459 @@
     return rows;
   }
 
-  const rows = $derived(content.trim() ? parseCsv(content.trim()) : []);
+  function toCsv(rows) {
+    const esc = (f) =>
+      /[",\n\r]/.test(f) ? '"' + String(f).replace(/"/g, '""') + '"' : String(f);
+    return rows.map((r) => r.map(esc).join(",")).join("\n") + "\n";
+  }
+
+  let rows = $state([]);
+  let sel = $state(null); // {r, c} — the selected cell (r = 0 is the header row)
+  let editing = $state(false); // whether the selected cell is in text-edit mode
+  let menu = $state(null); // {kind:"row"|"col", index, x, y} — the open ⋮ menu
+  let drag = $state(null); // {kind, from} — an in-flight reorder
+  let dropIndex = $state(null); // {kind, index} — the insertion position (0..n) under the cursor
+  let tableEl = $state(null); // the <table>, for moving DOM focus onto the selected cell
+  let wrapEl = $state(null); // the scroll container, for virtualization
+  let scrollTop = $state(0);
+  let viewportH = $state(600);
+  let rowH = $state(24); // measured body-row height (rows are uniform, single-line)
+  const OVERSCAN = 10; // extra rows rendered above/below the viewport
+  let seedNext = false; // caret to end (type-to-edit) rather than select-all
+  let reverting = false; // an Escape in progress — discard the edit on blur
+  let editOrig = ""; // the cell value when editing began, for Escape to restore
+  let lastEmitted = " uninitialised";
+  $effect.pre(() => {
+    if (content !== lastEmitted) {
+      rows = content.trim() ? parseCsv(content.trim()) : [];
+      lastEmitted = content;
+      sel = null;
+      editing = false;
+    }
+  });
+
   const header = $derived(rows[0] ?? []);
-  const body = $derived(rows.slice(1));
+  const cols = $derived(header.length);
+  const isSel = (r, c) => sel && sel.r === r && sel.c === c;
+
+  // ---- virtualization: render only the body rows in (or near) the viewport --------------
+  const colspan = $derived(cols + (editable ? 1 : 0));
+  const bodyCount = $derived(Math.max(0, rows.length - 1));
+  const vStart = $derived(Math.max(0, Math.floor(scrollTop / rowH) - OVERSCAN));
+  const vEnd = $derived(
+    Math.min(bodyCount, vStart + Math.ceil(viewportH / rowH) + OVERSCAN * 2),
+  );
+  const topPad = $derived(vStart * rowH);
+  const botPad = $derived(Math.max(0, (bodyCount - vEnd) * rowH));
+  // Visible body rows carrying their absolute index (1-based into `rows`).
+  const visibleRows = $derived(
+    rows.slice(vStart + 1, vEnd + 1).map((row, i) => ({ r: vStart + 1 + i, row })),
+  );
+
+  function onScroll() {
+    if (!wrapEl) return;
+    scrollTop = wrapEl.scrollTop;
+    viewportH = wrapEl.clientHeight;
+  }
+  // Measure a real row height once the table is on screen, and re-measure on content change.
+  $effect(() => {
+    rows.length; // re-run when the lexicon changes
+    if (!wrapEl) return;
+    viewportH = wrapEl.clientHeight;
+    const tr = wrapEl.querySelector("tbody tr:not(.vpad)");
+    if (tr?.offsetHeight) rowH = tr.offsetHeight;
+  });
+  // ---- stable column widths ------------------------------------------------------------
+  // Virtualization renders a shifting subset of rows, so `table-layout: auto` would re-fit
+  // every column to whatever happens to be on screen — widths jitter as you scroll. Instead
+  // we measure each column's widest cell across the WHOLE table once (cheap: canvas text
+  // metrics, no DOM render) and pin it with a <colgroup> + table-layout: fixed.
+  const CTRL_W = 26; // the ⋮ handle column (editable only)
+  const CELL_PAD = 16; // 7px l/r padding + 1px l/r border + a hair of slack
+  const HANDLE_W = 20; // header padding-right that makes room for its ⋮ handle
+  // Fonts mirror the CSS below: body is mono 16px; the first (symbol) column is the IPA face;
+  // headers are the sans face, semibold.
+  const MONO_FONT = "16px 'Noto Sans Mono', ui-monospace, 'SF Mono', Consolas, monospace";
+  const IPA_FONT = "600 16px 'Charis SIL', serif";
+  const HEAD_FONT = "600 16px system-ui, 'Segoe UI', Roboto, sans-serif";
+  let fontsReady = $state(false);
+  $effect(() => {
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(() => (fontsReady = true)); // re-measure once webfonts land
+    }
+  });
+  let _canvas = null;
+  function textWidth(text, font) {
+    if (typeof document === "undefined") return String(text).length * 9;
+    _canvas ??= document.createElement("canvas");
+    const ctx = _canvas.getContext("2d");
+    ctx.font = font;
+    return ctx.measureText(String(text)).width;
+  }
+  const colWidths = $derived.by(() => {
+    void fontsReady; // recompute after the IPA/webfonts finish loading
+    const widths = [];
+    for (let c = 0; c < cols; c++) {
+      const bodyFont = c === 0 ? IPA_FONT : MONO_FONT;
+      // The IPA face renders combining marks (tie-bars t͡s, stacked diacritics) that canvas
+      // metrics under-count; extra slack keeps fixed layout from clipping them off.
+      const slack = c === 0 ? 14 : 0;
+      const headW = textWidth(header[c] ?? "", HEAD_FONT) + (editable ? HANDLE_W : 0);
+      let bodyW = 0;
+      for (let r = 1; r < rows.length; r++) {
+        const v = rows[r][c];
+        if (v) bodyW = Math.max(bodyW, textWidth(v, bodyFont));
+      }
+      widths.push(Math.ceil(Math.max(headW, bodyW)) + CELL_PAD + slack);
+    }
+    return widths;
+  });
+  // The exact table width = sum of the column widths. A fixed-layout table with width:auto
+  // instead FILLS its container and hands the leftover space to a column, so that column's
+  // width shifts whenever the available width does (e.g. a scrollbar appearing) — the width
+  // "fluctuation on scroll". Pinning the table to the column sum leaves no slack to distribute.
+  const tableWidth = $derived(
+    (editable ? CTRL_W : 0) + colWidths.reduce((sum, w) => sum + w, 0),
+  );
+
+  // Scroll a body row into view (so keyboard navigation off-screen still renders + focuses).
+  function ensureVisible(r) {
+    if (!wrapEl || r < 1) return;
+    const top = (r - 1) * rowH;
+    let st = wrapEl.scrollTop;
+    if (top < st + rowH) st = Math.max(0, top - rowH);
+    else if (top + rowH > st + wrapEl.clientHeight - rowH)
+      st = top - wrapEl.clientHeight + rowH * 3;
+    st = Math.max(0, st);
+    wrapEl.scrollTop = st;
+    scrollTop = st;
+  }
+
+  function commit() {
+    const csv = toCsv(rows);
+    lastEmitted = csv;
+    onchange(csv);
+  }
+
+  // ---- selection + editing -------------------------------------------------------------
+  function select(r, c) {
+    if (!editable) return;
+    sel = { r, c };
+    editing = false;
+  }
+  function startEdit(r, c, seed = false) {
+    if (!editable) return;
+    sel = { r, c };
+    editOrig = rows[r][c] ?? "";
+    seedNext = seed;
+    editing = true;
+  }
+  function setCell(r, c, value) {
+    rows[r][c] = value;
+    commit();
+  }
+  function moveSel(dr, dc) {
+    if (!sel) return;
+    const r = Math.min(rows.length - 1, Math.max(0, sel.r + dr));
+    const c = Math.min(cols - 1, Math.max(0, sel.c + dc));
+    sel = { r, c };
+    editing = false;
+    ensureVisible(r); // bring it into the virtualized window before the focus effect runs
+  }
+  function cellKey(event, r, c) {
+    const k = event.key;
+    if (k === "ArrowUp") moveSel(-1, 0);
+    else if (k === "ArrowDown") moveSel(1, 0);
+    else if (k === "ArrowLeft") moveSel(0, -1);
+    else if (k === "ArrowRight") moveSel(0, 1);
+    else if (k === "Tab") moveSel(0, event.shiftKey ? -1 : 1);
+    else if (k === "Enter" || k === "F2") startEdit(r, c);
+    else if (k === "Backspace" || k === "Delete") setCell(r, c, "");
+    else if (k.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      rows[r][c] = k;
+      startEdit(r, c, true);
+    } else return;
+    event.preventDefault();
+  }
+  function inputKey(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.target.blur();
+      moveSel(1, 0);
+    } else if (event.key === "Tab") {
+      event.preventDefault();
+      const d = event.shiftKey ? -1 : 1;
+      event.target.blur();
+      moveSel(0, d);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      reverting = true;
+      event.target.blur();
+    }
+  }
+  function inputBlur(event, r, c) {
+    if (reverting) {
+      rows[r][c] = editOrig;
+      reverting = false;
+    } else {
+      setCell(r, c, event.target.value);
+    }
+    editing = false;
+  }
+  function focusCell(node) {
+    node.focus();
+    if (seedNext) {
+      const n = node.value.length;
+      node.setSelectionRange(n, n);
+      seedNext = false;
+    } else node.select();
+  }
+  $effect(() => {
+    if (!sel || editing || !tableEl) return;
+    tableEl.querySelector(`[data-cell="${sel.r}-${sel.c}"]`)?.focus();
+  });
+
+  // ---- row / column structure ----------------------------------------------------------
+  function emptyRow() {
+    return Array(cols || 1).fill("");
+  }
+  function addRow(index) {
+    rows.splice(index, 0, emptyRow());
+    commit();
+  }
+  function removeRow(index) {
+    rows.splice(index, 1);
+    sel = null;
+    commit();
+  }
+  // Move the row at `from` so it lands at insertion position `index` (0..rows.length).
+  function moveRow(from, index) {
+    if (from < 1 || index < 1 || index === from || index === from + 1) return;
+    const item = rows[from];
+    const rest = rows.filter((_, i) => i !== from);
+    rest.splice(index > from ? index - 1 : index, 0, item);
+    rows = rest;
+    commit();
+  }
+  function addCol(index) {
+    for (const row of rows) row.splice(index, 0, "");
+    commit();
+  }
+  function removeCol(index) {
+    for (const row of rows) row.splice(index, 1);
+    sel = null;
+    commit();
+  }
+  function moveCol(from, index) {
+    if (index === from || index === from + 1) return;
+    const at = index > from ? index - 1 : index;
+    for (const row of rows) {
+      const [cell] = row.splice(from, 1);
+      row.splice(at, 0, cell);
+    }
+    commit();
+  }
+
+  // ---- the ⋮ menu ----------------------------------------------------------------------
+  function openMenu(kind, index, event) {
+    event.stopPropagation();
+    menu = { kind, index, x: event.clientX, y: event.clientY };
+  }
+  function closeMenu() {
+    menu = null;
+  }
+  function act(fn, index) {
+    fn(index);
+    closeMenu();
+  }
+
+  // ---- drag reorder --------------------------------------------------------------------
+  // Native DnD, but the drop *position* (an insertion index, before/after the cell under the
+  // cursor) is what we track and show as a line — so it reads like Numbers, not a vague
+  // "dropped on a row" guess.
+  function startDrag(kind, from, event) {
+    drag = { kind, from };
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", `${kind}:${from}`);
+  }
+  function endDrag() {
+    drag = null;
+    dropIndex = null;
+  }
+  function overRow(event, r) {
+    if (drag?.kind !== "row") return;
+    event.preventDefault();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const index = event.clientY > rect.top + rect.height / 2 ? r + 1 : r;
+    if (dropIndex?.index !== index) dropIndex = { kind: "row", index };
+  }
+  function overCol(event, c) {
+    if (drag?.kind !== "col") return;
+    event.preventDefault();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const index = event.clientX > rect.left + rect.width / 2 ? c + 1 : c;
+    if (dropIndex?.index !== index) dropIndex = { kind: "col", index };
+  }
+  function dropRow(event) {
+    if (drag?.kind !== "row" || !dropIndex) return;
+    event.preventDefault();
+    moveRow(drag.from, dropIndex.index);
+    endDrag();
+  }
+  function dropCol(event) {
+    if (drag?.kind !== "col" || !dropIndex) return;
+    event.preventDefault();
+    moveCol(drag.from, dropIndex.index);
+    endDrag();
+  }
+  const insTop = (r) => dropIndex?.kind === "row" && dropIndex.index === r;
+  const insBottom = (r) =>
+    dropIndex?.kind === "row" && dropIndex.index === rows.length && r === rows.length - 1;
+  const insLeft = (c) => dropIndex?.kind === "col" && dropIndex.index === c;
+  const insRight = (c) => dropIndex?.kind === "col" && dropIndex.index === cols && c === cols - 1;
+  const dragRow = (r) => drag?.kind === "row" && drag.from === r;
+  const dragCol = (c) => drag?.kind === "col" && drag.from === c;
 </script>
 
-<div class="csv-wrap">
+<svelte:window onclick={closeMenu} />
+
+<div class="csv-wrap" bind:this={wrapEl} onscroll={onScroll}>
   {#if header.length}
-    <table class="csv">
+    <table class="csv" class:editable bind:this={tableEl} style="width: {tableWidth}px">
+      <colgroup>
+        {#if editable}<col style="width: {CTRL_W}px" />{/if}
+        {#each colWidths as w, i (i)}<col style="width: {w}px" />{/each}
+      </colgroup>
       <thead>
         <tr>
-          {#each header as h}<th>{h}</th>{/each}
+          {#if editable}<th class="ctrl" aria-hidden="true"></th>{/if}
+          {#each header as h, c (c)}
+            <th
+              class:sym-head={c === 0}
+              class:selected={isSel(0, c)}
+              class:ins-left={insLeft(c)}
+              class:ins-right={insRight(c)}
+              class:col-dragging={dragCol(c)}
+              data-cell={`0-${c}`}
+              tabindex={isSel(0, c) && !editing ? 0 : -1}
+              ondragover={(e) => overCol(e, c)}
+              ondrop={dropCol}
+              onclick={() => select(0, c)}
+              ondblclick={() => startEdit(0, c)}
+              onkeydown={(e) => cellKey(e, 0, c)}
+            >
+              {#if editing && isSel(0, c)}
+                <input
+                  use:focusCell
+                  value={rows[0][c] ?? ""}
+                  onblur={(e) => inputBlur(e, 0, c)}
+                  onkeydown={inputKey}
+                />
+              {:else}
+                <span class="label">{h}</span>
+              {/if}
+              {#if editable}
+                <button
+                  class="handle"
+                  title="Column options — click for menu, drag to move"
+                  aria-label="Column options"
+                  draggable="true"
+                  ondragstart={(e) => startDrag("col", c, e)}
+                  ondragend={endDrag}
+                  onclick={(e) => openMenu("col", c, e)}>⋮</button
+                >
+              {/if}
+            </th>
+          {/each}
         </tr>
       </thead>
       <tbody>
-        {#each body as row}
-          <tr>
-            {#each header as _, i}
-              <td class:sym={i === 0}>{row[i] ?? ""}</td>
+        {#if topPad > 0}
+          <tr class="vpad" aria-hidden="true">
+            <td colspan={colspan} style="height: {topPad}px"></td>
+          </tr>
+        {/if}
+        {#each visibleRows as { r, row } (r)}
+          <tr
+            class:ins-top={insTop(r)}
+            class:ins-bottom={insBottom(r)}
+            class:row-dragging={dragRow(r)}
+            ondragover={(e) => overRow(e, r)}
+            ondrop={dropRow}
+          >
+            {#if editable}
+              <td class="ctrl">
+                <button
+                  class="handle"
+                  title="Row options — click for menu, drag to move"
+                  aria-label="Row options"
+                  draggable="true"
+                  ondragstart={(e) => startDrag("row", r, e)}
+                  ondragend={endDrag}
+                  onclick={(e) => openMenu("row", r, e)}>⋮</button
+                >
+              </td>
+            {/if}
+            {#each header as _, c (c)}
+              <td
+                class:sym={c === 0}
+                class:selected={isSel(r, c)}
+                class:ins-left={insLeft(c)}
+                class:ins-right={insRight(c)}
+                class:col-dragging={dragCol(c)}
+                data-cell={`${r}-${c}`}
+                tabindex={isSel(r, c) && !editing ? 0 : -1}
+                ondragover={(e) => overCol(e, c)}
+                ondrop={dropCol}
+                onclick={() => select(r, c)}
+                ondblclick={() => startEdit(r, c)}
+                onkeydown={(e) => cellKey(e, r, c)}
+              >
+                {#if editing && isSel(r, c)}
+                  <input
+                    use:focusCell
+                    value={row[c] ?? ""}
+                    onblur={(e) => inputBlur(e, r, c)}
+                    onkeydown={inputKey}
+                  />
+                {:else}{row[c] ?? ""}{/if}
+              </td>
             {/each}
           </tr>
         {/each}
+        {#if botPad > 0}
+          <tr class="vpad" aria-hidden="true">
+            <td colspan={colspan} style="height: {botPad}px"></td>
+          </tr>
+        {/if}
       </tbody>
     </table>
+    {#if editable}
+      <button class="add-row" onclick={() => addRow(rows.length)}>+ Add row</button>
+    {/if}
   {:else}
     <p class="empty">Empty file.</p>
   {/if}
 </div>
+
+{#if menu}
+  <!-- Fixed so it escapes the table's overflow clipping; closed by the window click above. -->
+  <div class="ctx-menu" style="left: {menu.x}px; top: {menu.y}px" role="menu">
+    {#if menu.kind === "row"}
+      <button role="menuitem" onclick={() => act(addRow, menu.index)}>Add row above</button>
+      <button role="menuitem" onclick={() => act(addRow, menu.index + 1)}>Add row below</button>
+      <button role="menuitem" class="danger" onclick={() => act(removeRow, menu.index)}
+        >Remove row</button
+      >
+    {:else}
+      <button role="menuitem" onclick={() => act(addCol, menu.index)}>Add column left</button>
+      <button role="menuitem" onclick={() => act(addCol, menu.index + 1)}>Add column right</button>
+      <button role="menuitem" class="danger" onclick={() => act(removeCol, menu.index)}
+        >Remove column</button
+      >
+    {/if}
+  </div>
+{/if}
 
 <style>
   .csv-wrap {
@@ -82,13 +514,102 @@
     border-collapse: collapse;
     font-family: var(--mono);
     font-size: 16px;
+    /* Fixed layout + measured <colgroup> widths: columns stay put as virtualization swaps
+       the rendered rows (auto layout would re-fit them to the visible subset and jitter). */
+    table-layout: fixed;
+  }
+  .csv td,
+  .csv th {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .csv th,
   .csv td {
     border: 1px solid var(--border);
     padding: 2px 7px;
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
+    position: relative;
+  }
+  table.editable th,
+  table.editable td {
+    cursor: cell;
+  }
+  table.editable th {
+    padding-right: 20px; /* room for the ⋮ handle */
+  }
+  table.editable td.ctrl,
+  table.editable th.ctrl {
+    cursor: default;
+  }
+  /* Selection ring drawn inward, input filling the cell exactly — no size change on select. */
+  .csv td:focus,
+  .csv th:focus {
+    outline: none;
+  }
+  .csv td.selected,
+  .csv th.selected {
+    box-shadow: inset 0 0 0 2px var(--accent, #4a90d9);
+  }
+  .csv input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    font: inherit;
+    line-height: inherit;
+    text-align: left;
+    background: transparent;
+    color: var(--text-h);
+  }
+  /* The ⋮ drag/menu handle. */
+  .handle {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: grab;
+    font-size: 15px;
+    line-height: 1;
+    padding: 0 3px;
+    border-radius: 4px;
+    user-select: none;
+  }
+  th .handle {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .handle:hover {
+    color: var(--text-h);
+    background: var(--border);
+  }
+  .handle:active {
+    cursor: grabbing;
+  }
+  /* Drag reorder: a thick accent line at the exact insertion boundary, and the moving
+     row/column dimmed — the "where will it land" cue, Numbers-style. */
+  .csv tr.ins-top td {
+    box-shadow: inset 0 3px 0 var(--accent, #4a90d9);
+  }
+  .csv tr.ins-bottom td {
+    box-shadow: inset 0 -3px 0 var(--accent, #4a90d9);
+  }
+  .csv th.ins-left,
+  .csv td.ins-left {
+    box-shadow: inset 3px 0 0 var(--accent, #4a90d9);
+  }
+  .csv th.ins-right,
+  .csv td.ins-right {
+    box-shadow: inset -3px 0 0 var(--accent, #4a90d9);
+  }
+  .csv tr.row-dragging td,
+  .csv th.col-dragging,
+  .csv td.col-dragging {
+    opacity: 0.4;
   }
   /* Sticky header row and sticky first (symbol) column. */
   .csv thead th {
@@ -101,13 +622,15 @@
     font-family: var(--sans);
   }
   .csv td.sym,
-  .csv th:first-child {
+  .csv th.sym-head {
     position: sticky;
     left: 0;
     z-index: 1;
     background: var(--panel);
   }
-  .csv thead th:first-child {
+  /* Top-left corner: the "word" header pins both directions, so it must sit above
+     the sticky header row (z2) and the sticky first column (z1). */
+  .csv thead th.sym-head {
     z-index: 3;
   }
   .csv td.sym {
@@ -115,6 +638,60 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--text-h);
+  }
+  .csv td.ctrl,
+  .csv th.ctrl {
+    width: 1%;
+    padding: 0 2px;
+  }
+  /* Virtualization spacers: hold the scroll height for the off-screen rows. */
+  .csv tr.vpad td {
+    padding: 0;
+    border: 0;
+  }
+  .add-row {
+    margin: 8px 12px 12px;
+    padding: 5px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: none;
+    color: var(--text-h);
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  .add-row:hover {
+    background: var(--border);
+  }
+  .ctx-menu {
+    position: fixed;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    padding: 4px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  .ctx-menu button {
+    text-align: left;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: var(--text-h);
+    cursor: pointer;
+  }
+  .ctx-menu button:hover {
+    background: var(--border);
+  }
+  .ctx-menu button.danger:hover {
+    background: #d9534f;
+    color: #fff;
   }
   .empty {
     color: var(--muted);

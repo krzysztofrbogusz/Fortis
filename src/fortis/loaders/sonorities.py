@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -93,6 +94,25 @@ def load_bundle(
 def load_sonorities_inventory(
     path: Path, features: FeatureInventory
 ) -> Result[SonoritiesInventory, list[str]]:
+    """Load the sonority inventory from a TOML or CSV file, dispatched by extension.
+
+    Both formats carry the same schema (a level's ``name``, integer ``level``, and matching
+    ``bundle``) and both are **order-sensitive** — levels are tried first-match in file/row
+    order. A ``.csv`` path is read as a sonorities table (:func:`load_sonorities_inventory_csv`);
+    any other path is read as TOML.
+
+    Args:
+        path: Path to the sonorities file (``.csv`` for CSV, else TOML).
+        features: Feature inventory for bundle parsing.
+    """
+    if path.suffix.lower() == ".csv":
+        return load_sonorities_inventory_csv(path, features)
+    return load_sonorities_inventory_toml(path, features)
+
+
+def load_sonorities_inventory_toml(
+    path: Path, features: FeatureInventory
+) -> Result[SonoritiesInventory, list[str]]:
     """Load all sonority levels from a TOML file.
 
     Args:
@@ -122,6 +142,73 @@ def load_sonorities_inventory(
                 sonority = result
 
         inventory[label] = sonority
+
+    if error_list:
+        return Err(error_list)
+
+    return validate_sonorities_inventory(inventory).map(lambda _: inventory)
+
+
+# The CSV columns; all three are required (an empty ``bundle`` cell is the catch-all level).
+_SONORITY_COLUMNS = ("name", "level", "bundle")
+
+
+def load_sonorities_inventory_csv(
+    path: Path, features: FeatureInventory
+) -> Result[SonoritiesInventory, list[str]]:
+    """Load all sonority levels from a CSV file — the same schema as the TOML form, one per row.
+
+    Row order is significant: levels are matched first-to-last, exactly like the TOML table
+    order. A header row names the columns (read by name); the canonical order::
+
+        name, level, bundle
+
+    - ``name`` — the level's label (required, unique).
+    - ``level`` — a positive integer rank (required, unique across rows).
+    - ``bundle`` — the feature-bundle predicate a segment must match for this level (required
+      column; usually contains commas, so quote it — ``"sonorant: +, nasal: +"``). An empty
+      cell is the catch-all that matches anything.
+
+    Args:
+        path: Path to the CSV file.
+        features: Feature inventory for bundle parsing.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        return Err([f"could not read '{path}': {error}"])
+
+    reader = csv.DictReader(text.splitlines())
+    if reader.fieldnames is None:
+        return Err([f"'{path}' is empty (no header row)"])
+    unknown = [name for name in reader.fieldnames if name not in _SONORITY_COLUMNS]
+    if unknown:
+        return Err([f"'{path}' has unknown column(s): {', '.join(unknown)}"])
+    for required in _SONORITY_COLUMNS:
+        if required not in reader.fieldnames:
+            return Err([f"'{path}' must have a '{required}' column"])
+
+    error_list: list[str] = []
+    inventory = SonoritiesInventory()
+    for row in reader:
+        label = (row.get("name") or "").strip()
+        if not label:
+            error_list.append("Sonority has an empty name")
+            continue
+        if label in inventory:
+            error_list.append(f"Sonority '{label}' is already defined")
+            continue
+
+        sonority_def: dict[str, Any] = {
+            "level": (row.get("level") or "").strip(),
+            "bundle": row.get("bundle") or "",  # load_bundle strips; empty ⇒ catch-all (None)
+        }
+        match load_sonority(label, sonority_def, features):
+            case Err(err):
+                error_list.extend(err)
+                continue
+            case Ok(result):
+                inventory[label] = result
 
     if error_list:
         return Err(error_list)

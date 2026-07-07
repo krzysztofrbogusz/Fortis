@@ -2,7 +2,7 @@
 
 Fortis is a sound change engine for diachronic and synchronic phonology. It takes a lexicon and an ordered set of phonological rules, applies those rules to every word in the lexicon, and produces a derivation trace showing each intermediate form and the rule responsible for each change.
 
-Everything Fortis works with is **user-defined and imported from TOML files**: the feature vocabulary, the IPA letters, the diacritics, the sonority scale, the syllable parameters, the lexicon, and the rules. Fortis ships no built-in phonology; it is an engine that runs whatever inventories and rules you supply.
+Everything Fortis works with is **user-defined and imported from plain-text TOML and CSV files**: the feature vocabulary, the IPA letters, the diacritics, the sonority scale, the syllable parameters, the lexicon, and the rules. Fortis ships no built-in phonology; it is an engine that runs whatever inventories and rules you supply.
 
 ---
 
@@ -11,7 +11,7 @@ Everything Fortis works with is **user-defined and imported from TOML files**: t
 1. [Overview](#1-overview)
 2. [The Pipeline](#2-the-pipeline)
 3. [The Feature System](#3-the-feature-system)
-4. [The TOML Configuration Files](#4-the-toml-configuration-files)
+4. [Configuration Files](#4-configuration-files)
 5. [Rule Notation Reference](#5-rule-notation-reference)
 6. [Rule Application Semantics](#6-rule-application-semantics)
 7. [Syllabification](#7-syllabification)
@@ -126,7 +126,7 @@ but the number of levels, their ordering, and the predicates are all yours to de
 
 ---
 
-## 4. The TOML Configuration Files
+## 4. Configuration Files
 
 Every inventory Fortis uses is loaded from a file. All of them are user-authored.
 
@@ -172,6 +172,22 @@ string matters: `kata⟨◌́⟩` places a floating high _after_ the final segme
 suffixal tone that docks leftward onto it); `⟨◌́⟩kata` places one _before_ the
 first. A dock rule (§5.12) then binds it wherever it sits.
 
+**CSV form (`words.csv`).** The lexicon may instead be written as a CSV table — the
+same schema, one word per row — chosen by the file's extension (`load_word_inventory`
+dispatches on `.csv` vs TOML). A header row names the columns, read **by name** so any
+order works; the canonical order follows the derivation timeline:
+
+```
+word, gloss, <intermediate stage times, ascending>, final
+```
+
+e.g. `word, gloss, -200, -100, 750, 1000, 1200, 1400, final`. `word` is the IPA key
+(required); `gloss`/`final`/`frequency` are the reserved columns; every other column
+whose name is an **integer** is a stage time, its cell the attested form then. An empty
+cell means "not present". Fields are read with the `csv` module, so a value containing a
+comma must be quoted (`"amère, bitter"`). A project may carry either form; if both
+`words.toml` and `words.csv` are present, TOML wins.
+
 ### 4.2 rules.toml
 
 Each rule is a TOML table whose header is the rule's **id** (a slug). Chronology is carried by a separate `time` field, not by the header.
@@ -208,6 +224,22 @@ definition  = "∅ [+cons, +syll] → u [-syll]"
 **Ordering:** rules are sorted by `time` ascending — undated rules (no `time`) last — then by order of appearance in the file for rules that share a time. Leaving gaps between `time` values (e.g. −2000, −1000, 0) lets you insert later rules without renumbering.
 
 The three rules above also illustrate the result-position distinction of §5.1: in `laryngeal_coloring`, `a` is a **letter** and replaces the matched segment entirely; in `u_epenthesis`, the inserted `u` is a letter (full segment) while `[+cons, +syll] → [-syll]` is a **bundle** that merges, changing only syllabicity and leaving the rest of the consonant intact.
+
+**CSV form (`rules.csv`).** The rule list may also be written as a CSV table — one rule
+per row, chosen by extension. Columns are read by name; the canonical order mirrors a rule
+table top-to-bottom:
+
+```
+id, time, name, description, definition, application, words
+```
+
+`id` and `definition` are required; the rest are the optional fields above (an empty cell
+is "absent", so an empty `time` is an undated rule). Two fields that are lists in TOML are
+written `;`-separated in their one cell: a multi-part `definition` (its sub-steps share the
+row's time/name and mint `id#1`, `id#2`, …) and a multi-word `words` scope. `;` is used
+because `|` is reserved by alternation inside a definition (e.g. `(j|w)`); a gloss used as a
+word-scope therefore cannot itself contain `;`. As with the lexicon, a project may carry
+either form, and `rules.toml` wins if both are present.
 
 ### 4.3 tiers.toml
 

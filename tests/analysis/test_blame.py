@@ -31,9 +31,10 @@ def blames(derivs, latin):
 
 class TestInvariants:
     def test_blame_distance_equals_grader_distance(self, blames, derivs, latin):
-        graded = {g.gloss: g.distance for g in grade(derivs, latin).grades}
+        # Key by ipa, the unique identifier — glosses can repeat across the lexicon.
+        graded = {g.ipa: g.distance for g in grade(derivs, latin).grades}
         for blame in blames:
-            assert blame.distance == graded[blame.gloss]
+            assert blame.distance == graded[blame.ipa]
 
     def test_trajectory_endpoint_is_the_surface(self, blames):
         # The final trajectory point is derivation.surface, so its distance is the grade.
@@ -50,8 +51,13 @@ class TestInvariants:
 
 class TestTrajectoryTargets:
     def test_targets_track_the_attested_stage(self, derivs, latin):
-        # connaître carries stages -200,-100,750,1000,1200,1400 + final.
-        d = next(dv for dv in derivs if dv.word.gloss == "connaître")
+        # Any word carrying several attested stages plus a final (picked structurally rather
+        # than by name, so it doesn't depend on a specific entry being in the lexicon).
+        d = max(
+            (dv for dv in derivs
+             if dv.word.stages and dv.word.final is not None and blame_word(dv, latin)),
+            key=lambda dv: (len(dv.word.stages), dv.word.ipa),
+        )
         blame = blame_word(d, latin)
         stages, times = d.word.stages, sorted(d.word.stages)
         # The input heads to the earliest attested stage; the surface is the final.
@@ -78,9 +84,9 @@ class TestTrajectoryTargets:
 class TestProvenance:
     def test_culprits_are_rules_that_fired_on_that_word(self, blames, derivs):
         # Provenance may only name a rule that actually fired on the word in question.
-        by_gloss = {d.word.gloss: d for d in derivs}
+        by_ipa = {d.word.ipa: d for d in derivs}  # ipa is unique; glosses can repeat
         for blame in blames:
-            fired = {step.rule.id for step in by_gloss[blame.gloss].steps}
+            fired = {step.rule.id for step in by_ipa[blame.ipa].steps}
             for residual in blame.residuals:
                 if residual.culprit is not None:
                     assert residual.culprit in fired
@@ -93,8 +99,8 @@ class TestProvenance:
 class TestStructure:
     def test_exact_word_is_not_blamed(self, derivs, latin):
         # Find an exactly-derived word (there are hundreds) — it gets no blame.
-        blamed = {b.gloss for b in blame_all(derivs, latin)}
-        exact = next(d for d in derivs if d.word.final and d.word.gloss not in blamed)
+        blamed = {b.ipa for b in blame_all(derivs, latin)}  # ipa is unique; glosses can repeat
+        exact = next(d for d in derivs if d.word.final and d.word.ipa not in blamed)
         assert blame_word(exact, latin) is None
 
     def test_word_without_target_is_not_blamed(self, derivs, latin):

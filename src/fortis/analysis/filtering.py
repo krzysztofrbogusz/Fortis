@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.fortis.analysis.grading import _segment
+from src.fortis.analysis.grading import segment_form
 from src.fortis.application.deriving import resolve_rule_letters
 from src.fortis.application.matching import find_matches
 from src.fortis.application.rendering import render_syllabified
@@ -100,9 +100,9 @@ def _locations(derivation: Derivation, sd: StructuralDescription, project: Proje
     derived("surface", derivation.surface, derivation.surface_boundaries)
 
     if derivation.word.final is not None:
-        consider("target", _segment(derivation.word.final, project), derivation.word.final)
+        consider("target", segment_form(derivation.word.final, project), derivation.word.final)
     for time, form in sorted(derivation.word.stages.items()):
-        consider(f"stage {time}", _segment(form, project), form)
+        consider(f"stage {time}", segment_form(form, project), form)
     return locations
 
 
@@ -172,7 +172,7 @@ def filter_attested(
         if not forms:
             continue
         considered += 1
-        if any(_matches(sd, _segment(form, project), project) for form in forms):
+        if any(_matches(sd, segment_form(form, project), project) for form in forms):
             matched.append(derivation)
     return Ok(ScopeResult(pattern=pattern, matched=tuple(matched), considered=considered))
 

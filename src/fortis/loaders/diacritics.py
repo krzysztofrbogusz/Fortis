@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -149,6 +150,24 @@ def load_bool_field(symbol: str, diacritic_def: dict[str, Any], field: str) -> R
 def load_diacritic_inventory(
     path: Path, features: FeatureInventory
 ) -> Result[DiacriticInventory, list[str]]:
+    """Load the diacritic inventory from a TOML or CSV file, dispatched by extension.
+
+    Both formats carry the same schema (a symbol with a ``tier``/``kind``/``bundle`` and the
+    optional ``marks_boundary``/``read_only``/``contour`` flags). A ``.csv`` path is read as a
+    diacritics table (:func:`load_diacritic_inventory_csv`); any other path is read as TOML.
+
+    Args:
+        path: Path to the diacritics file (``.csv`` for CSV, else TOML).
+        features: Feature inventory for bundle parsing.
+    """
+    if path.suffix.lower() == ".csv":
+        return load_diacritic_inventory_csv(path, features)
+    return load_diacritic_inventory_toml(path, features)
+
+
+def load_diacritic_inventory_toml(
+    path: Path, features: FeatureInventory
+) -> Result[DiacriticInventory, list[str]]:
     """Load all diacritics from a TOML file.
 
     Args:
@@ -181,6 +200,95 @@ def load_diacritic_inventory(
                 diacritic = result
 
         inventory[symbol] = diacritic
+
+    if error_list:
+        return Err(error_list)
+
+    return validate_diacritic_inventory(inventory, features).map(lambda _: inventory)
+
+
+# Columns the CSV loader understands. ``diacritic``/``tier``/``kind``/``bundle`` are required;
+# the three flags are optional booleans (empty cell ⇒ false).
+_DIACRITIC_FLAGS = ("marks_boundary", "read_only", "contour")
+_DIACRITIC_COLUMNS = ("diacritic", "tier", "kind", "bundle", *_DIACRITIC_FLAGS)
+
+
+def _csv_bool(value: str) -> bool | str:
+    """A CSV boolean cell → a Python bool.
+
+    Empty or ``false`` ⇒ False, ``true`` ⇒ True; anything else is returned verbatim so the
+    reused per-field loader reports it uniformly.
+    """
+    stripped = value.strip().lower()
+    if stripped in ("", "false"):
+        return False
+    if stripped == "true":
+        return True
+    return value
+
+
+def load_diacritic_inventory_csv(
+    path: Path, features: FeatureInventory
+) -> Result[DiacriticInventory, list[str]]:
+    """Load all diacritics from a CSV file — the same schema as the TOML form, one per row.
+
+    A header row names the columns, read **by name** so any order works. The canonical order::
+
+        diacritic, tier, kind, bundle, marks_boundary, read_only, contour
+
+    - ``diacritic`` — the symbol (required). A combining mark may be written on the dotted-circle
+      carrier (``◌̃``); the carrier is stripped on load, exactly as in TOML.
+    - ``tier`` — ``segment`` or ``syllable`` (required).
+    - ``kind`` — ``before``, ``after``, or ``combining`` (required).
+    - ``bundle`` — the feature bundle the diacritic contributes (required). It usually contains
+      commas, so quote it (``"+labial, +rounded"``).
+    - ``marks_boundary`` / ``read_only`` / ``contour`` — optional booleans (``true``/``false``;
+      an empty cell is false).
+
+    Args:
+        path: Path to the CSV file.
+        features: Feature inventory for bundle parsing.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        return Err([f"could not read '{path}': {error}"])
+
+    reader = csv.DictReader(text.splitlines())
+    if reader.fieldnames is None:
+        return Err([f"'{path}' is empty (no header row)"])
+    unknown = [name for name in reader.fieldnames if name not in _DIACRITIC_COLUMNS]
+    if unknown:
+        return Err([f"'{path}' has unknown column(s): {', '.join(unknown)}"])
+    for required in ("diacritic", "tier", "kind", "bundle"):
+        if required not in reader.fieldnames:
+            return Err([f"'{path}' must have a '{required}' column"])
+
+    error_list: list[str] = []
+    inventory = DiacriticInventory()
+    for row in reader:
+        symbol = (row.get("diacritic") or "").strip().replace(_DOTTED_CIRCLE, "")
+        if not symbol:
+            error_list.append("Diacritic has an empty symbol")
+            continue
+        if symbol in inventory:
+            error_list.append(f"Diacritic '{present_symbol(symbol)}' is already defined")
+            continue
+
+        diacritic_def: dict[str, Any] = {
+            "tier": (row.get("tier") or "").strip(),
+            "kind": (row.get("kind") or "").strip(),
+            "bundle": (row.get("bundle") or "").strip(),
+        }
+        for flag in _DIACRITIC_FLAGS:
+            if flag in reader.fieldnames:
+                diacritic_def[flag] = _csv_bool(row.get(flag) or "")
+
+        match load_diacritic(symbol, diacritic_def, features):
+            case Err(err):
+                error_list.extend(err)
+            case Ok(result):
+                inventory[symbol] = result
 
     if error_list:
         return Err(error_list)

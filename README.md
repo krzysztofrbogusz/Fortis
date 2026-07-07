@@ -92,6 +92,12 @@ python -m src.fortis.main --words my_words.toml --rules my_rules.toml
 python -m src.fortis.main --project projects/pie_to_germanic   # PIE → Proto-Germanic
 ```
 
+The lexicon, the rule list, the diacritics, and the sonority scale may each be written as
+**TOML or CSV** — the loader dispatches on the file extension, so `--words my_words.csv` or a
+project carrying `rules.csv` works the same way (the CSV is a flatter, spreadsheet-friendly form
+of the same schema; if a project has both formats of a file, TOML wins). The feature system,
+tiers, and syllable parameters stay TOML, since they nest. See `docs/user_guide.md` §4.1–§4.2.
+
 Every run also writes reports alongside the printed trace: `output.md` (the
 firing-rule trace per word) and `derivation_table.csv` (one row per word and one
 column per rule — each titled `<time>: <rule>` — holding the word's resulting

@@ -9,6 +9,14 @@ or all of it (see the main [README](../README.md#design-philosophy)). For
 how to author your own feature system from scratch, see
 [`user_guide.md`](user_guide.md) §3–§4.
 
+The letter inventory is a CSV table (`letters.csv`). The lexicon, the rule list, the
+diacritics, and the sonority scale each accept **either** form, chosen by file
+extension: `words.toml`/`words.csv`, `rules.toml`/`rules.csv`,
+`diacritics.toml`/`diacritics.csv`, `sonorities.toml`/`sonorities.csv` (if both are
+present, TOML wins). The feature system (`features.toml`), tiers (`tiers.toml`), and
+syllable parameters (`syllable_parts.toml`) stay TOML, since they nest. The CSV forms
+are documented in [`user_guide.md`](user_guide.md) §4.1–§4.2.
+
 ## Feature geometry
 
 The segmental tree, from `features.toml` (a `root` node parenting the

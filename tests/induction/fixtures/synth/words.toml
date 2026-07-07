@@ -1,0 +1,49 @@
+# A small, fully synthetic benchmark project for the induction tests — a self-consistent
+# lexicon (the hand cascade in rules.toml regenerates every form with zero residual) with
+# the same stage-time schema as the Latin benchmark. Generated, not hand-typed; do not edit
+# by hand — regenerate if rules.toml changes. NOT real data.
+
+"popo" = { gloss = "w0", "-200" = "po.po", "-100" = "po.bo", "750" = "pu.bu", "1000" = "pu.bu", "1200" = "pu.bu", "1400" = "pu.bu", final = "pu.bu" }
+"popa" = { gloss = "w1", "-200" = "po.pa", "-100" = "po.ba", "750" = "pu.ba", "1000" = "pu.ba", "1200" = "pu.ba", "1400" = "pu.ba", final = "pu.ba" }
+"pope" = { gloss = "w2", "-200" = "po.pe", "-100" = "po.be", "750" = "pu.be", "1000" = "pu.be", "1200" = "pu.be", "1400" = "pu.bi", final = "pu.bi" }
+"popos" = { gloss = "w3", "-200" = "po.pos", "-100" = "po.bos", "750" = "pu.bus", "1000" = "pu.bus", "1200" = "pu.bu", "1400" = "pu.bu", final = "pu.bu" }
+"popas" = { gloss = "w4", "-200" = "po.pas", "-100" = "po.bas", "750" = "pu.bas", "1000" = "pu.bas", "1200" = "pu.ba", "1400" = "pu.ba", final = "pu.ba" }
+"popes" = { gloss = "w5", "-200" = "po.pes", "-100" = "po.bes", "750" = "pu.bes", "1000" = "pu.bes", "1200" = "pu.be", "1400" = "pu.bi", final = "pu.bi" }
+"poko" = { gloss = "w6", "-200" = "po.ko", "-100" = "po.ko", "750" = "pu.ku", "1000" = "pu.tu", "1200" = "pu.tu", "1400" = "pu.tu", final = "pu.tu" }
+"poka" = { gloss = "w7", "-200" = "po.ka", "-100" = "po.ka", "750" = "pu.ka", "1000" = "pu.ta", "1200" = "pu.ta", "1400" = "pu.ta", final = "pu.ta" }
+"poke" = { gloss = "w8", "-200" = "po.ke", "-100" = "po.ke", "750" = "pu.ke", "1000" = "pu.te", "1200" = "pu.te", "1400" = "pu.ti", final = "pu.ti" }
+"pokos" = { gloss = "w9", "-200" = "po.kos", "-100" = "po.kos", "750" = "pu.kus", "1000" = "pu.tus", "1200" = "pu.tu", "1400" = "pu.tu", final = "pu.tu" }
+"pokas" = { gloss = "w10", "-200" = "po.kas", "-100" = "po.kas", "750" = "pu.kas", "1000" = "pu.tas", "1200" = "pu.ta", "1400" = "pu.ta", final = "pu.ta" }
+"pokes" = { gloss = "w11", "-200" = "po.kes", "-100" = "po.kes", "750" = "pu.kes", "1000" = "pu.tes", "1200" = "pu.te", "1400" = "pu.ti", final = "pu.ti" }
+"poto" = { gloss = "w12", "-200" = "po.to", "-100" = "po.to", "750" = "pu.tu", "1000" = "pu.tu", "1200" = "pu.tu", "1400" = "pu.tu", final = "pu.tu" }
+"pota" = { gloss = "w13", "-200" = "po.ta", "-100" = "po.ta", "750" = "pu.ta", "1000" = "pu.ta", "1200" = "pu.ta", "1400" = "pu.ta", final = "pu.ta" }
+"pote" = { gloss = "w14", "-200" = "po.te", "-100" = "po.te", "750" = "pu.te", "1000" = "pu.te", "1200" = "pu.te", "1400" = "pu.ti", final = "pu.ti" }
+"potos" = { gloss = "w15", "-200" = "po.tos", "-100" = "po.tos", "750" = "pu.tus", "1000" = "pu.tus", "1200" = "pu.tu", "1400" = "pu.tu", final = "pu.tu" }
+"potas" = { gloss = "w16", "-200" = "po.tas", "-100" = "po.tas", "750" = "pu.tas", "1000" = "pu.tas", "1200" = "pu.ta", "1400" = "pu.ta", final = "pu.ta" }
+"potes" = { gloss = "w17", "-200" = "po.tes", "-100" = "po.tes", "750" = "pu.tes", "1000" = "pu.tes", "1200" = "pu.te", "1400" = "pu.ti", final = "pu.ti" }
+"pomo" = { gloss = "w18", "-200" = "po.mo", "-100" = "po.mo", "750" = "pu.mu", "1000" = "pu.nu", "1200" = "pu.nu", "1400" = "pu.nu", final = "pu.nu" }
+"poma" = { gloss = "w19", "-200" = "po.ma", "-100" = "po.ma", "750" = "pu.ma", "1000" = "pu.na", "1200" = "pu.na", "1400" = "pu.na", final = "pu.na" }
+"pome" = { gloss = "w20", "-200" = "po.me", "-100" = "po.me", "750" = "pu.me", "1000" = "pu.ne", "1200" = "pu.ne", "1400" = "pu.ni", final = "pu.ni" }
+"pomos" = { gloss = "w21", "-200" = "po.mos", "-100" = "po.mos", "750" = "pu.mus", "1000" = "pu.nus", "1200" = "pu.nu", "1400" = "pu.nu", final = "pu.nu" }
+"pomas" = { gloss = "w22", "-200" = "po.mas", "-100" = "po.mas", "750" = "pu.mas", "1000" = "pu.nas", "1200" = "pu.na", "1400" = "pu.na", final = "pu.na" }
+"pomes" = { gloss = "w23", "-200" = "po.mes", "-100" = "po.mes", "750" = "pu.mes", "1000" = "pu.nes", "1200" = "pu.ne", "1400" = "pu.ni", final = "pu.ni" }
+"papo" = { gloss = "w24", "-200" = "pa.po", "-100" = "pa.bo", "750" = "pa.bu", "1000" = "pa.bu", "1200" = "pa.bu", "1400" = "pa.bu", final = "pa.bu" }
+"papa" = { gloss = "w25", "-200" = "pa.pa", "-100" = "pa.ba", "750" = "pa.ba", "1000" = "pa.ba", "1200" = "pa.ba", "1400" = "pa.ba", final = "pa.ba" }
+"pape" = { gloss = "w26", "-200" = "pa.pe", "-100" = "pa.be", "750" = "pa.be", "1000" = "pa.be", "1200" = "pa.be", "1400" = "pa.bi", final = "pa.bi" }
+"papos" = { gloss = "w27", "-200" = "pa.pos", "-100" = "pa.bos", "750" = "pa.bus", "1000" = "pa.bus", "1200" = "pa.bu", "1400" = "pa.bu", final = "pa.bu" }
+"papas" = { gloss = "w28", "-200" = "pa.pas", "-100" = "pa.bas", "750" = "pa.bas", "1000" = "pa.bas", "1200" = "pa.ba", "1400" = "pa.ba", final = "pa.ba" }
+"papes" = { gloss = "w29", "-200" = "pa.pes", "-100" = "pa.bes", "750" = "pa.bes", "1000" = "pa.bes", "1200" = "pa.be", "1400" = "pa.bi", final = "pa.bi" }
+"pako" = { gloss = "w30", "-200" = "pa.ko", "-100" = "pa.ko", "750" = "pa.ku", "1000" = "pa.tu", "1200" = "pa.tu", "1400" = "pa.tu", final = "pa.tu" }
+"paka" = { gloss = "w31", "-200" = "pa.ka", "-100" = "pa.ka", "750" = "pa.ka", "1000" = "pa.ta", "1200" = "pa.ta", "1400" = "pa.ta", final = "pa.ta" }
+"pake" = { gloss = "w32", "-200" = "pa.ke", "-100" = "pa.ke", "750" = "pa.ke", "1000" = "pa.te", "1200" = "pa.te", "1400" = "pa.ti", final = "pa.ti" }
+"pakos" = { gloss = "w33", "-200" = "pa.kos", "-100" = "pa.kos", "750" = "pa.kus", "1000" = "pa.tus", "1200" = "pa.tu", "1400" = "pa.tu", final = "pa.tu" }
+"pakas" = { gloss = "w34", "-200" = "pa.kas", "-100" = "pa.kas", "750" = "pa.kas", "1000" = "pa.tas", "1200" = "pa.ta", "1400" = "pa.ta", final = "pa.ta" }
+"pakes" = { gloss = "w35", "-200" = "pa.kes", "-100" = "pa.kes", "750" = "pa.kes", "1000" = "pa.tes", "1200" = "pa.te", "1400" = "pa.ti", final = "pa.ti" }
+"pato" = { gloss = "w36", "-200" = "pa.to", "-100" = "pa.to", "750" = "pa.tu", "1000" = "pa.tu", "1200" = "pa.tu", "1400" = "pa.tu", final = "pa.tu" }
+"pate" = { gloss = "w37", "-200" = "pa.te", "-100" = "pa.te", "750" = "pa.te", "1000" = "pa.te", "1200" = "pa.te", "1400" = "pa.ti", final = "pa.ti" }
+"patos" = { gloss = "w38", "-200" = "pa.tos", "-100" = "pa.tos", "750" = "pa.tus", "1000" = "pa.tus", "1200" = "pa.tu", "1400" = "pa.tu", final = "pa.tu" }
+"patas" = { gloss = "w39", "-200" = "pa.tas", "-100" = "pa.tas", "750" = "pa.tas", "1000" = "pa.tas", "1200" = "pa.ta", "1400" = "pa.ta", final = "pa.ta" }
+"pates" = { gloss = "w40", "-200" = "pa.tes", "-100" = "pa.tes", "750" = "pa.tes", "1000" = "pa.tes", "1200" = "pa.te", "1400" = "pa.ti", final = "pa.ti" }
+"pamo" = { gloss = "w41", "-200" = "pa.mo", "-100" = "pa.mo", "750" = "pa.mu", "1000" = "pa.nu", "1200" = "pa.nu", "1400" = "pa.nu", final = "pa.nu" }
+"pama" = { gloss = "w42", "-200" = "pa.ma", "-100" = "pa.ma", "750" = "pa.ma", "1000" = "pa.na", "1200" = "pa.na", "1400" = "pa.na", final = "pa.na" }
+"pame" = { gloss = "w43", "-200" = "pa.me", "-100" = "pa.me", "750" = "pa.me", "1000" = "pa.ne", "1200" = "pa.ne", "1400" = "pa.ni", final = "pa.ni" }

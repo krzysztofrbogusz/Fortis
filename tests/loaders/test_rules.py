@@ -5,6 +5,8 @@ from src.fortis.loaders.rules import (
     load_application,
     load_rule,
     load_rule_inventory,
+    load_rule_inventory_csv,
+    load_rule_inventory_toml,
     load_time,
 )
 from src.fortis.models.rules import ApplicationMode
@@ -220,3 +222,140 @@ definition = "e → f"
         result = load_rule_inventory(path, features)
         assert result.is_err()
         assert any("duplicate rule id 'foo#1'" in e for e in result.unwrap_err())
+
+
+class TestLoadRuleInventoryCsv:
+    def test_from_file(self, tmp_path, features):
+        csv_content = (
+            "id,time,name,description,definition,application,words\n"
+            "laryngeal_coloring,-2000,Laryngeal coloring,,m → n,,\n"
+            # the definition contains a comma, so it must be quoted (RFC 4180)
+            'voicing_assimilation,-2000,,,"[+cons, -voice] → [-voice]",,\n'
+        )
+        path = tmp_path / "rules.csv"
+        path.write_text(csv_content)
+        result = load_rule_inventory(path, features)  # dispatches to CSV by extension
+        assert result.is_ok(), f"Errors: {result.unwrap_err() if result.is_err() else None}"
+        inv = result.unwrap()
+        assert len(inv[-2000]) == 2
+        assert inv[-2000][0].id == "laryngeal_coloring"
+        assert inv[-2000][0].name == "Laryngeal coloring"
+        assert inv[-2000][1].id == "voicing_assimilation"
+
+    def test_empty_time_is_untimed(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,time,definition\nr,,a → b\n")
+        inv = load_rule_inventory(path, features).unwrap()
+        assert None in inv
+        assert inv[None][0].time is None
+
+    def test_multipart_definition_via_semicolons(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,time,definition\nmulti,0,a → b;c → d\n")
+        inv = load_rule_inventory(path, features).unwrap()
+        ids = [r.id for r in inv[0]]
+        assert ids == ["multi#1", "multi#2"]
+        assert [r.raw_definition for r in inv[0]] == ["a → b", "c → d"]
+
+    def test_words_scope_via_semicolons(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,definition,words\nr,a → b,sun;ear\n")
+        inv = load_rule_inventory(path, features).unwrap()
+        assert inv[None][0].words == ("sun", "ear")
+
+    def test_column_order_is_free(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("definition,id,time\na → b,r,-100\n")
+        inv = load_rule_inventory(path, features).unwrap()
+        assert inv[-100][0].id == "r"
+        assert inv[-100][0].raw_definition == "a → b"
+
+    def test_empty_id_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,definition\n,a → b\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("line 2" in e and "empty rule id" in e for e in result.unwrap_err())
+
+    def test_missing_definition_cell_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,definition\nr,\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("missing the required 'definition'" in e for e in result.unwrap_err())
+
+    def test_missing_id_column_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("time,definition\n0,a → b\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("'id' column" in e for e in result.unwrap_err())
+
+    def test_missing_definition_column_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,time\nr,0\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("'definition' column" in e for e in result.unwrap_err())
+
+    def test_unknown_column_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,definition,colour\nr,a → b,blue\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("unknown column" in e and "colour" in e for e in result.unwrap_err())
+
+    def test_non_integer_time_is_an_error(self, tmp_path, features):
+        path = tmp_path / "rules.csv"
+        path.write_text("id,time,definition\nr,soon,a → b\n")
+        result = load_rule_inventory(path, features)
+        assert result.is_err()
+        assert any("time" in e for e in result.unwrap_err())
+
+
+class TestCsvTomlEquivalence:
+    """A representative rules block must load identically from CSV and from TOML."""
+
+    def test_round_trip_is_identical(self, tmp_path, features):
+        toml_content = """\
+[cl_assim]
+time = -100
+name = "Assimilation"
+description = "n before a velar"
+definition = "n → ŋ / _ k"
+
+[cl_multi]
+time = -100
+definition = ["a → e", "o → u"]
+
+[cl_scoped]
+time = -100
+application = "left_to_right"
+words = ["sun", "ear"]
+definition = "s → h / _ #"
+
+[untimed_last]
+definition = "b → p / _ #"
+"""
+        csv_content = (
+            "id,time,name,description,definition,application,words\n"
+            "cl_assim,-100,Assimilation,n before a velar,n → ŋ / _ k,,\n"
+            "cl_multi,-100,,,a → e;o → u,,\n"
+            "cl_scoped,-100,,,s → h / _ #,left_to_right,sun;ear\n"
+            "untimed_last,,,,b → p / _ #,,\n"
+        )
+        (tmp_path / "rules.toml").write_text(toml_content)
+        (tmp_path / "rules.csv").write_text(csv_content)
+
+        inv_toml = load_rule_inventory_toml(tmp_path / "rules.toml", features).unwrap()
+        inv_csv = load_rule_inventory_csv(tmp_path / "rules.csv", features).unwrap()
+
+        def flat(inv):
+            return [
+                (r.id, r.time, r.raw_definition, r.name, r.description,
+                 r.application, r.words)
+                for time in inv
+                for r in inv[time]
+            ]
+
+        assert flat(inv_toml) == flat(inv_csv)

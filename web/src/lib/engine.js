@@ -20,11 +20,15 @@ export const FILES = [
   "features.toml",
   "letters.csv",
   "diacritics.toml",
+  "diacritics.csv",
   "sonorities.toml",
+  "sonorities.csv",
   "syllable_parts.toml",
   "tiers.toml",
   "words.toml",
+  "words.csv",
   "rules.toml",
+  "rules.csv",
   "settings.toml",
 ];
 
@@ -61,7 +65,9 @@ Path(OVERLAY).mkdir(parents=True, exist_ok=True)
 def _pick(name):
     p = Path(OVERLAY)/name
     return p if p.exists() else Path(DEFAULT)/name
-def read_file(name): return _pick(name).read_text(encoding="utf-8")
+def read_file(name):
+    p = _pick(name)
+    return p.read_text(encoding="utf-8") if p.exists() else ""
 def write_file(name, text): (Path(OVERLAY)/name).write_text(text, encoding="utf-8")
 def remove_file(name):
     p = Path(OVERLAY)/name
@@ -69,8 +75,30 @@ def remove_file(name):
 def reset_overlay():
     for p in Path(OVERLAY).iterdir():
         if p.is_file(): p.unlink()
+def _active_of(toml_name, csv_name):
+    # The file load_project() actually uses for a toml/csv pair: overlay TOML, else overlay
+    # CSV, else the shipped default's TOML (mirrors pick_words/pick_rules in load_project).
+    for f in (toml_name, csv_name):
+        if (Path(OVERLAY)/f).exists(): return f
+    return toml_name
 def file_status(names):
-    return json.dumps({name: ("project" if (Path(OVERLAY)/name).exists() else "default") for name in names})
+    # "project" (in the overlay), "default" (only in the shipped default), or "absent"
+    # (in neither). For each dual-format pair (words, rules) the non-effective file is forced
+    # absent so the .toml and .csv never both show a tab — the UI hides absent files.
+    def _src(name):
+        if (Path(OVERLAY)/name).exists(): return "project"
+        if (Path(DEFAULT)/name).exists(): return "default"
+        return "absent"
+    out = {name: _src(name) for name in names}
+    for toml_name, csv_name in (
+        ("words.toml", "words.csv"), ("rules.toml", "rules.csv"),
+        ("diacritics.toml", "diacritics.csv"), ("sonorities.toml", "sonorities.csv"),
+    ):
+        keep = _active_of(toml_name, csv_name)
+        for f in (toml_name, csv_name):
+            if f in out and f != keep:
+                out[f] = "absent"
+    return json.dumps(out)
 # A run is split so the UI can paint a progress bar between word batches:
 # prepare_run() parses the project once; derive_batch(start,count) renders a
 # slice (accumulating raw derivations for the reports); finalize_run() writes
@@ -243,7 +271,7 @@ def finalize_run():
 
     warns = syllabification_warnings(acc, project)
     _write_or_clear(O/"warnings.md", render_warnings(warns, "the current project") if warns else None)
-    warnings = [{"word": w.gloss or w.ipa, "stage": w.stage,
+    warnings = [{"word": w.ipa, "gloss": w.gloss, "form": w.form,
                  "clusters": list(w.clusters), "syllabified": w.syllabified} for w in warns]
     _t_end = time.perf_counter()
     _LAST.update(project=project, rules=rules, derivations=list(acc))  # for the Filter tab

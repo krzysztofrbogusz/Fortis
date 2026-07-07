@@ -75,10 +75,26 @@ def load_project(
         candidate = project_dir / filename
         return candidate if candidate.exists() else defaults / filename
 
+    def pick_dual(toml_name: str, csv_name: str) -> Path:
+        """The path for a dual-format inventory (``.toml`` or ``.csv``).
+
+        Returns the project's ``.toml`` if present, else its ``.csv``, else the shipped
+        default's ``.toml``. Words, rules, diacritics, and sonorities each load from either
+        format (their loaders dispatch by extension); TOML wins when both are present, so a
+        project can carry a canonical ``.toml`` and a derived ``.csv`` side by side.
+        """
+        for filename in (toml_name, csv_name):
+            candidate = project_dir / filename
+            if candidate.exists():
+                return candidate
+        return defaults / toml_name
+
     if words_path is None:
-        words_path = pick("words.toml")
+        words_path = pick_dual("words.toml", "words.csv")
     if rules_path is None:
-        rules_path = pick("rules.toml")
+        rules_path = pick_dual("rules.toml", "rules.csv")
+    diacritics_path = pick_dual("diacritics.toml", "diacritics.csv")
+    sonorities_path = pick_dual("sonorities.toml", "sonorities.csv")
 
     error_list: list[str] = []
 
@@ -111,17 +127,17 @@ def load_project(
 
     # ---- Diacritics ------------------------------------------------------------------------------
     diacritics: DiacriticInventory | None = None
-    match load_diacritic_inventory(pick("diacritics.toml"), features):
+    match load_diacritic_inventory(diacritics_path, features):
         case Err(err):
-            error_list.extend(f"diacritics.toml: {e}" for e in err)
+            error_list.extend(f"{diacritics_path.name}: {e}" for e in err)
         case Ok(result):
             diacritics = result
 
     # ---- Sonorities ------------------------------------------------------------------------------
     sonorities: SonoritiesInventory | None = None
-    match load_sonorities_inventory(pick("sonorities.toml"), features):
+    match load_sonorities_inventory(sonorities_path, features):
         case Err(err):
-            error_list.extend(f"sonorities.toml: {e}" for e in err)
+            error_list.extend(f"{sonorities_path.name}: {e}" for e in err)
         case Ok(result):
             sonorities = result
 
@@ -137,7 +153,7 @@ def load_project(
     words: WordInventory | None = None
     match load_word_inventory(words_path):
         case Err(err):
-            error_list.extend(f"words.toml: {e}" for e in err)
+            error_list.extend(f"{words_path.name}: {e}" for e in err)
         case Ok(result):
             words = result
 
@@ -145,7 +161,7 @@ def load_project(
     rules: RuleInventory | None = None
     match load_rule_inventory(rules_path, features):
         case Err(err):
-            error_list.extend(f"rules.toml: {e}" for e in err)
+            error_list.extend(f"{rules_path.name}: {e}" for e in err)
         case Ok(result):
             rules = result
 

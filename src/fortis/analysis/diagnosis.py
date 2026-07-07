@@ -90,7 +90,7 @@ def confusions(grades: tuple[Grade, ...], limit: int | None = None) -> list[Conf
     for grade in grades:
         if grade.exact:
             continue
-        label = grade.gloss or grade.ipa
+        label = f"{grade.ipa} • {grade.gloss}" if grade.gloss else grade.ipa
         for op in align(split_phones(grade.target), split_phones(grade.derived)):
             if op.kind == "match":
                 continue
@@ -337,7 +337,7 @@ def errors_by_time(blames: list[Blame]) -> list[TimeBucket]:
     counts: dict[int | None, Counter[tuple[str | None, str | None]]] = {}
     examples: dict[tuple[int | None, str | None, str | None], list[str]] = {}
     for blame in blames:
-        label = blame.gloss or blame.ipa
+        label = f"{blame.ipa} • {blame.gloss}" if blame.gloss else blame.ipa
         for residual in blame.residuals:
             time = residual.culprit_time if residual.culprit else None
             pair = (residual.expected, residual.got)

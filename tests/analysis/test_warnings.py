@@ -37,6 +37,7 @@ def test_unpatternable_cluster_warns(tmp_path):
     assert "apta" not in by_ipa  # pt splits legally (one coda + one onset)
     assert "astra" in by_ipa  # str is three consonants → no 1+1 split → sonority fallback
     astra = by_ipa["astra"]
+    assert astra.form == "astra"  # the exact (unsyllabified) form the warning fired on
     assert astra.clusters == ("str",)
     assert astra.syllabified == "as.tra"
 

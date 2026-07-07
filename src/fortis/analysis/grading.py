@@ -178,8 +178,12 @@ def align(target: Sequence[str], derived: Sequence[str]) -> list[AlignOp]:
 _ABSENT = object()
 
 
-def _specified(bundle: FeatureBundle) -> dict[str, object]:
-    """The bundle's features that carry a value, as ``{feature: value}``."""
+def specified_features(bundle: FeatureBundle) -> dict[str, object]:
+    """The bundle's features that carry a value, as ``{feature: value}``.
+
+    Public so the induction bits model can price a phone by its specified-feature
+    count (:mod:`src.fortis.induction.objective`).
+    """
     return {feature: spec.value for feature, spec in bundle.items() if spec.value is not None}
 
 
@@ -190,7 +194,7 @@ def feature_diff(a: FeatureBundle, b: FeatureBundle) -> int:
     difference, as does a feature present on both with different values. So
     ``ɑ̃`` and ``ɑ`` differ by one (nasal), ``ɑ̃`` and ``t`` by many.
     """
-    left, right = _specified(a), _specified(b)
+    left, right = specified_features(a), specified_features(b)
     return sum(left.get(f, _ABSENT) != right.get(f, _ABSENT) for f in left.keys() | right.keys())
 
 
@@ -214,8 +218,8 @@ def feature_edit_distance(
     restricted (optimal string alignment) variant.
     """
     n, m = len(a), len(b)
-    a_sizes = [len(_specified(bundle)) for bundle in a]
-    b_sizes = [len(_specified(bundle)) for bundle in b]
+    a_sizes = [len(specified_features(bundle)) for bundle in a]
+    b_sizes = [len(specified_features(bundle)) for bundle in b]
     d = [[0] * (m + 1) for _ in range(n + 1)]
     for i in range(1, n + 1):
         d[i][0] = d[i - 1][0] + a_sizes[i - 1]
@@ -240,13 +244,16 @@ def feature_edit_distance(
     return d[n][m]
 
 
-def _segment(form: str, project: Project) -> list[FeatureBundle] | None:
+def segment_form(form: str, project: Project) -> list[FeatureBundle] | None:
     """Segment a rendered form into feature bundles for the feature comparison.
 
     Syllable dots, morpheme boundaries, whitespace, and stress marks (structural, not
     segmental) are stripped first, matching :func:`split_phones` — so the feature
     distance stays 0 exactly when the phone distance is. Returns ``None`` if the form
     uses a symbol the project cannot segment.
+
+    Public so the induction bits model can featurise a phone before pricing an edit
+    (:mod:`src.fortis.induction.objective`).
     """
     cleaned = "".join(char for char in form if char not in _IGNORED and not char.isspace())
     try:
@@ -263,7 +270,7 @@ def feature_compare(
     Both strings go through the same segmentation, so this is 0 exactly when the
     phone distance is 0. Returns ``None`` if either form cannot be segmented.
     """
-    a, b = _segment(derived, project), _segment(target, project)
+    a, b = segment_form(derived, project), segment_form(target, project)
     if a is None or b is None:
         return None
     return feature_edit_distance(a, b, transposition_cost)
