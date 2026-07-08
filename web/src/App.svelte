@@ -11,8 +11,6 @@
     prepareRun,
     deriveBatch,
     finalizeRun,
-    runFilter,
-    runScope,
     listExampleProjects,
     loadExampleProject,
   } from "./lib/engine.js";
@@ -41,14 +39,7 @@
   let errorContext = $state(null); // Error-context analysis: per-stage per-segment autopsy, or null
   let blame = $state(null); // per-word blame, or null when all exact
   let warnings = $state([]); // syllabification-fallback warnings from the last run
-  let filterPattern = $state(""); // the Filter tab's pattern input
-  let filterData = $state(null); // the last run_filter result, or null
-  let filterError = $state(null); // filter parse/resolve errors, or null
-  let filterBusy = $state(false); // a filter run is in flight
-  let scopePattern = $state(""); // the Scope tab's pattern input
-  let scopeData = $state(null); // the last run_scope result, or null
-  let scopeError = $state(null); // scope parse/resolve errors, or null
-  let scopeBusy = $state(false); // a scope run is in flight
+  let unfiredRules = $state([]); // word-scoped rules naming a word absent from the lexicon: {rule, word}
   let timing = $state(null); // {words, rules, deriveMs, accuracyMs, analysisMs} from the last run
   let matrixCsv = $state(""); // derivation_matrix.csv content, for the right-pane Matrix view
   let rulesCsv = $state(""); // rule_firings.csv content, for the right-pane Rules view
@@ -227,6 +218,7 @@
     result = null; // clear the previous results so the pane doesn't show stale output under the bar
     accuracy = null; // and the previous accuracy summary
     warnings = []; // and the previous warnings
+    unfiredRules = []; // and the previous never-fire flags
     matrixCsv = ""; // and the previous derivation table
     rulesCsv = ""; // and the previous rule-firings table
     timing = null; // and the previous run's timing
@@ -283,11 +275,9 @@
       blame = fin?.blame ?? null;
       if (!blame && resultView === "blame") resultView = "derivations"; // all exact ⇒ leave the tab
       warnings = fin?.warnings ?? [];
-      if (!warnings.length && resultView === "warnings") resultView = "derivations"; // none ⇒ leave the tab
-      filterData = null; // a new run invalidates the last filter's matches
-      filterError = null;
-      scopeData = null;
-      scopeError = null;
+      unfiredRules = fin?.unfiredRules ?? [];
+      if (!warnings.length && !unfiredRules.length && resultView === "warnings")
+        resultView = "derivations"; // none ⇒ leave the tab
       matrixCsv = readFile("reports/derivation_matrix.csv"); // for the Matrix view
       rulesCsv = readFile("reports/rule_firings.csv"); // for the Rules view
       result = { derivations: acc };
@@ -356,50 +346,6 @@
     rerun(true); // force a run regardless of size (the Run project button)
   }
 
-  async function runFilterAction() {
-    const pattern = filterPattern.trim();
-    if (!pattern || filterBusy) return;
-    filterBusy = true;
-    filterError = null;
-    await paint(); // let the button repaint as "Running…" before the blocking call
-    try {
-      const res = runFilter(pattern);
-      if (res.error) {
-        filterError = res.error;
-        filterData = null;
-      } else {
-        filterData = res;
-        filterError = null;
-      }
-    } catch (e) {
-      filterError = [e?.message ?? String(e)];
-    } finally {
-      filterBusy = false;
-    }
-  }
-
-  async function runScopeAction() {
-    const pattern = scopePattern.trim();
-    if (!pattern || scopeBusy) return;
-    scopeBusy = true;
-    scopeError = null;
-    await paint();
-    try {
-      const res = runScope(pattern);
-      if (res.error) {
-        scopeError = res.error;
-        scopeData = null;
-      } else {
-        scopeData = res;
-        scopeError = null;
-      }
-    } catch (e) {
-      scopeError = [e?.message ?? String(e)];
-    } finally {
-      scopeBusy = false;
-    }
-  }
-
   async function removeFileTab(name, ev) {
     ev.stopPropagation();
     removeFile(name);
@@ -434,8 +380,6 @@
     errorContext: "error_context.csv",
     blame: "blame.csv",
     warnings: "warnings.md",
-    filter: "filtered_output.md",
-    scope: "scoped_output.md",
   };
 
   function saveResult() {
@@ -726,7 +670,19 @@
     <section class="panel right">
       <div class="panel-head results-head">
         <div class="head-row">
-          <h2>Results</h2>
+          <div class="head-title">
+            <h2>Results</h2>
+            {#if warnings.length || unfiredRules.length}
+              {@const warnTotal = warnings.length + unfiredRules.length}
+              <button
+                class="warn-tab"
+                class:active={resultView === "warnings"}
+                onclick={() => (resultView = "warnings")}
+                title="Rules that never fire, and words that fell back to sonority syllabification"
+                >⚠ {warnTotal} warning{warnTotal === 1 ? "" : "s"}</button
+              >
+            {/if}
+          </div>
           <div class="actions">
             {#if result?.derivations}
               <div class="view-tabs">
@@ -776,26 +732,6 @@
                     >Blame</button
                   >
                 {/if}
-                {#if warnings.length}
-                  <button
-                    class:active={resultView === "warnings"}
-                    onclick={() => (resultView = "warnings")}
-                    title="Words that fell back to sonority syllabification"
-                    >Warnings <span class="warn-count">{warnings.length}</span></button
-                  >
-                {/if}
-                <button
-                  class:active={resultView === "filter"}
-                  onclick={() => (resultView = "filter")}
-                  title="Find the words a pattern touches in any form (input → surface → target)"
-                  >Filter</button
-                >
-                <button
-                  class:active={resultView === "scope"}
-                  onclick={() => (resultView = "scope")}
-                  title="Measure accuracy + diagnose only the words whose attested forms match a pattern"
-                  >Scope</button
-                >
               </div>
               <button
                 class="save-result"
@@ -856,11 +792,11 @@
         <CsvTable content={matrixCsv} />
       {:else if resultView === "rules" && rulesCsv}
         <div class="table-timing">{@render timingLine()}</div>
-        <CsvTable content={rulesCsv} />
+        <CsvTable content={rulesCsv} wideColumns={["changes", "matched"]} />
       {:else}
       <div class="results">
         <!-- The firing-rule trace of one word, as a borderless table (rule · t · before → after
-             · change) — shared by the Derivation and Filter tabs. `showDefs` reveals each rule's
+             · change) — used by the Derivation tab. `showDefs` reveals each rule's
              definition under its name (the Derivation tab's Definition toggle). -->
         {#snippet traceSteps(steps, showDefs)}
           {@const hasTime = steps.some((s) => s.time != null)}
@@ -884,7 +820,7 @@
             </tbody>
           </table>
         {/snippet}
-        <!-- Shared by the Errors, Error context, Filter, and Scope views. -->
+        <!-- Shared by the Errors and Error context views. -->
         {#snippet confusionTable(confs)}
           <table class="report-summary">
             <thead>
@@ -1107,135 +1043,50 @@
               </table>
             </details>
           {/each}
-        {:else if resultView === "warnings" && warnings.length}
-          <p class="caveat">
-            These words’ onset/coda patterns admitted no legal split for the listed cluster, so
-            syllabification fell back to the sonority Maximal Onset division. Loosen the patterns to
-            cover these clusters, or accept the fallback.
-          </p>
-          <table class="report-summary warnings-table">
-            <thead>
-              <tr><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr>
-            </thead>
-            <tbody>
-              {#each warnings as w}
-                <tr>
-                  <td class="tgt">{w.word}</td>
-                  <td class="gloss-cell">{w.gloss}</td>
-                  <td class="form">{w.form}</td>
-                  <td class="form">{w.clusters.join(", ")}</td>
-                  <td class="form">{w.syllabified}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        {:else if resultView === "filter"}
-          <div class="filter-bar">
-            <input
-              class="filter-input"
-              placeholder="pattern, e.g.  d͡ʒ   or   t̪ [aperture: high]"
-              bind:value={filterPattern}
-              onkeydown={(e) => e.key === "Enter" && runFilterAction()}
-            />
-            <button
-              class="run-filter"
-              disabled={filterBusy || !filterPattern.trim()}
-              title="Find the words this pattern touches in any form"
-              onclick={runFilterAction}>{filterBusy ? "Running…" : "Run filter"}</button
-            >
-          </div>
-          <p class="caveat">
-            Finds the words a sequence pattern touches in <strong>any</strong> form — the input,
-            an intermediate derived form, the surface, the attested target, or a stage. A pattern
-            is often transient, so most matched words derive correctly: this shows <em>which</em>
-            words pass through a shape and <em>where</em>.
-          </p>
-          {#if filterError}
-            <div class="card error">
-              {#each filterError as line}<pre>{line}</pre>{/each}
-            </div>
-          {:else if filterData}
-            <p>
-              Matched <strong>{filterData.matched} of {filterData.considered}</strong> words for
-              <code>{filterData.pattern}</code>.
-              {#if filterData.accuracy}
-                Subset accuracy: {filterData.accuracy.exact}/{filterData.accuracy.assessed} exact ({(
-                  filterData.accuracy.accuracy * 100
-                ).toFixed(1)}%), mean phone dist {filterData.accuracy.meanPhone.toFixed(3)}.
-              {/if}
+        {:else if resultView === "warnings" && (warnings.length || unfiredRules.length)}
+          {#if unfiredRules.length}
+            <p class="caveat">
+              These rules are word-scoped to a word that isn’t in the lexicon, so they can never
+              fire. Fix the word name, or drop the scope.
             </p>
-            {#if filterData.confusions.length}
-              {@render confusionTable(filterData.confusions)}
-            {/if}
-            {#each filterData.words as w}
-              <article class="card derivation">
-                <header class="word-head">
-                  <span class="word-ipa">{w.card.ipa}</span>
-                  {#if w.card.gloss}<span class="gloss">‘{w.card.gloss}’</span>{/if}
-                  {#if w.measurement}<span class="muted">· {w.measurement.exact ? "exact" : "d" + w.measurement.distance}</span>{/if}
-                </header>
-                <p class="residuals">
-                  <span class="muted">matched at:</span>
-                  {#each w.locations as loc, i}<code>{loc}</code>{#if i < w.locations.length - 1}, {/if}{/each}
-                </p>
-                {@render traceSteps(w.card.steps, false)}
-                <div class="surface"><span class="muted" aria-hidden="true">→</span><span class="form">{w.card.surface}</span></div>
-              </article>
-            {/each}
-          {:else}
-            <p class="muted">Enter a pattern and click <strong>Run filter</strong>.</p>
+            <table class="report-summary warnings-table">
+              <thead>
+                <tr><th>rule</th><th>scoped to missing word</th></tr>
+              </thead>
+              <tbody>
+                {#each unfiredRules as u}
+                  <tr>
+                    <td class="form">{u.rule}</td>
+                    <td class="tgt">{u.word}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
           {/if}
-        {:else if resultView === "scope"}
-          <div class="filter-bar">
-            <input
-              class="filter-input"
-              placeholder="pattern to scope by, e.g.  ʁ   or   [aperture: high] n̪"
-              bind:value={scopePattern}
-              onkeydown={(e) => e.key === "Enter" && runScopeAction()}
-            />
-            <button
-              class="run-filter"
-              disabled={scopeBusy || !scopePattern.trim()}
-              title="Measure accuracy + errors only for the words whose attested forms match this pattern"
-              onclick={runScopeAction}>{scopeBusy ? "Running…" : "Run scope"}</button
-            >
-          </div>
-          <p class="caveat">
-            Measures accuracy + errors only for the words whose <strong>attested</strong> target — or any
-            attested stage — matches the pattern, for debugging accuracy on a sub-population. The
-            full accuracy + errors + error context + blame for the subset is in the downloadable
-            <code>scoped_output.md</code>.
-          </p>
-          {#if scopeError}
-            <div class="card error">
-              {#each scopeError as line}<pre>{line}</pre>{/each}
-            </div>
-          {:else if scopeData}
-            <p>
-              Scoped to <strong>{scopeData.matched} of {scopeData.considered}</strong> words for
-              <code>{scopeData.pattern}</code>.
-              {#if scopeData.accuracy}
-                {scopeData.accuracy.exact}/{scopeData.accuracy.assessed} exact ({(
-                  scopeData.accuracy.accuracy * 100
-                ).toFixed(1)}%), mean phone dist {scopeData.accuracy.meanPhone.toFixed(3)}.
-              {/if}
+          {#if warnings.length}
+            <p class="caveat">
+              These words’ onset/coda patterns admitted no legal split for the listed cluster, so
+              syllabification fell back to the sonority Maximal Onset division. Loosen the patterns
+              to cover these clusters, or accept the fallback.
             </p>
-            {#if scopeData.errors}
-              <h3 class="section-head">Errors</h3>
-              {#each scopeData.errors.stages as s}
-                <details class="report-detail" open={s.label === "final"}>
-                  <summary>
-                    <span class="tgt">stage {s.label}</span>
-                    <span class="muted">{s.confusions.length} error(s)</span>
-                  </summary>
-                  {@render confusionTable(s.confusions)}
-                </details>
-              {/each}
-            {:else}
-              <p class="muted">No assessed words in the scoped subset.</p>
-            {/if}
-          {:else}
-            <p class="muted">Enter a pattern and click <strong>Run scope</strong>.</p>
+            <table class="report-summary warnings-table">
+              <thead>
+                <tr
+                  ><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr
+                >
+              </thead>
+              <tbody>
+                {#each warnings as w}
+                  <tr>
+                    <td class="tgt">{w.word}</td>
+                    <td class="gloss-cell">{w.gloss}</td>
+                    <td class="form">{w.form}</td>
+                    <td class="form">{w.clusters.join(", ")}</td>
+                    <td class="form">{w.syllabified}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
           {/if}
         {:else if !result}
           {#if !busy}<p class="muted">No results yet.</p>{/if}
@@ -1447,6 +1298,30 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+  }
+  .head-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .warn-tab {
+    font-size: var(--fs-body);
+    padding: 2px 9px;
+    border: 1px solid var(--warn-border);
+    border-radius: 999px;
+    background: var(--warn-bg);
+    color: var(--warn-fg);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .warn-tab:hover:not(:disabled) {
+    background: var(--warn-bg-hover);
+    border-color: var(--warn-fg);
+  }
+  .warn-tab.active {
+    border-color: var(--warn-fg);
+    font-weight: 600;
   }
   .panel-head h2 {
     margin: 0;
@@ -1678,18 +1553,6 @@
     font-size: var(--fs-body);
     padding: 4px 10px;
   }
-  .warn-count {
-    display: inline-block;
-    min-width: 1.4em;
-    padding: 0 5px;
-    margin-left: 4px;
-    border-radius: 999px;
-    background: var(--accent-bg);
-    border: 1px solid var(--accent-border);
-    font-size: 0.85em;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
-  }
   .save-result {
     margin-left: 8px;
   }
@@ -1809,17 +1672,6 @@
   }
 
   /* Errors, Error context + Blame tabs (reuse the report-* tables above) */
-  .section-head {
-    font-size: var(--fs-body);
-    font-weight: 600;
-    color: var(--text-h);
-    margin: 12px 0 8px;
-  }
-  .residuals {
-    font-size: var(--fs-body);
-    line-height: 1.8;
-    margin: 6px 0 4px;
-  }
   /* The blame residuals render as a wrapped list of static, button-styled pills — one per
      wrong phone → its culprit rule — below each word's summary header. */
   .residual-pills {
@@ -1850,42 +1702,6 @@
   .report-misses tr.regressed td:first-child {
     font-weight: 600;
     color: var(--text-h);
-  }
-
-  /* Filter tab: the pattern input + run button */
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .filter-input {
-    flex: 1;
-    min-width: 0;
-    font-family: var(--mono);
-    font-size: var(--fs-body);
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--panel);
-    color: var(--text-h);
-  }
-  .filter-input:focus {
-    outline: none;
-    border-color: var(--text-h);
-  }
-  .run-filter {
-    font-size: var(--fs-body);
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--panel);
-    color: var(--text-h);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .run-filter:disabled {
-    opacity: 0.5;
-    cursor: default;
   }
 
   .timing-line {

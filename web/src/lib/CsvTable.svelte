@@ -6,7 +6,9 @@
   //  - The `⋮` handle on each row/column opens a menu (add before/after, remove) or is dragged
   //    to reorder — a line marks exactly where it will land, and the moving row/column dims.
   // RFC4180 quoting: a quoted field may contain commas, newlines, and doubled `""`.
-  let { content = "", onchange = null } = $props();
+  // `wideColumns` is a list of header names that get a roomier default width (a higher cap and
+  // a minimum), for content-heavy columns like the rule table's `changes`/`matched`.
+  let { content = "", onchange = null, wideColumns = [] } = $props();
   const editable = $derived(typeof onchange === "function");
 
   function parseCsv(text) {
@@ -124,6 +126,8 @@
   const CELL_PAD = 16; // 7px l/r padding + 1px l/r border + a hair of slack
   const HANDLE_W = 26; // editable header padding-right: room for the ⋮ handle + edge resize grip
   const MAX_COL_W = 320; // cap a column's measured width; over-long cells ellipsize (drag to widen)
+  const WIDE_MAX_COL_W = 460; // a roomier cap for wideColumns (content-heavy columns)
+  const WIDE_MIN_COL_W = 220; // and a comfortable minimum default for them
   const MIN_COL_W = 44; // floor when dragging a column narrower
   // Fonts mirror the CSS below: headers are the sans face at --fs-body; the first (key) column
   // is the IPA face at --fs-content, semibold; every other body column is the IPA face at
@@ -162,7 +166,11 @@
         const v = rows[r][c];
         if (v) bodyW = Math.max(bodyW, textWidth(v, bodyFont));
       }
-      widths.push(Math.min(MAX_COL_W, Math.ceil(Math.max(headW, bodyW)) + CELL_PAD + slack));
+      const wide = wideColumns.includes(header[c]);
+      const cap = wide ? WIDE_MAX_COL_W : MAX_COL_W;
+      const floor = wide ? WIDE_MIN_COL_W : 0;
+      const natural = Math.ceil(Math.max(headW, bodyW)) + CELL_PAD + slack;
+      widths.push(Math.max(floor, Math.min(cap, natural)));
     }
     return widths;
   });

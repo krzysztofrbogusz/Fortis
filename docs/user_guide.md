@@ -615,7 +615,7 @@ For each word, Fortis records the sequence of forms from the input through every
 
 The terminal shows only summary and general information — the files written, a `words derived / rules applied` count, per-phase timing, and (when the lexicon carries targets) the accuracy, errors, and blame headlines. The full per-word derivation trace is written to **`derivations.csv`** (long-format: one row per word × firing rule), not printed.
 
-The same trace renders in human-readable block form in `filtered_output.md` and the web app — each word's headword and gloss (`ipa – "gloss"`), then a block per rule that fired: a heading line with the rule's `time:` and name, and beneath it one indented `before → after   (change)` line per locus the rule changed (with `.` between syllables), ending in a `Surface:` line:
+The same trace renders in human-readable block form in the web app — each word's headword and gloss (`ipa – "gloss"`), then a block per rule that fired: a heading line with the rule's `time:` and name, and beneath it one indented `before → after   (change)` line per locus the rule changed (with `.` between syllables), ending in a `Surface:` line:
 
 ```
 meħˈteːr – "mother"
@@ -644,9 +644,9 @@ Every CLI run writes into a `reports/` subfolder of the project directory:
 - **`derivation_matrix.csv`** — the same run in wide format: one row per word, one column
   per rule (each titled `<time>: <name>`), holding the word's form right after that rule
   fired (empty where it did not).
-- **`rule_firings.csv`** — the run inverted to one row per rule (`rule, t, count, matched,
-  changes`): the words it matched as `before → after` and the distinct segment-level
-  changes it made (e.g. `d→t`). A rule that never fired shows `count` 0 with empty cells.
+- **`rule_firings.csv`** — the run inverted to one row per rule (`rule, t, count, changes,
+  matched`): the distinct segment-level changes it made (e.g. `d→t`) and the words it
+  matched as `before → after`. A rule that never fired shows `count` 0 with empty cells.
 - **`accuracy.csv`** and **`distance_to_target.csv`** — the **accuracy**
   analysis, written only when the lexicon carries attested forms (`final`/`stages`,
   §4.1). It measures each derived form's distance to its target with two edit
@@ -669,36 +669,18 @@ Every CLI run writes into a `reports/` subfolder of the project directory:
   (columns `gloss, step, regression, t, form, target, d, fd`); exact words are included as short
   `d=0` paths. The interactive Blame tab additionally shows each wrong phone's culprit rule.
 
-Two pattern filters scope this output (both take Fortis sequence notation — feature
-bundles, letters, quantifiers):
-
-- On the standalone accuracy CLI, `--scope 'PATTERN'` writes **`scoped_output.md`** — accuracy
-  and blame recomputed over just the words whose attested target, or any attested stage,
-  matches (the per-stage errors and error context stay CSV-only) — for debugging accuracy
-  on a sub-population (e.g. words that carried an /s/ at some stage, even if it later
-  dropped). The whole-lexicon reports are left intact.
-- On the engine run, `--filter 'PATTERN'` additionally writes **`filtered_output.md`**
-  and **`filtered_table.csv`** — a synthesis of the words a pattern touches in *any*
-  form (input, an intermediate derived form, the surface, the attested target, or a
-  stage), each with its trace labelled by where it matched. Because a pattern is often
-  transient, most matched words derive correctly, so it answers *which* words pass
-  through a shape and *where*, not which are wrong.
-
 The thresholds these analyses use are tunable per project in an optional
 `settings.toml` (the autopsy's support floor and how many phones to autopsy, the
-edit distance's metathesis cost); an absent file, or key, uses the built-in
-defaults. The standalone accuracy CLI `python -m src.fortis.analysis.main` writes the
-same reports; its `--try 'RULE'` (optionally `--at TIME`) additionally previews a
-candidate rule against the lexicon and writes `whatif.md`.
+edit distance's metathesis cost); an absent file, or key, uses the built-in defaults.
 
 A run ends with a one-line summary on stderr — words derived, rules applied,
 per-phase timing, and the files saved.
 
 ### 8.4 Parallel derivation
 
-Because deriving one word never affects another, both CLIs (`python -m src.fortis.main`
-and `python -m src.fortis.analysis.main`) fan a large lexicon across worker processes
-**automatically**, giving a ~4–6× speedup on a multi-core machine. The result is
+Because deriving one word never affects another, the CLI (`python -m src.fortis.main`)
+fans a large lexicon across worker processes **automatically**, giving a ~4–6× speedup
+on a multi-core machine. The result is
 byte-identical to a serial run and in the same order. A small lexicon (below a couple
 hundred words) stays in a single process, since the pool's start-up cost — spawning
 processes and handing each the project — would outweigh the gain. `--serial` forces a

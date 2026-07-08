@@ -2,8 +2,8 @@
 
 For each induced interval it writes the iteration table (each accepted rule, its ΔL split into
 fit and rule-cost bits, the exact-match and word-count movement, and its placement), the shrink
-log, and the headline before→after. It follows the conventions of ``whatif.md`` and
-``diagnosis.md`` — a stderr summary line plus a Markdown file written to the project directory.
+log, and the headline before→after. It follows the project's report conventions — a stderr
+summary line plus a Markdown file written to the project directory.
 """
 from __future__ import annotations
 

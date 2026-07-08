@@ -305,8 +305,8 @@ def segment_form(form: str, project: Project) -> list[FeatureBundle] | None:
 
     Syllable dots, morpheme boundaries, whitespace, and stress marks are stripped first, then
     the rest is segmented against the inventory and its tiers lowered. Used where a *string* is
-    all a caller has — the ``--filter``/``--scope`` pattern matcher, and the induction bits
-    model featurising a phone. (The accuracy/error comparison works from ``Form``s and
+    all a caller has — the induction bits model featurising a phone. (The accuracy/error
+    comparison works from ``Form``s and
     :func:`form_phones`/:func:`comparable_bundles` instead, keeping suprasegmentals.)
     """
     cleaned = "".join(char for char in form if char not in _IGNORED and not char.isspace())

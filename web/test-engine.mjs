@@ -43,7 +43,7 @@ try {
   if (!derivations.startsWith("word,rule,t,before,after,change"))
     throw new Error("derivations.csv missing its header row: " + derivations.slice(0, 80));
   if (!csv.startsWith("ipa,gloss,")) throw new Error("derivation_matrix.csv missing its header row: " + csv.slice(0, 80));
-  if (!ruleFirings.startsWith("rule,t,count,matched,changes"))
+  if (!ruleFirings.startsWith("rule,t,count,changes,matched"))
     throw new Error("rule_firings.csv missing its header row: " + ruleFirings.slice(0, 80));
   log(`5. reports written: derivations.csv (${derivations.split("\n").length} rows), derivation_matrix.csv (${csv.split("\n").length} rows), rule_firings.csv (${ruleFirings.split("\n").length} rows)`);
 
@@ -175,35 +175,6 @@ try {
   if (!dttCsv.startsWith("stage,gloss,derived,target,d,fd"))
     throw new Error("distance_to_target.csv missing its header: " + dttCsv.slice(0, 80));
   log(`12. errors + error context + blame (${diag.blame.words.length} word(s)) + accuracy CSVs through Pyodide`);
-  py.runPython(`reset_overlay()`);
-
-  // 13. Interactive filter over the last run: match a vowel pattern against every form,
-  //     return matched words (trace + where-matched) and write filtered_output.md.
-  const run13 = JSON.parse(py.runPython("run_derivations()").toString());
-  if (run13.error) throw new Error("filter setup run failed: " + JSON.stringify(run13.error));
-  const filt = JSON.parse(py.runPython(`run_filter("[+syllabic]")`).toString());
-  if (filt.error) throw new Error("run_filter errored: " + JSON.stringify(filt.error));
-  if (!filt.words.length) throw new Error("expected matched words for a vowel pattern");
-  const fw = filt.words[0];
-  if (!fw.card || !Array.isArray(fw.locations) || !fw.locations.length)
-    throw new Error("filter word missing card/locations: " + JSON.stringify(fw));
-  const filteredMd = py.runPython(`read_file("reports/filtered_output.md")`).toString();
-  if (!filteredMd.startsWith("# Filtered")) throw new Error("filtered_output.md not written");
-  const badFilter = JSON.parse(py.runPython(`run_filter("[bad")`).toString());
-  if (!badFilter.error) throw new Error("expected run_filter to error on a bad pattern");
-  log(`13. run_filter: matched ${filt.matched}/${filt.considered}, filtered_output.md written; bad pattern → error`);
-
-  // 14. Interactive scope: restrict the accuracy analyses to words whose attested forms match,
-  //     write scoped_output.md, return the subset's accuracy headline + errors.
-  const scoped = JSON.parse(py.runPython(`run_scope("[+syllabic]")`).toString());
-  if (scoped.error) throw new Error("run_scope errored: " + JSON.stringify(scoped.error));
-  if (typeof scoped.matched !== "number" || typeof scoped.considered !== "number")
-    throw new Error("run_scope missing matched/considered: " + JSON.stringify(scoped));
-  const scopedMd = py.runPython(`read_file("reports/scoped_output.md")`).toString();
-  if (!scopedMd.startsWith("# Scoped")) throw new Error("scoped_output.md not written");
-  if (!JSON.parse(py.runPython(`run_scope("[bad")`).toString()).error)
-    throw new Error("expected run_scope to error on a bad pattern");
-  log(`14. run_scope: ${scoped.matched}/${scoped.considered} words, scoped_output.md written; bad pattern → error`);
   py.runPython(`reset_overlay()`);
 
   log("SMOKE TEST PASSED");

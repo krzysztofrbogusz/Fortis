@@ -17,8 +17,6 @@ layer:
   environments most associated with the error (by phi coefficient).
 - **blame** (`analysis/blame.py`) — attributes each wrong output to the specific rule (and
   position) that produced the wrong phone.
-- **what-if** (`--try` on the accuracy CLI) — derive + measure a *candidate* rule against the
-  whole lexicon and report the effect.
 
 Inputs live in `words.toml`: each word carries its input IPA, an attested `final` target,
 and optionally **intermediate attested `stages`** keyed by time (e.g. the Latin→French
@@ -52,7 +50,7 @@ This works because Fortis already computes every term of the boosting loop:
 | loss `L(cascade)` | accuracy — total phone + feature edit distance over the lexicon |
 | pseudo-residual ("which way is down") | diagnosis — the most systematic remaining error **and its conditioning environment** → the next rule to fit |
 | which existing learner now hurts | blame — residual error attributed to a specific rule/position |
-| line search (evaluate a candidate step) | what-if / `--try` — derive + measure a candidate rule, report the loss delta |
+| line search (evaluate a candidate step) | re-derive + measure the candidate rule's loss delta |
 | cheap repeated evaluation | identity caches + parallel derivation |
 
 So the loss, a genuine **gradient surrogate**, and the step evaluator all exist. The missing
@@ -94,7 +92,7 @@ For each time interval (bounded by consecutive attested stages), and boosting wi
 2. Loss = distance(current derived, target).
 3. Run diagnosis on the residual → top systematic correspondence + its environment.
 4. Propose that rule at a few context generalities and positions within the interval.
-5. Evaluate each with what-if; take the steepest-descent candidate; insert it.
+5. Evaluate each by re-deriving + measuring; take the steepest-descent candidate; insert it.
 6. Repeat until the interval's loss plateaus or an **MDL penalty** (rule cost) outweighs the
    gain. Then move to the next interval.
 7. Finally, relax the interval boundaries and do a global refinement pass (blame-guided:
@@ -146,7 +144,7 @@ from. Please cover:
    refinement pass, and graceful degradation when only `final` is present (no stages).
 4. **Data + API** — any `words.toml` / loader changes; the new module(s) and their public
    functions; how they reuse `accuracy`, `diagnosis`, `blame`, `form_at_time`, and the
-   parallel `derive_all`; CLI/report surface (by analogy to `--try` and the written reports).
+   parallel `derive_all`; CLI/report surface (by analogy to the written reports).
 5. **Complexity and performance** — how many derivations the search evaluates and how to keep
    it affordable (caching, parallelism, candidate pruning).
 6. **Evaluation protocol** — the Latin→French ablation above, metrics, and what "good enough"

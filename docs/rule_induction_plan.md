@@ -47,7 +47,7 @@ Everything maps onto existing machinery:
 | residual → next rule | `confusions`, phi machinery from `diagnosis`       | derived-side contexts (§2.1), proposal generator (§2.2) |
 | step evaluation      | `derive_all(_parallel)`, `apply_rule`, `load_rule` | incremental scorer (§2.3)                               |
 | chronology           | `Word.stages`, `form_at_time`, `blame`             | interval bucketing, mini-projects (§3)                  |
-| reporting            | report conventions of `whatif.md` etc.             | `induction.md`, `induced_rules.toml` (§4.4)             |
+| reporting            | the written-report conventions                     | `induction.md`, `induced_rules.toml` (§4.4)             |
 
 ## 1. Objective function
 

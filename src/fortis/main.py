@@ -25,32 +25,25 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import os
 import re
 import sys
+import textwrap
 import time
 from collections.abc import Sequence
 from pathlib import Path
 
 from src.fortis.analysis.accuracy import (
     accuracy_by_stage,
-    distance_to_target,
     ingest_targets,
-    measure_accuracy,
 )
 from src.fortis.analysis.blame import blame_all, blame_summary_line, render_blame_csv
 from src.fortis.analysis.diagnosis import (
-    confusions,
     diagnose_stages,
     error_context_omissions,
     errors_summary_line,
     render_error_context_csv,
     render_errors_csv,
-)
-from src.fortis.analysis.filtering import (
-    FilterResult,
-    MatchedWord,
-    filter_by_pattern,
-    filter_summary_line,
 )
 from src.fortis.analysis.reporting import (
     accuracy_summary_line,
@@ -70,15 +63,50 @@ from src.fortis.application.deriving import (
 from src.fortis.application.rendering import describe_change, render_syllabified
 from src.fortis.application.tiers import lower_tiers
 from src.fortis.config import config
-from src.fortis.loaders.project import load_project
+from src.fortis.loaders.project import load_project, unfired_scoped_rules
 from src.fortis.models.derivation import Derivation, DerivationStep
 from src.fortis.models.project import Project
 from src.fortis.models.rules import RuleInventory
-from src.fortis.result import Err, Ok
 
 # Sentinel: no ``--output`` path given (the default) ⇒
 # write to ``<project>/reports/derivations.csv``.
 _AUTO_OUTPUT = object()
+
+# ANSI colour, on only for an interactive stderr (respecting NO_COLOR).
+_COLOR = sys.stderr.isatty() and not os.environ.get("NO_COLOR")
+
+
+def _sgr(text: str, *codes: str) -> str:
+    """Wrap *text* in SGR codes, or return it unchanged when colour is off."""
+    return f"\033[{';'.join(codes)}m{text}\033[0m" if _COLOR else text
+
+
+def _label(text: str) -> str:
+    return _sgr(text, "1", "36")  # bold cyan — the Accuracy/Errors/Blame column
+
+
+def _key(text: str) -> str:
+    return _sgr(text, "1")  # bold — the headline figures
+
+
+def _dim(text: str) -> str:
+    return _sgr(text, "2")  # faint — secondary detail and the report list
+
+
+def _print_scoped_warnings(unfired: list[tuple[str, str]]) -> None:
+    """Compactly report word-scoped rules that never fire (scoped to an absent word)."""
+    if not unfired:
+        return
+    rules = list(dict.fromkeys(rule_id for rule_id, _ in unfired))  # distinct, first-seen order
+    print(
+        f"{_sgr('⚠', '33')}  {_key(str(len(rules)))} rule(s) never fire — "
+        "word-scoped to a word not in the lexicon:",
+        file=sys.stderr,
+    )
+    body = textwrap.fill(
+        ", ".join(rules), width=76, initial_indent="     ", subsequent_indent="     "
+    )
+    print(_dim(body), file=sys.stderr)
 
 
 def _progress_bar(done: int, total: int) -> None:
@@ -143,14 +171,6 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--filter",
-        dest="filter",
-        metavar="PATTERN",
-        help="after the run, synthesise the words a sequence pattern touches in ANY form "
-        "(input, intermediate, surface, target, stage) into filtered_output.md + "
-        "filtered_table.csv, e.g. 't̪ [aperture: high]'",
-    )
-    parser.add_argument(
         "--serial",
         dest="serial",
         action="store_true",
@@ -201,6 +221,7 @@ def main(argv: list[str] | None = None) -> None:
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         raise SystemExit(1) from error
+    _print_scoped_warnings(unfired_scoped_rules(project.rules, project.words))
     init_done = time.perf_counter()
 
     # Phase 2 — rule application: derive every word (with a progress bar on a TTY).
@@ -218,33 +239,28 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(1) from error
     derive_done = time.perf_counter()
 
-    # Phase 3 — printing: write the reports and print the traces.
+    # Phase 3 — write the core derivation reports (the full trace lives here, not the terminal).
     output_dir = args.project or config.paths.default
     default_path = output_dir / "reports" / "derivations.csv"
     path = default_path if args.output is _AUTO_OUTPUT else args.output
     path.parent.mkdir(parents=True, exist_ok=True)  # the reports/ subfolder (or --output's dir)
     path.write_text(_build_derivations_csv(derivations, project), encoding="utf-8")
-    print(f"wrote {path}", file=sys.stderr)
     saved = [path]
-
     csv_path = path.parent / "derivation_matrix.csv"
     csv_path.write_text(_build_matrix_csv(derivations, rules, project), encoding="utf-8")
-    print(f"wrote {csv_path}", file=sys.stderr)
     saved.append(csv_path)
-
     firings_path = path.parent / "rule_firings.csv"
     firings_path.write_text(_build_rule_firings_csv(derivations, rules, project), encoding="utf-8")
-    print(f"wrote {firings_path}", file=sys.stderr)
     saved.append(firings_path)
     write_done = time.perf_counter()
 
     where = f"`{args.project}`" if args.project is not None else "the shipped `projects/default`"
 
-    # Phase 4 — accuracy: if the lexicon carries attested forms (final and/or
-    # intermediate stages), measure the derivation's distance to target and write the
-    # accuracy CSVs (per-stage summary + the per-word distance-to-target table).
+    # Phase 4 — accuracy + errors + blame, when the lexicon carries attested forms. Each
+    # analysis writes its CSV(s) and contributes a one-line headline to the run summary.
     has_targets = any(word.final is not None or word.stages for word in project.words.values())
     accuracy_split = write_done  # split point between accuracy and the (costlier) analysis
+    summaries: list[tuple[str, str, list[str]]] = []  # (label, headline, sub-lines) rows
     if has_targets:
         ingest_targets(derivations, project)  # segment attested forms once, in the main process
         stages = accuracy_by_stage(derivations, project)
@@ -254,13 +270,14 @@ def main(argv: list[str] | None = None) -> None:
         ):
             report_path = path.parent / name
             report_path.write_text(render(stages), encoding="utf-8")
-            print(f"wrote {report_path}", file=sys.stderr)
             saved.append(report_path)
-        print(accuracy_summary_line(stages))
+        acc = accuracy_summary_line(stages).removeprefix("final: ")
+        acc_head, _, stage_tail = acc.partition(" · stages ")
+        acc_subs = [f"also at stages {stage_tail}"] if stage_tail else []
+        summaries.append(("Accuracy", acc_head, acc_subs))
         accuracy_split = time.perf_counter()  # accuracy done; what follows is analysis
 
-        # Errors + Error context, per attested stage and the final: which segments came
-        # out wrong, and the environments most associated with each.
+        # Errors + Error context, per attested stage and the final.
         stage_diag = diagnose_stages(derivations, project)
         for name, render in (
             ("errors.csv", render_errors_csv),
@@ -268,75 +285,51 @@ def main(argv: list[str] | None = None) -> None:
         ):
             report_path = path.parent / name
             report_path.write_text(render(stage_diag), encoding="utf-8")
-            print(f"wrote {report_path}", file=sys.stderr)
             saved.append(report_path)
-        print(errors_summary_line(stage_diag))
-        # Say plainly what error_context.csv left out — segments that erred but were too
-        # sparse to autopsy (< min_errors) or had no error-associated environment.
+        err_subs: list[str] = []
+        # Say plainly what error_context.csv left out — segments too sparse to autopsy.
         omitted = error_context_omissions(stage_diag)
         if omitted:
             shown = ", ".join(f"{seg} @ {label}" for label, seg in omitted[:10])
             more = f", +{len(omitted) - 10} more" if len(omitted) > 10 else ""
-            print(
-                f"note: {len(omitted)} erroring segment(s) omitted from error_context.csv "
-                f"(too few errors or no error-associated environment): {shown}{more}",
-                file=sys.stderr,
+            err_subs.append(
+                f"{len(omitted)} segment(s) too sparse to autopsy — omitted from "
+                f"error_context.csv: {shown}{more}"
             )
+        err_head = errors_summary_line(stage_diag).removeprefix("final: ").split(" — see")[0]
+        summaries.append(("Errors", err_head, err_subs))
 
-        # Every assessed word's distance trajectory, worst first (blame.csv). Exact words are
-        # included as short d=0 paths; the residuals + culprit rules live in the web Blame tab.
+        # Every assessed word's distance trajectory, worst first (blame.csv).
         blames = blame_all(derivations, project, include_exact=True)
         blame_path = path.parent / "blame.csv"
         blame_path.write_text(render_blame_csv(blames), encoding="utf-8")
-        print(f"wrote {blame_path}", file=sys.stderr)
         saved.append(blame_path)
-        print(blame_summary_line(blames))
+        summaries.append(("Blame", blame_summary_line(blames).split(" — see")[0], []))
     accuracy_done = time.perf_counter()
 
     # Phase 4b — syllabification warnings: words whose onset/coda patterns admitted no
     # legal split and fell back to sonority. Only written when there is something to report.
-    warnings = syllabification_warnings(derivations, project)
+    syllab_warnings = syllabification_warnings(derivations, project)
     warn_path = path.parent / "warnings.md"
-    if warnings:
-        warn_path.write_text(render_warnings(warnings, where), encoding="utf-8")
-        print(f"wrote {warn_path}", file=sys.stderr)
+    syllab_line = None
+    if syllab_warnings:
+        warn_path.write_text(render_warnings(syllab_warnings, where), encoding="utf-8")
         saved.append(warn_path)
-        print(warnings_summary_line(warnings), file=sys.stderr)
+        syllab_line = warnings_summary_line(syllab_warnings)
     elif warn_path.exists():
         warn_path.unlink()  # a prior run warned but this one doesn't — clear the stale report
 
-    # Phase 4c — filter: a post-run pass. --filter synthesises the words a pattern touches
-    # in ANY form (input → intermediate → surface → target → stage) into two extra files.
-    if args.filter is not None:
-        match filter_by_pattern(derivations, args.filter, project):
-            case Err(errs):
-                for error in errs:
-                    print(f"error: --filter: {error}", file=sys.stderr)
-                raise SystemExit(1)
-            case Ok(result):
-                ftable_path = path.parent / "filtered_table.csv"
-                ftable_path.write_text(
-                    _build_matrix_csv([m.derivation for m in result.matched], rules, project),
-                    encoding="utf-8",
-                )
-                foutput_path = path.parent / "filtered_output.md"
-                foutput_path.write_text(
-                    _build_filtered_report(result, project, where), encoding="utf-8"
-                )
-                for report_path in (ftable_path, foutput_path):
-                    print(f"wrote {report_path}", file=sys.stderr)
-                    saved.append(report_path)
-                print(filter_summary_line(result))
-
-    # Phase 5 — summary: the full per-word trace lives in derivations.csv, not the
-    # terminal; only the run summary and headlines are printed.
+    # Phase 5 — the run summary block on stderr.
     done = time.perf_counter()
     phases = {"init": init_done - start, "apply": derive_done - init_done}
     if has_targets:  # accuracy = the distance CSVs; analysis = errors + error context + blame
         phases["accuracy"] = accuracy_split - write_done
         phases["analysis"] = accuracy_done - accuracy_split
     phases["write"] = (write_done - derive_done) + (done - accuracy_done)
-    _print_run_summary(derivations, rules, saved, phases, done - start)
+    _print_summary(
+        derivations, rules, saved, phases, done - start,
+        summaries=summaries, syllab_line=syllab_line, reports_dir=path.parent,
+    )
 
 
 _SUBRULE_SUFFIX = re.compile(r"#\d+$")
@@ -352,32 +345,54 @@ def _applied_rule_count(derivations: list[Derivation]) -> int:
     return len(fired)
 
 
-def _print_run_summary(
+def _print_summary(
     derivations: list[Derivation],
     rules: RuleInventory,
     saved: list[Path],
     phases: dict[str, float],
     total: float,
+    *,
+    summaries: list[tuple[str, str, list[str]]],
+    syllab_line: str | None,
+    reports_dir: Path,
 ) -> None:
-    """Print the end-of-run summary to stderr: counts, timing, and saved files.
+    """Print the end-of-run summary to stderr: analysis headlines, run stats, and reports.
 
-    ``phases`` maps each phase name (init, apply, accuracy, analysis, write — accuracy and
-    analysis only when the run assessed) to its elapsed seconds; ``total`` is the whole
-    run's seconds. Analysis (errors + error context + blame) is split from accuracy because
-    it is the costlier half — notably ``diagnose_stages``, which tallies confusions and
-    autopsies every erroring segment at each attested stage.
+    ``summaries`` are ``(label, headline, sub-lines)`` rows (Accuracy/Errors/Blame), the
+    sub-lines shown dimmed under the headline; ``syllab_line`` is the syllabification-fallback
+    warning if any. ``phases`` maps each phase name (init, apply, accuracy, analysis, write —
+    accuracy and analysis only when the run assessed) to its elapsed seconds; ``total`` is the
+    whole run's seconds.
     """
+    out = sys.stderr
+    pad = max((len(label) for label, _, _ in summaries), default=0)
+    if summaries:
+        print("", file=out)
+    for label, headline, subs in summaries:
+        print(f"  {_label(label.ljust(pad))}  {headline}", file=out)
+        for sub in subs:
+            print(f"  {' ' * pad}  {_dim(sub)}", file=out)
+    if syllab_line:
+        print(f"  {_sgr('⚠', '33')}  {syllab_line}", file=out)
+
     words = len(derivations)
     applied = _applied_rule_count(derivations)
     total_rules = len(_rule_columns(rules))
-    breakdown = ", ".join(f"{name} {secs:.2f}s" for name, secs in phases.items())
-    names = ", ".join(path.name for path in saved)
+    breakdown = " · ".join(f"{name} {secs:.2f}s" for name, secs in phases.items())
+    print("", file=out)
     print(
-        f"\n{words} words derived, {applied} of {total_rules} rules applied\n"
-        f"elapsed {total:.2f}s ({breakdown})\n"
-        f"saved {names}",
-        file=sys.stderr,
+        f"  {_key(str(words))} words · {_key(f'{applied}/{total_rules}')} rules applied · "
+        f"{_key(f'{total:.2f}s')}",
+        file=out,
     )
+    print(f"  {_dim(breakdown)}", file=out)
+
+    print("", file=out)
+    print(f"  {_key(str(len(saved)))} reports {_dim('→ ' + str(reports_dir))}", file=out)
+    listing = textwrap.fill(
+        " · ".join(p.stem for p in saved), width=76, initial_indent="  ", subsequent_indent="  "
+    )
+    print(_dim(listing), file=out)
 
 
 def _trace_lines(steps: Sequence[DerivationStep], project: Project) -> list[str]:
@@ -460,11 +475,11 @@ def _build_rule_firings_csv(
 ) -> str:
     """Per-rule firing report: one row per rule, what it matched and how it changed it.
 
-    Columns: ``rule, t, count, matched, changes``. ``count`` is how many words the rule
-    changed; ``matched`` is each such word as ``before → after`` (comma-separated, in
-    derivation order); ``changes`` is the *distinct* segment-level deltas it made (e.g.
-    ``d→t``), comma-separated. Every rule gets a row in firing order — one that never fired
-    shows ``count`` 0 with empty ``matched``/``changes``, so dead rules are visible. A
+    Columns: ``rule, t, count, changes, matched``. ``count`` is how many words the rule
+    changed; ``changes`` is the *distinct* segment-level deltas it made (e.g. ``d→t``),
+    comma-separated; ``matched`` is each such word as ``before → after`` (comma-separated,
+    in derivation order). Every rule gets a row in firing order — one that never fired
+    shows ``count`` 0 with empty ``changes``/``matched``, so dead rules are visible. A
     list-``definition`` rule's sub-rules are merged into one row, matching the other tables.
     """
     matched: dict[str, list[str]] = {}
@@ -481,97 +496,17 @@ def _build_rule_firings_csv(
             changes.setdefault(base, {})[change] = None
     buffer = io.StringIO()
     writer = csv.writer(buffer)
-    writer.writerow(["rule", "t", "count", "matched", "changes"])
+    writer.writerow(["rule", "t", "count", "changes", "matched"])
     for base, name, rule_time in _rule_rows(rules):
         firings = matched.get(base, [])
         writer.writerow([
             name,
             "" if rule_time is None else rule_time,
             len(firings),
-            ", ".join(firings),
             ", ".join(changes.get(base, {})),
+            ", ".join(firings),
         ])
     return buffer.getvalue()
-
-
-def _filtered_word_md(matched: MatchedWord, project: Project) -> list[str]:
-    """One matched word for filtered_output.md: distance to target, match sites, and trace."""
-    derivation = matched.derivation
-    surface = render_syllabified(
-        lower_tiers(derivation.surface), derivation.surface_boundaries, project
-    )
-    lines = [
-        f"### {derivation.word.gloss or derivation.word.ipa}",
-        "",
-        f"`{derivation.word.ipa}` → `{surface}`",
-        "",
-    ]
-    measured = distance_to_target(derivation, project)
-    if measured is not None:
-        verdict = "exact" if measured.exact else f"distance {measured.distance}"
-        lines.append(f"target `{measured.target}` — {verdict}.")
-    lines.append("matched at: " + ", ".join(f"`{loc.label}`" for loc in matched.locations))
-    lines.append("")
-    trace = _trace_lines(derivation.steps, project)
-    if trace:
-        lines += ["```", *trace, "```", ""]
-    return lines
-
-
-def _build_filtered_report(result: FilterResult, project: Project, where: str) -> str:
-    """The ``filtered_output.md`` synthesis: where the pattern appears, then each trace.
-
-    Trace-centric: a matched word usually derives correctly (the pattern arose and
-    resolved), so the payload is *which* words pass through it and *where* — a subset
-    accuracy + confusion header, then every matched word's derivation.
-    """
-    lines = [
-        f"# Filtered — {where} · filter `{result.pattern}`",
-        "",
-        f"Matched **{len(result.matched)} of {result.considered}** words where `{result.pattern}`",
-        "appears in some form — the input, an intermediate derived form, the surface, the",
-        "attested target, or a stage. Most matched words derive correctly; this shows *which*",
-        "words pass through the pattern and *where*, with each word's trace below.",
-        "",
-    ]
-    if not result.matched:
-        return "\n".join([*lines, "No word matched."]).rstrip() + "\n"
-
-    lines += ["## Where matched", "", "| word | matched at |", "| --- | --- |"]
-    for matched in result.matched:
-        labels = ", ".join(f"`{loc.label}`" for loc in matched.locations)
-        name = matched.derivation.word.gloss or matched.derivation.word.ipa
-        lines.append(f"| {name} | {labels} |")
-    lines.append("")
-
-    report = measure_accuracy([matched.derivation for matched in result.matched], project)
-    if report.assessed:
-        lines += [
-            "## Subset accuracy",
-            "",
-            f"{report.exact}/{report.assessed} exact ({report.accuracy:.1%}), mean phone "
-            f"{report.mean_distance:.3f}, mean feature {report.mean_feature_distance:.3f}.",
-            "",
-        ]
-        table = confusions(report.distances)
-        if table:
-            lines += [
-                "Confusions among the matched words (counts only — the subset is too small",
-                "for the phi autopsy):",
-                "",
-                "| expected | got | count | examples |",
-                "| --- | --- | ---: | --- |",
-            ]
-            for c in table:
-                exp = f"`{c.expected}`" if c.expected is not None else "`∅`"
-                got = f"`{c.got}`" if c.got is not None else "`∅`"
-                lines.append(f"| {exp} | {got} | {c.count} | {', '.join(c.examples)} |")
-            lines.append("")
-
-    lines += ["## Derivations", ""]
-    for matched in result.matched:
-        lines += _filtered_word_md(matched, project)
-    return "\n".join(lines).rstrip() + "\n"
 
 
 def _rule_columns(rules: RuleInventory) -> list[tuple[str, str]]:

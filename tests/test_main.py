@@ -12,12 +12,11 @@ def test_main_derives_every_word(project, capsys, tmp_path):
     # shipped feature showcase, reports to tmp_path
     out_path = tmp_path / "derivations.csv"
     main(["--output", str(out_path)])
-    out = capsys.readouterr().out
-    # The per-word cascade is written to derivations.csv, not printed. stdout carries only
-    # summary/general information — the accuracy headline, never a per-word trace ("Surface:"
-    # was the cascade's per-word marker).
-    assert "Surface:" not in out
-    assert "final:" in out  # the accuracy headline still prints
+    captured = capsys.readouterr()
+    # The per-word cascade is written to derivations.csv, not printed — stdout is empty; the
+    # run summary (with the accuracy headline) is on stderr.
+    assert captured.out == ""
+    assert "exact" in captured.err  # the Accuracy headline in the run summary
     # A couple of the showcase derivations come through in the long-format trace.
     trace = out_path.read_text(encoding="utf-8")
     assert "ag.ba" in trace  # voicing assimilation: k → g before b
@@ -38,13 +37,13 @@ def test_main_writes_rule_firings_csv(tmp_path):
     main(["--output", str(tmp_path / "derivations.csv")])
     text = (tmp_path / "rule_firings.csv").read_text(encoding="utf-8")
     rows = list(csv.reader(text.splitlines()))
-    assert rows[0] == ["rule", "t", "count", "matched", "changes"]
+    assert rows[0] == ["rule", "t", "count", "changes", "matched"]
     fired = [r for r in rows[1:] if int(r[2]) > 0]  # rules that changed at least one word
     assert fired
     for r in fired:
-        assert " → " in r[3]  # matched holds `before → after` entries
-        assert r[4]  # and the distinct changes are non-empty
-        assert len(r[3].split(", ")) == int(r[2])  # one matched entry per counted firing
+        assert r[3]  # changes (distinct segment deltas) are non-empty
+        assert " → " in r[4]  # matched holds `before → after` entries
+        assert len(r[4].split(", ")) == int(r[2])  # one matched entry per counted firing
 
 
 def test_main_writes_derivations_csv_long_format(tmp_path):
@@ -117,25 +116,6 @@ def test_main_run_summary_splits_out_analysis(project, tmp_path, capsys):
     main(["--project", str(tmp_path)])
     err = capsys.readouterr().err
     assert "accuracy" in err and "analysis" in err
-
-
-def test_main_filter_writes_synthesis(project, tmp_path):
-    # --filter synthesises the words a pattern touches (any form) into two extra files.
-    ipa = next(iter(project.words))
-    (tmp_path / "words.toml").write_text(f'"{ipa}" = "x"\n', encoding="utf-8")
-    main(["--project", str(tmp_path), "--filter", "[+syllabic]"])  # any vowel — always present
-    filtered = tmp_path / "reports" / "filtered_output.md"
-    assert filtered.exists() and (tmp_path / "reports" / "filtered_table.csv").exists()
-    assert "# Filtered" in filtered.read_text(encoding="utf-8")
-
-
-def test_main_filter_bad_pattern_exits(project, tmp_path):
-    import pytest
-
-    ipa = next(iter(project.words))
-    (tmp_path / "words.toml").write_text(f'"{ipa}" = "x"\n', encoding="utf-8")
-    with pytest.raises(SystemExit):
-        main(["--project", str(tmp_path), "--filter", "[bad"])
 
 
 def _derive(word, rules, project):

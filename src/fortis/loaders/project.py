@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 
 from src.fortis.config import config
@@ -26,23 +25,21 @@ from src.fortis.models.tier_declaration import TierInventory
 from src.fortis.result import Err, Ok, Result
 
 
-def _warn_unknown_scoped_words(rules: RuleInventory, words: WordInventory) -> None:
-    """Warn when a word-scoped rule names a word absent from the lexicon (a likely typo).
+def unfired_scoped_rules(rules: RuleInventory, words: WordInventory) -> list[tuple[str, str]]:
+    """Word-scoped rules naming a word absent from the lexicon — ``(rule_id, word)`` pairs.
 
-    A ``words`` entry matches a word by ipa or gloss; one that matches neither makes the
-    rule silently never fire, which is almost always a mistake. Non-fatal — the project
-    still loads — so it is a warning, surfaced on stderr by the CLI.
+    A ``words`` entry matches a word by ipa or gloss; one that matches neither makes the rule
+    silently never fire, which is almost always a typo. Non-fatal — the project still loads —
+    so it is returned rather than raised; the CLI and web app surface the list for the author.
     """
     known = set(words.keys()) | {word.gloss for word in words.values() if word.gloss is not None}
-    for rules_at_time in rules.values():
-        for rule in rules_at_time:
-            for name in rule.words:
-                if name not in known:
-                    warnings.warn(
-                        f"rule '{rule.id}': word-scope '{name}' matches no word "
-                        "(by ipa or gloss) in words.toml — this rule will never fire",
-                        stacklevel=2,
-                    )
+    return [
+        (rule.id, name)
+        for rules_at_time in rules.values()
+        for rule in rules_at_time
+        for name in rule.words
+        if name not in known
+    ]
 
 
 def load_project(
@@ -184,8 +181,6 @@ def load_project(
     assert words is not None
     assert rules is not None
     assert settings is not None
-
-    _warn_unknown_scoped_words(rules, words)
 
     # The derivation starts at the earliest time defined by any time-keyed
     # inventory (rules, syllable parts). Untimed (None) rules are ignored here — they apply

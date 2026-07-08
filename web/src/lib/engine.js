@@ -51,7 +51,7 @@ export const OUTPUT_FILES = [
 const HELPER = `
 import json, re, time, shutil
 from pathlib import Path
-from src.fortis.loaders.project import load_project
+from src.fortis.loaders.project import load_project, unfired_scoped_rules
 from src.fortis.application.deriving import derive, resolve_rule_letters
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.application.rendering import render_syllabified, describe_change
@@ -59,11 +59,9 @@ from src.fortis.application.tiers import lower_tiers
 from src.fortis.analysis.accuracy import accuracy_by_stage, measure_accuracy, distance_to_target, ingest_targets
 from src.fortis.analysis.diagnosis import confusions, diagnose_stages, render_errors_csv, render_error_context_csv
 from src.fortis.analysis.blame import blame_all, render_blame_csv
-from src.fortis.analysis.filtering import filter_by_pattern, filter_attested
-from src.fortis.analysis.synthesis import render_scoped
 from src.fortis.analysis.reporting import render_accuracy_csv, render_distance_to_target_csv
 from src.fortis.analysis.warnings import syllabification_warnings, render_warnings
-from src.fortis.main import _build_derivations_csv, _build_matrix_csv, _build_rule_firings_csv, _build_filtered_report
+from src.fortis.main import _build_derivations_csv, _build_matrix_csv, _build_rule_firings_csv
 _SUB = re.compile(r"#\\d+$")
 DEFAULT = "/work/projects/default"
 OVERLAY = "/work/overlay"
@@ -117,9 +115,6 @@ def file_status(names):
 # the reports. _SESSION carries state across these calls (Python globals persist
 # across runPython). run_derivations() composes them for one-shot callers.
 _SESSION = {}
-# The last completed run (project + derivations + rules), so the interactive Filter tab
-# can run over it without re-deriving. Set at finalize; cleared when a new run starts.
-_LAST = {}
 
 def _card(d, project):
     # One word's rendered derivation trace (the Derivations-tab card shape).
@@ -153,7 +148,6 @@ def prepare_run():
     try: rules = resolve_rule_letters(project.rules, project)
     except ValueError as e: return json.dumps({"error":[str(e)]})
     _SESSION.clear()
-    _LAST.clear()  # a new run invalidates the Filter cache
     _SESSION.update(project=project, rules=rules, words=list(project.words.items()), acc=[])
     n_rules = sum(len(rules_at_time) for rules_at_time in project.rules.values())
     return json.dumps({"words": len(_SESSION["words"]), "rules": n_rules})
@@ -258,7 +252,7 @@ def _write_or_clear(path, text):
 
 def finalize_run():
     if "project" not in _SESSION:  # superseded
-        return json.dumps({"accuracy": None, "errors": None, "errorContext": None, "blame": None, "warnings": []})
+        return json.dumps({"accuracy": None, "errors": None, "errorContext": None, "blame": None, "warnings": [], "unfiredRules": []})
     project, rules, acc = _SESSION["project"], _SESSION["rules"], _SESSION["acc"]
     O = _reports_dir()  # every report mirrors the CLI's <project>/reports/ subfolder
     (O/"derivations.csv").write_text(_build_derivations_csv(acc, project), encoding="utf-8")
@@ -288,70 +282,13 @@ def finalize_run():
     _write_or_clear(O/"warnings.md", render_warnings(warns, "the current project") if warns else None)
     warnings = [{"word": w.ipa, "gloss": w.gloss, "form": w.form,
                  "clusters": list(w.clusters), "syllabified": w.syllabified} for w in warns]
+    # Word-scoped rules pointing at a word not in the lexicon (a likely typo — they never fire).
+    unfired = [{"rule": r, "word": w} for r, w in unfired_scoped_rules(rules, project.words)]
     _t_end = time.perf_counter()
-    _LAST.update(project=project, rules=rules, derivations=list(acc))  # for the Filter tab
     _SESSION.clear()
     return json.dumps({"accuracy": accuracy, "errors": errors, "errorContext": error_context,
-                       "blame": blame, "warnings": warnings,
+                       "blame": blame, "warnings": warnings, "unfiredRules": unfired,
                        "accuracyMs": round((_t_accuracy - _t0) * 1000), "analysisMs": round((_t_end - _t_accuracy) * 1000)})
-
-def run_filter(pattern):
-    # Interactive filter over the last completed run — matches the pattern against every
-    # form each word takes, writes filtered_output.md/filtered_table.csv, and returns the
-    # matched words (trace card + where-matched + measurement) for the Filter tab.
-    if "project" not in _LAST:
-        return json.dumps({"error": ["Run the project first, then filter."]})
-    project, rules, derivations = _LAST["project"], _LAST["rules"], _LAST["derivations"]
-    res = filter_by_pattern(derivations, pattern, project)
-    if res.is_err():
-        return json.dumps({"error": res.unwrap_err()})
-    result = res.unwrap()
-    matched_derivs = [m.derivation for m in result.matched]
-    O = _reports_dir()
-    O.joinpath("filtered_output.md").write_text(
-        _build_filtered_report(result, project, "the current project"), encoding="utf-8")
-    O.joinpath("filtered_table.csv").write_text(
-        _build_matrix_csv(matched_derivs, rules, project), encoding="utf-8")
-
-    report = measure_accuracy(matched_derivs, project)
-    accuracy = None
-    confusions_json = []
-    if report.assessed:
-        accuracy = {"exact": report.exact, "assessed": report.assessed,
-                   "accuracy": round(report.accuracy, 4), "meanPhone": round(report.mean_distance, 3)}
-        confusions_json = _confusions_json(confusions(report.distances))
-    words = []
-    for m in result.matched:
-        g = distance_to_target(m.derivation, project)
-        words.append({"card": _card(m.derivation, project),
-                      "locations": [loc.label for loc in m.locations],
-                      "measurement": ({"target": g.target, "distance": g.distance, "exact": g.exact} if g else None)})
-    return json.dumps({"pattern": pattern, "matched": len(result.matched),
-                       "considered": result.considered, "accuracy": accuracy,
-                       "confusions": confusions_json, "words": words})
-
-def run_scope(pattern):
-    # Restrict the accuracy analyses to the words whose attested forms match the pattern:
-    # write scoped_output.md, and return the subset accuracy headline + errors.
-    if "project" not in _LAST:
-        return json.dumps({"error": ["Run the project first, then scope."]})
-    project, derivations = _LAST["project"], _LAST["derivations"]
-    res = filter_attested(derivations, pattern, project)
-    if res.is_err():
-        return json.dumps({"error": res.unwrap_err()})
-    result = res.unwrap()
-    subset = list(result.matched)
-    where = "the current project · scope '" + pattern + "': " + str(len(subset)) + "/" + str(result.considered) + " words"
-    _reports_dir().joinpath("scoped_output.md").write_text(render_scoped(subset, project, where), encoding="utf-8")
-    report = measure_accuracy(subset, project)
-    accuracy = None
-    errors = None
-    if report.assessed:
-        accuracy = {"exact": report.exact, "assessed": report.assessed,
-                   "accuracy": round(report.accuracy, 4), "meanPhone": round(report.mean_distance, 3)}
-        errors = _errors_summary(diagnose_stages(subset, project))
-    return json.dumps({"pattern": pattern, "matched": len(subset), "considered": result.considered,
-                       "accuracy": accuracy, "errors": errors})
 
 def run_derivations():
     prep = json.loads(prepare_run())
@@ -363,6 +300,7 @@ def run_derivations():
     return json.dumps({"derivations": out, "accuracy": fin.get("accuracy"),
                        "errors": fin.get("errors"), "errorContext": fin.get("errorContext"),
                        "blame": fin.get("blame"), "warnings": fin.get("warnings"),
+                       "unfiredRules": fin.get("unfiredRules"),
                        "accuracyMs": fin.get("accuracyMs"), "analysisMs": fin.get("analysisMs")})
 `;
 
@@ -547,35 +485,3 @@ export function finalizeRun() {
   }
 }
 
-/**
- * Filter the last completed run: match PATTERN against every form each word takes and
- * return the matched words (trace card + where-matched + measurement). Also writes
- * filtered_output.md / filtered_table.csv into the overlay.
- * @param {string} pattern a Fortis sequence pattern
- * @returns {{pattern: string, matched: number, considered: number, accuracy: object|null,
- *   confusions: Array, words: Array}|{error: string[]}}
- */
-export function runFilter(pattern) {
-  const fn = py.globals.get("run_filter");
-  try {
-    return JSON.parse(fn(pattern));
-  } finally {
-    fn.destroy();
-  }
-}
-
-/**
- * Scope the accuracy analyses to words whose attested forms match PATTERN: writes
- * scoped_output.md and returns the subset's accuracy headline + errors.
- * @param {string} pattern a Fortis sequence pattern
- * @returns {{pattern: string, matched: number, considered: number, accuracy: object|null,
- *   errors: object|null}|{error: string[]}}
- */
-export function runScope(pattern) {
-  const fn = py.globals.get("run_scope");
-  try {
-    return JSON.parse(fn(pattern));
-  } finally {
-    fn.destroy();
-  }
-}

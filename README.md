@@ -106,8 +106,8 @@ synthetic rules — `input` (its raw IPA and how the engine ingested it: syllabi
 normalised) and `output` (the surface form). Alongside it, `derivation_matrix.csv`
 gives the wide view (one row per word and one column per rule — each titled
 `<time>: <rule>` — holding the word's resulting form wherever that rule fired,
-empty otherwise), and `rule_firings.csv` inverts it (one row per rule: the words it
-matched as `before → after` and the distinct segment changes it made, e.g. `d→t`).
+empty otherwise), and `rule_firings.csv` inverts it (one row per rule: the distinct
+segment changes it made, e.g. `d→t`, and the words it matched as `before → after`).
 If the lexicon carries attested forms (`final` and/or
 intermediate `stages`), four more analyses run over it: the **accuracy**
 analysis writes `accuracy.csv` (per-stage exact-match accuracy + mean phone
@@ -130,8 +130,7 @@ Deriving one word never touches another, so a large lexicon is fanned across wor
 processes **automatically** — a ~4–6× speedup on a multi-core machine, with output
 byte-identical to a serial run. Small lexica stay in a single process (the pool's
 startup cost is not worth paying below a couple hundred words). Pass `--serial` to
-force one process, or `--workers N` to pin the pool size. The same flags apply to the
-standalone accuracy CLI (`python -m src.fortis.analysis.main`), which derives the same way.
+force one process, or `--workers N` to pin the pool size.
 
 ### Web app
 
@@ -167,12 +166,8 @@ distance (a base segment plus its combining marks is one phone; an exact match i
 0) and a finer **feature** distance (a substitution costs the number of features
 that differ, so `ɑ̃` is one edit from `ɑ` but eleven from `t`; an adjacent-swap
 metathesis counts as one). Both are reported per word and in aggregate, per stage
-and for the final surface, in `accuracy.csv` / `distance_to_target.csv`. To
-measure accuracy without a full run:
-
-```
-python -m src.fortis.analysis.main --project projects/latin_to_french
-```
+and for the final surface, in `accuracy.csv` / `distance_to_target.csv` — written on
+every run that has attested forms.
 
 Intermediate `stages` are measured by matching the derived snapshot at rule-time T
 against the attested form at stage T, so those rows are only meaningful when the
@@ -194,38 +189,6 @@ lexicon has them:
   `gloss, step, regression, t, form, target, d, fd`), worst first, exact words included. The
   interactive Blame tab additionally attributes each wrong phone (by stable segment
   id) to the rule that last set it.
-
-To preview a change before committing it, `--try 'RULE'` splices a candidate rule
-into the cascade (optionally at `--at TIME`), re-derives, and writes `whatif.md` —
-how many words it improves, regresses, or leaves unchanged:
-
-```
-python -m src.fortis.analysis.main --project projects/latin_to_french --try 'eː → ɛː / _ t'
-```
-
-To focus the error analyses on an environment, `--scope 'PATTERN'` writes a
-`scoped_output.md` — accuracy and blame recomputed over just the words whose attested
-target, or **any** attested stage, matches the pattern (the per-stage errors and error
-context stay CSV-only) — leaving the whole-lexicon reports intact. So you can debug accuracy on a
-sub-population, including words that carried an /s/ at some stage even if it later dropped:
-
-```
-python -m src.fortis.analysis.main --project projects/latin_to_french --scope 'ʁ'
-```
-
-To trace a configuration through the derivation, `--filter 'PATTERN'` on the engine
-run synthesises every word the pattern touches in **any** form — its input, an
-intermediate derived form, the surface, the attested target, or a stage — into
-`filtered_output.md` (each matched word's trace, labelled by where it matched, over a
-subset accuracy + confusion header) and `filtered_table.csv`. Because a pattern is often
-transient (it arises at one rule and resolves at a later one), most matched words derive
-correctly: this answers *which* words pass through a shape and *where*, not which are
-wrong. The pattern is the same notation a rule target uses (feature bundles, letters,
-quantifiers):
-
-```
-python -m src.fortis.main --project projects/latin_to_french --filter 'd͡ʒ'
-```
 
 The thresholds these analyses use (the autopsy's support floor, how many phones
 to autopsy, the edit distance's metathesis cost) are tunable per project in an
@@ -444,12 +407,8 @@ fortis/
         ├── accuracy.py          #   phone + feature edit distance vs attested target forms
         ├── diagnosis.py         #   per-stage confusions (errors) + per-segment context autopsy
         ├── blame.py             #   attribute each wrong word to the rule that produced it
-        ├── filtering.py         #   --filter / --scope: select the words a pattern touches
-        ├── synthesis.py         #   bundle a scoped subset's reports into scoped_output.md
-        ├── whatif.py            #   preview a candidate rule's accuracy delta before committing
         ├── warnings.py          #   syllabification-fallback warnings
-        ├── reporting.py         #   render the accuracy CSVs (per-stage summary + per-word)
-        └── main.py              #   accuracy CLI: measure accuracy + errors + blame, no full run
+        └── reporting.py         #   render the accuracy CSVs (per-stage summary + per-word)
 ```
 
 ## Current limitations and future directions

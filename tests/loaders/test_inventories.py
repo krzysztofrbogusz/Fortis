@@ -1,7 +1,5 @@
 """Tests for the top-level project loader (integration)."""
 
-import pytest
-
 from src.fortis.loaders.project import load_project
 
 FEATURES_TOML = """\
@@ -66,9 +64,6 @@ class TestLoadProject:
         assert -2000 in project.syllable_parts
         assert "xenti" in project.words
 
-    # Falls back to the (word-scoped) default showcase rules, which don't match these test
-    # words — that "rule will never fire" warning is correct here and not what we're testing.
-    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_missing_files_fall_back_to_defaults(self, tmp_path):
         # A project that omits files (here, all but the lexicon) uses the shipped
         # defaults — so re-using the default feature system needs no features.toml.

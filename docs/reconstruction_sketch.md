@@ -96,8 +96,8 @@ exactly the reasoning to automate.
    but real typological frequencies are better.
 5. **Rule induction** — synthesize the minimal context-conditioned Fortis rules mapping
    proto → each daughter. **The hard, open part** (program synthesis over rule notation).
-   _Have as the verifier/critic_: forward derive + measure (fitness), `--try`/whatif (test a
-   candidate rule), and **`blame`** (localize exactly where a derivation diverges → tells
+   _Have as the verifier/critic_: forward derive + measure (fitness) to test a candidate
+   rule, and **`blame`** (localize exactly where a derivation diverges → tells
    the search _which_ rule to fix). Missing: the _proposer_ of candidate rules.
 6. **Joint optimization** — co-optimize ancestor and rules under the description-length
    objective (they trade off).

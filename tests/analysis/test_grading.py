@@ -1,6 +1,5 @@
 """Tests for the accuracy analysis (src/fortis/analysis/accuracy.py)."""
 
-from src.fortis.analysis import main as grade_cli
 from src.fortis.analysis.accuracy import (
     AccuracyReport,
     DistanceToTarget,
@@ -342,36 +341,3 @@ class TestRendering:
         assert ["300", "alpha", "x", "x", "0", "0"] in body
         assert ["300", "beta", "y", "z", "1", "3"] in body
         assert ["final", "alpha", "x", "x", "0", "0"] in body
-
-
-class TestGradeCli:
-    def test_writes_report_and_prints_summary(self, capsys, tmp_path):
-        output = tmp_path / "accuracy.csv"
-        # The default showcase carries target forms, so the run writes the accuracy
-        # summary CSV and prints a headline reporting exact matches.
-        grade_cli.main(["--output", str(output)])
-        assert output.exists()
-        assert output.read_text(encoding="utf-8").startswith("stage,assessed,exact,within 1")
-        assert (tmp_path / "distance_to_target.csv").exists()
-        out = capsys.readouterr().out
-        assert "exact" in out
-
-    def test_summary_reports_analysis_timing(self, capsys, tmp_path):
-        grade_cli.main(["--output", str(tmp_path / "accuracy.csv")])
-        err = capsys.readouterr().err
-        assert "derive" in err and "accuracy" in err and "analysis" in err
-
-    def test_scope_writes_scoped_output_leaving_standard_whole(self, tmp_path):
-        output = tmp_path / "accuracy.csv"
-        grade_cli.main(["--output", str(output), "--scope", "[+syllabic]"])  # any vowel
-        scoped = tmp_path / "scoped_output.md"
-        assert scoped.exists()
-        assert "# Scoped" in scoped.read_text(encoding="utf-8")
-        # the standard report stays whole-lexicon — no scope note
-        assert "scope" not in output.read_text(encoding="utf-8")
-
-    def test_bad_scope_pattern_exits(self, tmp_path):
-        import pytest
-
-        with pytest.raises(SystemExit):
-            grade_cli.main(["--output", str(tmp_path / "accuracy.csv"), "--scope", "[bad"])

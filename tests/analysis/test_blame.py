@@ -14,7 +14,6 @@ from src.fortis.analysis.blame import (
     blame_all,
     blame_summary_line,
     blame_word,
-    render_blame,
     render_blame_csv,
 )
 from src.fortis.application.deriving import derive_all
@@ -127,17 +126,6 @@ class TestStructure:
         target_less = next((d for d in derivs if d.word.final is None), None)
         if target_less is not None:
             assert blame_word(target_less, latin) is None
-
-    def test_render_has_sections_and_caveat(self, blames):
-        md = render_blame(blames, "`proj`")
-        assert "# Blame" in md
-        assert "notation artifact" in md  # the stage caveat
-        assert "Residuals:" in md
-
-    def test_render_empty_is_short(self):
-        md = render_blame([], "`proj`")
-        assert "nothing to blame" in md.lower()
-        assert "Residuals:" not in md
 
     def test_csv_has_header_and_a_row_per_trajectory_point(self, derivs, latin):
         blames = blame_all(derivs, latin, include_exact=True)
