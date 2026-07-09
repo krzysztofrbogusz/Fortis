@@ -141,6 +141,9 @@ force one process, or `--workers N` to pin the pool size.
 
 ### Web app
 
+**Live: <https://krzysztofrbogusz.github.io/Fortis/>** — no install; it runs entirely in your
+browser.
+
 `web/` is a browser front end that runs the same Python engine used by the CLI —
 compiled to WebAssembly and executed in-browser via [Pyodide](https://pyodide.org),
 rather than a separate JavaScript reimplementation. Edit any of the 9 project
