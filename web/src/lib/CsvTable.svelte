@@ -852,4 +852,17 @@
     color: var(--muted);
     padding: 14px;
   }
+
+  /* On mobile, keep only the header row sticky — the first (symbol) column scrolls with the
+     rest, since a pinned column eats too much of a narrow screen. The corner cell keeps its
+     top-stickiness (from .csv thead th) but drops the horizontal pin. */
+  @media (max-width: 960px) {
+    .csv td.sym {
+      position: static;
+      left: auto;
+    }
+    .csv th.sym-head {
+      left: auto;
+    }
+  }
 </style>

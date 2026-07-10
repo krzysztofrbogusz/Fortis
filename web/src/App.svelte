@@ -57,6 +57,10 @@
   let bigProject = $state(false); // project exceeds the auto-run limit — shows the manual Run button
   let dirty = $state(false); // overlay edited since the last committed run (a big project needs re-running)
   let pendingSize = $state(null); // { words, rules } of the project awaiting a run
+  // The Run button is disabled when the shown results are current; the status dot goes amber
+  // ("Modified — re-run") when a big project has been edited since its last run.
+  const current = $derived(!dirty && result?.derivations != null);
+  const modified = $derived(ready && bigProject && dirty && result?.derivations != null);
   let single = $state(null); // last single-word run: {found, ipa, gloss, derivations, accuracy, …} | {error} | null
   let singleInput = $state(""); // the Single tab's input-bar text
   let singleBusy = $state(false); // a single-word derivation is in flight
@@ -125,7 +129,7 @@
   // Everything the project switcher lists: the built-in default, the bundled
   // examples, and any locally-imported folders (added by loadProject).
   const projects = $derived([
-    { id: "", label: "Default" },
+    { id: "", label: "default" },
     ...examples.map((e) => ({ id: e.dir, label: e.label || e.dir, kind: "example", entry: e })),
     ...imported.map((p) => ({ id: p.id, label: p.label, kind: "imported", files: p.files })),
   ]);
@@ -136,19 +140,25 @@
     else document.documentElement.dataset.theme = theme;
     localStorage.setItem("theme", theme);
   });
+  // A single button cycles the theme, like the psyguide switcher: system → dark → light → …
+  const nextTheme = { system: "dark", dark: "light", light: "system" };
+  const cycleTheme = () => (theme = nextTheme[theme] ?? "system");
 
   // Adjustable split between the left (inventories) and right (results) panes: the left pane's
   // width as a percent, dragged via the divider and clamped so neither pane collapses.
   let panelsEl; // the flex row that holds both panes, for the drag's coordinate frame
   let splitPct = $state(clampSplit(Number(localStorage.getItem("splitPct"))));
   $effect(() => localStorage.setItem("splitPct", String(splitPct)));
+  // Mobile only: which stacked panel is collapsed to just its header so the other gets
+  // full height. "" = split, "left" = editor collapsed, "right" = results collapsed.
+  let collapsed = $state("");
 
   function clampSplit(pct) {
     return Number.isFinite(pct) && pct > 0 ? Math.min(80, Math.max(20, pct)) : 50;
   }
 
   function startResize(event) {
-    if (window.matchMedia("(max-width: 800px)").matches) return; // stacked: no horizontal drag
+    if (window.matchMedia("(max-width: 960px)").matches) return; // stacked: no horizontal drag
     event.preventDefault();
     const rect = panelsEl.getBoundingClientRect();
     const onMove = (e) => {
@@ -556,40 +566,67 @@
         <span class="err-dot"></span> {status}
       {:else if !ready}
         <span class="spinner"></span> {status}
+      {:else if modified}
+        <span class="mod-dot"></span> <span class="mod-text">Modified</span>
       {:else}
         <span class="ok-dot"></span> Engine ready
       {/if}
       {#if ready && bigProject}
-        {@const current = !dirty && result?.derivations != null}
-        {#if dirty && result?.derivations != null}
-          <span class="run-note">modified — re-run to update</span>
-        {/if}
         <button
           class="run-top"
           disabled={busy || current}
+          aria-label="Run project"
           title={current
             ? "Results are up to date"
-            : "Derive the whole lexicon and regenerate the reports"}
-          onclick={runProject}>Run project</button
+            : "Run project — derive the whole lexicon and regenerate the reports"}
+          onclick={runProject}
         >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
       {/if}
-      <div class="theme-toggle">
-        <button
-          class:active={theme === "light"}
-          title="Light theme"
-          onclick={() => (theme = "light")}>Light</button
-        >
-        <button
-          class:active={theme === "dark"}
-          title="Dark theme"
-          onclick={() => (theme = "dark")}>Dark</button
-        >
-        <button
-          class:active={theme === "system"}
-          title="Follow the system theme"
-          onclick={() => (theme = "system")}>System</button
-        >
-      </div>
+      <button
+        class="theme-toggle"
+        onclick={cycleTheme}
+        aria-label="Toggle theme"
+        title={theme === "system"
+          ? "Theme: system (click for dark)"
+          : theme === "dark"
+            ? "Theme: dark (click for light)"
+            : "Theme: light (click for system)"}
+      >
+        {#if theme === "system"}
+          <!-- Auto / system (eclipse) -->
+          <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" stroke="none" aria-hidden="true">
+            <path d="M13,7c-0.6,0-1-0.4-1-1V5c0-0.6,0.4-1,1-1s1,0.4,1,1v1C14,6.6,13.6,7,13,7z" />
+            <path d="M5.9,9.9c-0.3,0-0.5-0.1-0.7-0.3L3.1,7.5c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l2.1,2.1c0.4,0.4,0.4,1,0,1.4C6.4,9.8,6.2,9.9,5.9,9.9z" />
+            <path d="M3,17H2c-0.6,0-1-0.4-1-1s0.4-1,1-1h1c0.6,0,1,0.4,1,1S3.6,17,3,17z" />
+            <path d="M3.8,26.2c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l2.1-2.1c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4l-2.1,2.1C4.3,26.1,4.1,26.2,3.8,26.2z" />
+            <path d="M13,28c-0.6,0-1-0.4-1-1v-1c0-0.6,0.4-1,1-1s1,0.4,1,1v1C14,27.6,13.6,28,13,28z" />
+            <path d="M22,25c-5,0-9-4-9-9s4-9,9-9s9,4,9,9S27,25,22,25z" />
+            <path d="M11,16c0-3.1,1.3-5.9,3.3-7.9C13.9,8,13.5,8,13,8c-4.4,0-8,3.6-8,8s3.6,8,8,8c0.5,0,0.9,0,1.3-0.1C12.3,21.9,11,19.1,11,16z" />
+          </svg>
+        {:else if theme === "dark"}
+          <!-- Dark (moon) -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        {:else}
+          <!-- Light (sun) -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        {/if}
+      </button>
     </div>
   </header>
 
@@ -607,7 +644,7 @@
     style="--split-left: {splitPct}%"
   >
     <!-- LEFT: inventories -->
-    <section class="panel left">
+    <section class="panel left" class:is-collapsed={collapsed === "left"}>
       <div class="panel-head">
         <div class="project-picker">
           <select
@@ -640,24 +677,28 @@
         </div>
       </div>
 
+      <div class="file-selection">
       {#if defaultFiles.length}
-        <div class="file-group-label">Default</div>
-        <div class="tabs">
-          {#each defaultFiles as f}
-            <button
-              class="tab"
-              class:active={f === active}
-              disabled={!ready}
-              title={FILE_HELP[f]}
-              onclick={() => selectFile(f)}>{f}</button
-            >
-          {/each}
+        <div class="file-group">
+          <div class="file-group-label">Default</div>
+          <div class="tabs">
+            {#each defaultFiles as f}
+              <button
+                class="tab"
+                class:active={f === active}
+                disabled={!ready}
+                title={FILE_HELP[f]}
+                onclick={() => selectFile(f)}>{f}</button
+              >
+            {/each}
+          </div>
         </div>
       {/if}
 
       {#if projectFiles.length}
-        <div class="file-group-label">Project</div>
-        <div class="tabs">
+        <div class="file-group">
+          <div class="file-group-label">Project</div>
+          <div class="tabs">
           {#each projectFiles as f}
             <span class="tab-wrap">
               <button
@@ -675,9 +716,12 @@
               >
             </span>
           {/each}
+          </div>
         </div>
       {/if}
+      </div>
 
+      <div class="editor-area">
       {#if active?.endsWith(".csv")}
         <CsvTable {content} onchange={onCsvEdit} />
       {:else if active?.endsWith(".toml")}
@@ -705,6 +749,7 @@
           oninput={onEdit}
         ></textarea>
       {/if}
+      </div>
 
       <input
         bind:this={fileInput}
@@ -738,10 +783,31 @@
       onpointerdown={startResize}
       onkeydown={keyResize}
       ondblclick={() => (splitPct = 50)}
-    ></div>
+    >
+      <!-- Mobile only (see the max-width: 960px block): collapse one stacked panel so the
+           other fills the screen. ▴ = editor full, ▾ = results full; tap again to restore. -->
+      <button
+        type="button"
+        class="collapse-btn"
+        class:active={collapsed === "right"}
+        title={collapsed === "right" ? "Restore split" : "Editor full height"}
+        aria-label="Give the editor full height"
+        onclick={(e) => (e.stopPropagation(), (collapsed = collapsed === "right" ? "" : "right"))}
+        onpointerdown={(e) => e.stopPropagation()}>▴</button
+      >
+      <button
+        type="button"
+        class="collapse-btn"
+        class:active={collapsed === "left"}
+        title={collapsed === "left" ? "Restore split" : "Results full height"}
+        aria-label="Give the results full height"
+        onclick={(e) => (e.stopPropagation(), (collapsed = collapsed === "left" ? "" : "left"))}
+        onpointerdown={(e) => e.stopPropagation()}>▾</button
+      >
+    </div>
 
     <!-- RIGHT: results -->
-    <section class="panel right">
+    <section class="panel right" class:is-collapsed={collapsed === "right"}>
       <div class="panel-head results-head">
         <div class="head-row">
           <div class="head-title">
@@ -843,6 +909,7 @@
         {/if}
       {/snippet}
 
+      <div class="result-area">
       {#if busy}
         <div class="results">
           <div class="run-prompt">
@@ -867,6 +934,11 @@
              definition under its name (the Derivation tab's Definition toggle). -->
         {#snippet traceSteps(steps, showDefs)}
           {@const hasTime = steps.some((s) => s.time != null)}
+          <!-- The trace table hugs its content (nowrap form columns), so on a narrow
+               screen it can exceed the card. Contain that overflow to a per-card scroll
+               region: the card itself stays pane-width (no page-level scroll, no blank
+               space beside narrower cards) and only the wide table scrolls within it. -->
+          <div class="trace-scroll">
           <table class="report-misses blame-traj">
             <thead>
               <tr><th>rule</th>{#if hasTime}<th>t</th>{/if}<th>before</th><th>after</th><th>change</th></tr>
@@ -886,6 +958,7 @@
               {/each}
             </tbody>
           </table>
+          </div>
         {/snippet}
         <!-- Shared by the Errors and Error context views. -->
         {#snippet confusionTable(confs)}
@@ -1102,6 +1175,7 @@
                   <span class="form">{w.stage.derived}</span>
                 </p>
               {/if}
+              <div class="trace-scroll">
               <table class="report-misses blame-traj">
                 <thead>
                   <tr><th>step</th><th>t</th><th>form</th><th>target</th><th>d</th><th>fd</th></tr>
@@ -1119,6 +1193,7 @@
                   {/each}
                 </tbody>
               </table>
+              </div>
             </details>
           {/each}
         {/snippet}
@@ -1297,6 +1372,7 @@
         {/if}
       </div>
       {/if}
+      </div>
     </section>
   </main>
 </div>
@@ -1378,26 +1454,31 @@
     font-size: var(--fs-body);
     color: var(--muted);
   }
+  /* Single cycling icon button (system → dark → light), styled after the psyguide switcher. */
   .theme-toggle {
-    display: flex;
     margin-left: 4px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
-  .theme-toggle button {
-    font-size: var(--fs-label);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 3px 8px;
-    border-radius: 0;
-    margin-left: -1px;
+  .theme-toggle:hover {
+    color: var(--text-h);
+    background: var(--accent-bg);
+    border-color: var(--accent-border);
   }
-  .theme-toggle button:first-child {
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-    margin-left: 0;
-  }
-  .theme-toggle button:last-child {
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
+  .theme-toggle svg {
+    display: block;
+    width: 18px;
+    height: 18px;
   }
 
   .fatal {
@@ -1433,6 +1514,20 @@
   .right {
     flex: 1 1 0;
   }
+  /* The editor pane's body is: .panel-head, then .file-selection (the file tabs), then
+     .editor-area (the active editor/CSV table, which fills the rest). The results pane's
+     body is .panel-head then .result-area. Grouping the "one of" views under a single flex
+     child keeps the collapse rule and the fill simple. */
+  .file-selection {
+    flex: none;
+  }
+  .editor-area,
+  .result-area {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
   .divider {
     flex: none;
     position: relative;
@@ -1455,6 +1550,11 @@
   }
   .divider:focus-visible {
     outline: none;
+  }
+  /* The panel-collapse buttons live in the divider but only appear on mobile (see the
+     max-width: 960px block); on desktop the divider is a resize handle only. */
+  .collapse-btn {
+    display: none;
   }
 
   .panel-head {
@@ -1480,7 +1580,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 0;
+    flex: none; /* keep the "Results" label + warning badge at content width — don't let
+                   space-between squeeze it so the badge overflows into the wrapping tabs */
   }
   .warn-tab {
     font-size: var(--fs-body);
@@ -1707,22 +1808,23 @@
     text-align: center;
   }
   .run-top {
-    font-size: var(--fs-body);
-    padding: 4px 14px;
-    font-weight: 600;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--accent);
     background: var(--accent-bg);
     border-color: var(--accent-border);
+  }
+  .run-top svg {
+    display: block;
   }
   .run-top:disabled {
     color: var(--muted);
     background: transparent;
     font-weight: 400;
-  }
-  .run-note {
-    color: var(--warn-fg);
-    font-weight: 600;
-    white-space: nowrap;
   }
   .run-prompt .muted {
     max-width: 30ch;
@@ -1774,11 +1876,26 @@
     padding-top: 12px;
   }
 
+  /* One horizontally-scrollable row (like the file tabs) rather than wrapping to several
+     rows — fills the actions row, with Save pinned after it. */
   .view-tabs {
     display: flex;
-    flex-wrap: wrap;
+    flex: 1;
+    flex-wrap: nowrap;
     gap: 4px;
-    min-width: 0; /* allow the group to shrink within .actions so the buttons wrap (like the file tabs) */
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .view-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .view-tabs button {
+    flex: 0 0 auto; /* keep each tab its natural width */
+  }
+  .head-row > .actions {
+    flex: 1;
+    min-width: 0;
   }
   .view-tabs button {
     font-size: var(--fs-body);
@@ -1786,6 +1903,7 @@
   }
   .save-result {
     margin-left: 8px;
+    flex: none; /* pinned after the scrolling tabs — never shrinks */
   }
 
   .report-summary,
@@ -1840,9 +1958,16 @@
   .report-misses td.form {
     color: var(--text-h);
   }
+  /* Wide traces (long IPA forms) scroll inside their own card rather than widening the
+     whole results pane. On desktop the table fits, so this container never scrolls. */
+  .trace-scroll {
+    overflow-x: auto;
+  }
   /* Blame trajectory: the t/form/target/d/fd columns hug their content; the first `step`
      column absorbs the remaining width and wraps long rule labels instead of forcing the
-     table wide. */
+     table wide. A min-width keeps that label column readable when the table is starved for
+     space (mobile) — without it, overflow-wrap: anywhere shreds the label to one letter
+     per line. break-word (not anywhere) then only breaks words too long to fit. */
   .blame-traj td:not(:first-child),
   .blame-traj th:not(:first-child) {
     width: 1%;
@@ -1851,7 +1976,8 @@
   .blame-traj td:first-child,
   .blame-traj th:first-child {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    min-width: 15ch;
   }
 
   .caveat {
@@ -2045,7 +2171,8 @@
     }
   }
   .ok-dot,
-  .err-dot {
+  .err-dot,
+  .mod-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -2054,29 +2181,161 @@
   .ok-dot {
     background: #2faa5b;
   }
+  .mod-dot {
+    background: var(--warn-fg);
+  }
+  .mod-text {
+    color: var(--warn-fg);
+    font-weight: 600;
+  }
   .err-dot {
     background: var(--error);
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: 960px) {
+    .app {
+      overflow-x: hidden; /* nothing should push the page wider than the screen */
+    }
     .panels {
       flex-direction: column;
     }
-    /* Stacked: the horizontal split no longer applies — share the height evenly. */
-    .left,
-    .right {
-      flex: 1 1 50%;
+    /* Stacked: the horizontal split no longer applies. Give the editor a little more of
+       the height than the results, since editing is the cramped half on a phone. */
+    .left {
+      flex: 1 1 56%;
     }
+    .right {
+      flex: 1 1 44%;
+    }
+    /* Collapse a stacked panel to just its header so the other fills the screen. The
+       remaining panel keeps flex-grow, so it expands into the freed space automatically. */
+    .panel.is-collapsed {
+      flex: 0 0 auto;
+    }
+    /* :global so this also hides child-component roots that don't carry App's scope class
+       (CsvTable's .csv-wrap, DependencyTree's .tree-outer) — otherwise a collapsed pane
+       showing a CSV/Matrix/Tree wouldn't actually collapse. */
+    .panel.is-collapsed > :global(:not(.panel-head)) {
+      display: none;
+    }
+    /* The divider stops being a drag handle and becomes the collapse control bar. */
     .divider {
       width: auto;
-      height: 9px;
+      height: auto;
+      flex: none;
       cursor: default;
+      touch-action: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 5px 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
     }
     .divider::before {
-      inset: 4px 0; /* the line runs horizontally when stacked */
+      display: none; /* no resize line on mobile */
     }
-    .divider:hover::before {
-      inset: 3px 0;
+    .collapse-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 24px;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .collapse-btn.active {
+      color: var(--text-h);
+      border-color: var(--accent-border);
+      background: var(--panel);
+    }
+
+    /* Compact single-line header: drop the tagline and the long "modified" note (the
+       accented run icon already signals a pending re-run), and tighten the padding so
+       brand + Docs + status + run + theme fit on one row. flex-wrap stays as a fallback. */
+    .bar {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+    .tag {
+      display: none;
+    }
+
+    /* Editor pane header: the project selector + load buttons scroll horizontally in one
+       row, instead of colliding when a project's (folder-name) title is long. */
+    .left .panel-head {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .left .panel-head::-webkit-scrollbar {
+      display: none;
+    }
+    .left .panel-head > * {
+      flex: 0 0 auto; /* the picker and the action-button group keep their natural widths */
+    }
+
+    /* File chips: one horizontally-scrollable row rather than four wrapped rows, so the
+       editor below it keeps usable height. */
+    .tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tabs .tab,
+    .tabs .tab-wrap {
+      flex: 0 0 auto; /* keep each chip its natural width — don't squeeze the filenames */
+    }
+
+    /* Put the Default/Project label inline at the start of its scrollable chip row, so each
+       file group is a single line (label · chips →) instead of a label above the chips. */
+    .file-group {
+      display: flex;
+      align-items: center;
+      padding: 2px 0;
+    }
+    .file-group .file-group-label {
+      flex: 0 0 auto;
+      padding: 0 0 0 16px;
+    }
+    .file-group .tabs {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0 16px 0 8px;
+    }
+    /* Symmetric breathing room around the file-tab strip: match the space below it (to the
+       edit area) to the space above it (the header's 8px bottom padding). */
+    .editor-area {
+      margin-top: 8px;
+    }
+
+    /* The editor soft-wraps long lines instead of clipping them off the right edge — the
+       textarea and its highlight mirror share these metrics, so they stay aligned. */
+    .editor {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    /* Drop the result actions onto their own full-width line (the tab row itself already
+       scrolls horizontally — see the base .view-tabs). */
+    .head-row {
+      flex-wrap: wrap;
+    }
+    .head-row > .actions {
+      flex: 1 1 100%;
     }
   }
 

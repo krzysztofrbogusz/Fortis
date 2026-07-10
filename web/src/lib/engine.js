@@ -381,7 +381,7 @@ let py = null; // the Pyodide interpreter, set once initialised
  */
 export async function initEngine(onStatus = () => {}) {
   if (py) return;
-  onStatus("Loading Python runtime (Pyodide)…");
+  onStatus("Loading Pyodide…");
   const { loadPyodide } = await import(/* @vite-ignore */ PYODIDE_URL);
   const interp = await loadPyodide({ indexURL: PYODIDE_INDEX });
 
