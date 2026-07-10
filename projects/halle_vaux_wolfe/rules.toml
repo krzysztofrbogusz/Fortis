@@ -1,0 +1,15 @@
+# Nasal place assimilation as Place-node spreading — the phenomenon Halle, Vaux & Wolfe
+# use to motivate the geometry. The nasal recalls (~1) the following consonant's whole
+# Place node, so a single spread carries every place feature (labial / coronal / dorsal
+# and their dependents) at once — the autosegmental point of a Place node.
+[place_assimilation]
+name = "Nasal place assimilation (Place spreading)"
+definition = "[+nasal] -> [place: ~1] / _ [+consonantal, place: ~1]"
+
+# Uyghur Raising (Hahn 1991:84, via HVW ex. 12): a low vowel raises to high in a medial
+# open syllable. "Open" = the vowel sits immediately before a syllable boundary ($, no coda).
+# "Medial" = non-initial (a preceding syllable — its nucleus, then the $ — sits to the left,
+# so a bare word-initial $ can't satisfy it) and non-final (an onset follows the $).
+[uyghur_raising]
+name = "Uyghur Raising"
+definition = "[-consonantal, +sonorant, +low] -> [+high, -low] / [-consonantal] [+consonantal]* $ [+consonantal]* _ $ [+consonantal]"

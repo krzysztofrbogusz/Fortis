@@ -1,0 +1,6 @@
+# A tiny showcase: nasal place assimilation, HVW's illustration of Place-node spreading.
+# Each `final` is the attested target the derivation is graded against.
+"anka" = { gloss = "place assimilation → velar",  final = "aŋka" }
+"anpa" = { gloss = "place assimilation → labial",  final = "ampa" }
+"anta" = { gloss = "place assimilation → coronal (vacuous)", final = "anta" }
+"kalalar" = { gloss = "Uyghur Raising: medial open syllable raises", final = "kalilar" }
