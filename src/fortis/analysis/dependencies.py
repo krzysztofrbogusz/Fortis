@@ -176,7 +176,7 @@ def dependency_layout(graph: DependencyGraph) -> dict:
         column[n.index] = 0 if not same_time else 1 + max(column[d] for d in same_time)
 
     times = sorted({n.time for n in nodes}, key=lambda t: (t is None, t))
-    max_col = {t: 0 for t in times}
+    max_col = dict.fromkeys(times, 0)
     for n in nodes:
         max_col[n.time] = max(max_col[n.time], column[n.index])
     base_x: dict[int | None, float] = {}  # left edge (first column centre) of each time block

@@ -4,6 +4,7 @@ from src.fortis.analysis.accuracy import (
     AccuracyReport,
     DistanceToTarget,
     StageAccuracy,
+    _cross_time_columns,
     accuracy_by_stage,
     distance_to_target,
     edit_distance,
@@ -12,7 +13,6 @@ from src.fortis.analysis.accuracy import (
     ingest_targets,
     measure_accuracy,
 )
-from src.fortis.analysis.accuracy import _cross_time_columns
 from src.fortis.analysis.reporting import (
     accuracy_summary_line,
     render_accuracy_csv,
@@ -349,7 +349,7 @@ class TestRendering:
             "stage", "assessed", "exact", "within 1", "mean phone dist", "mean feature dist",
             "token-wt exact", "token-wt phone dist", "token-wt feature dist",
         ]
-        # 300 weighted: exact 9/10 = 0.900, phone (9·0+1·1)/10 = 0.100, feature (9·0+1·3)/10 = 0.300.
+        # 300 weighted: exact 9/10 = 0.900, phone (9·0+1·1)/10 = 0.100, feature (9·0+1·3)/10 = 0.3.
         assert rows[1] == ["300", "2", "1", "2", "0.500", "1.500", "0.900", "0.100", "0.300"]
         # final is all-exact (weight 9) ⇒ token-weighted exact 1.000.
         assert rows[2][6] == "1.000"
@@ -358,7 +358,9 @@ class TestRendering:
         import csv
 
         rows = list(csv.reader(render_distance_to_target_csv(self._stages()).splitlines()))
-        assert rows[0] == ["stage", "gloss", "derived", "target", "d", "fd", "matches at", "closest at"]
+        assert rows[0] == [
+            "stage", "gloss", "derived", "target", "d", "fd", "matches at", "closest at",
+        ]
         body = rows[1:]
         # Every assessed word at every stage — exact matches included. The synthetic
         # DistanceToTargets here are built directly (not via _measure), so the cross-target

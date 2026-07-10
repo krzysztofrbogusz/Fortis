@@ -354,7 +354,9 @@ def _spread_label(features: list[str], bundle: FeatureBundle, project: Project) 
     for feature in features:  # add every node from each feature up to the common ancestor
         node = feature
         while node != ancestor:
-            node = project.features.parent(node)
+            parent = project.features.parent(node)
+            assert parent is not None  # ancestor dominates feature, so it is reached first
+            node = parent
             on_path.add(node)
     names = [ancestor, *(d for d in project.features.descendants(ancestor) if d in on_path)]
     lines, leaves = [], []

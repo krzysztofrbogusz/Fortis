@@ -19,6 +19,8 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D101", "D102", "D103"]
+# Mostly one embedded HTML/CSS/JS template string, where a 100-col limit doesn't apply.
+"src/fortis/analysis/dependencies.py" = ["E501"]
 
 [tool.basedpyright]
 # Pyright "standard" semantics: real type errors, without basedpyright's extra-strict checks
