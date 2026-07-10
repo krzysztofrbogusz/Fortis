@@ -512,19 +512,24 @@ def parse_autoseg_ref(
 
     ``~n=value`` binds the autosegment carrying *value* under reference *n*; ``~n`` recalls
     a bound autosegment, so the applier associates the **same** one (spreading it) rather
-    than minting a copy. The bind's inner value is parsed in pattern context.
+    than minting a copy. The bind's inner value is parsed in pattern context. A trailing ``?``
+    (``~n?``) marks a *presence-optional* node-spread — it matches whether the source carries
+    the node or not, spreading its absence as a value too (see ``AutosegRecall``).
     """
     ref_str, sep, value_str = raw_value[1:].partition("=")
+    optional = ref_str.endswith("?")
+    if optional:
+        ref_str = ref_str[:-1]
     if not ref_str.isdigit():
         return Err(f"tier reference '{raw_value}' must be ~ followed by a reference number")
     ref = int(ref_str)
     if not sep:
-        return Ok(AutosegRecall(ref))
+        return Ok(AutosegRecall(ref, optional=optional))
     match parse_kind_value(value_str, feature, features):
         case Err(error):
             return Err(error)
         case Ok(value):
-            return Ok(AutosegBind(ref, value))
+            return Ok(AutosegBind(ref, value, optional=optional))
 
 
 def parse_pattern_value(

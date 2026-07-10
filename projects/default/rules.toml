@@ -142,13 +142,15 @@ definition  = "[+syllabic, <1: aperture: high>] -> [α front, β back, <1: γ ro
 application = "left_to_right"
 
 # (2) By autosegmental SPREADING: each harmonic feature is copied from the preceding vowel by
-# node-spread (~n). Backness copies the `back` node (clearing `front`); rounding, gated by the
-# same <1: aperture: high>, copies `rounded`/`labial`. A node-spread binds nodes the source must carry,
-# so this fires from a back, round vowel — the same outcome as (1) by a different mechanism.
+# node-spread (~n). Backness uses `back: ~1?` + `front: ~2?` — the `?` makes each a PRESENCE-
+# OPTIONAL spread that copies the node's presence *or* absence, so a back trigger (no `front`)
+# clears the target's `front` and a front trigger clears its `back` (plain `~n` would require the
+# node present and only spread one way). Rounding, gated by <1: aperture: high>, copies
+# `rounded`/`labial`. Same outcome as (1) by a different mechanism.
 [vowel_harmony_spread]
 words       = ["vowel harmony (spreading)"]
 name        = "Vowel harmony (spreading)"
-definition  = "[+syllabic, <1: aperture: high>] -> [back: ~1, front: none, <1: rounded: ~2>, <1: labial: ~3>] / [+syllabic, back: ~1, rounded: ~2, labial: ~3] [-syllabic]* _"
+definition  = "[+syllabic, <1: aperture: high>] -> [back: ~1?, front: ~2?, <1: rounded: ~3>, <1: labial: ~4>] / [+syllabic, back: ~1?, front: ~2?, rounded: ~3, labial: ~4] [-syllabic]* _"
 application = "left_to_right"
 
 # A morpheme boundary "-" (written in the word, e.g. at-a) is a real, deletable segment that

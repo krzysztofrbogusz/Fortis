@@ -378,6 +378,19 @@ def pattern_matches(
                 if not _spec_matches(spec, FeatureSpec(feature=feature, value=None), bindings):
                     return False
                 continue
+            if (
+                feature in node_descendants
+                and isinstance(spec.value, AutosegBind | AutosegRecall)
+                and spec.value.optional
+            ):
+                # A *presence-optional* node-spread reference (`front: ~n?`) on an ABSENT node: bind
+                # an EMPTY subtree, so the applier spreads its *absence* (clears the node on the
+                # target) — the node counterpart of a unary alpha's absent pole. Plain `~n` (not
+                # optional) still requires the node present here, so single-node spreads like place
+                # assimilation (`oral: ~1`) keep the canonical "spread only what's there" semantics.
+                if bindings is not None:
+                    bindings.node_reference[spec.value.ref] = FeatureBundle()
+                continue
             if spec.value is None:
                 # "F: none" is satisfied by absence; "F: !none" requires presence.
                 if spec.negated:

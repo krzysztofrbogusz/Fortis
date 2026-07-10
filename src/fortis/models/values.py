@@ -36,17 +36,31 @@ class AutosegBind:
     so a later ``AutosegRecall`` on another anchor can associate the **same** autosegment —
     the difference between *spreading* a tone (one autosegment, many anchors) and *copying*
     it (a fresh autosegment).
+
+    ``optional`` (written ``~n?``): a *presence-optional* node-spread — bind the node whether
+    the source carries it or not, spreading its absence as a value too (see ``AutosegRecall``).
     """
 
     ref: int
     value: Limb
+    optional: bool = False
 
 
 @dataclass(frozen=True)
 class AutosegRecall:
-    """Recall a bound tier autosegment (``tone: ~1``): associate the same one — spread."""
+    """Recall a bound tier autosegment (``tone: ~1``): associate the same one — spread.
+
+    ``optional`` (written ``~n?``): a *presence-optional* segmental node-spread. Plain ``node: ~n``
+    is the canonical rule — it spreads a node the source *has*, so it matches only a source that
+    carries it. ``node: ~n?`` instead spreads the node's presence *or* absence: it matches whether
+    the source has the node or not, and an absent source clears the node on the target (the node
+    analogue of a unary alpha's absent pole). Needed where mutually-exclusive privative siblings
+    (``front``/``back``) spread as a set — a back source clears the target's ``front``, and vice
+    versa.
+    """
 
     ref: int
+    optional: bool = False
 
 
 type SingleValue = int | None | Literal["any"]  # None == undefined / unspecified
