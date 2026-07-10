@@ -402,8 +402,15 @@ def pattern_matches(
         if feature in node_descendants and isinstance(spec.value, AutosegBind | AutosegRecall):
             # Node-spread reference (`oral: ~n`): the node is present (checked above), so capture
             # this segment's subtree — the node plus its descendants here — for the applier to
-            # copy onto the target. A *segmental* node spreads by copying its subtree (unlike a
-            # tier autosegment, which shares a link); the capture matches unconditionally.
+            # copy onto the target. A *segmental* node spreads by copying its subtree (unlike a tier
+            # autosegment, which shares a link). A plain recall (`~n`) captures unconditionally; a
+            # bind-and-match (`~n=value`) first requires the node's value to match, so the
+            # reference binds only a source of that value — e.g. `high: ~1=-` binds a [-high] vowel,
+            # skipping the [+high] ones a transparent gap steps over (Sibe uvularization).
+            if isinstance(spec.value, AutosegBind) and not _spec_matches(
+                replace(spec, value=spec.value.value), target[feature], bindings
+            ):
+                return False
             if bindings is not None:
                 names = set(node_descendants[feature]) | {feature}
                 bindings.node_reference[spec.value.ref] = FeatureBundle(
