@@ -37,6 +37,7 @@
   let runToken = 0; // bumped for each new run/load; a run whose token is stale aborts (supersession)
 
   let openDefs = $state({}); // per-card: index → whether that card's rule definitions are shown
+  let openAuto = $state({}); // per-card: index → whether that card's autosegmental diagrams are shown
   let result = $state(null); // { derivations } | { error }
   let accuracy = $state(null); // accuracy summary from the last run, or null when there's no target
   let errors = $state(null); // Errors analysis: per-stage confusions, or null when all exact
@@ -65,6 +66,7 @@
   let singleInput = $state(""); // the Single tab's input-bar text
   let singleBusy = $state(false); // a single-word derivation is in flight
   let singleDefs = $state(false); // whether the single derivation card shows its rule definitions
+  let singleAuto = $state(false); // whether the single derivation card shows its autosegmental diagrams
 
   let fileInput; // single-file <input>
   let projectInput; // multi-file (folder) <input>
@@ -265,6 +267,7 @@
       rulesCsv = ""; // and the previous rule-firings table
       timing = null; // and the previous run's timing
       openDefs = {}; // reset per-card definition toggles (indices map to new words after a run)
+      openAuto = {}; // and the per-card autosegmental toggles
       await paint(); // paint the (updated) left pane + cleared right pane before the first batch blocks
       if (myToken !== runToken) return; // superseded while painting — a newer run owns the session now
       const total = prep.words;
@@ -932,7 +935,7 @@
         <!-- The firing-rule trace of one word, as a borderless table (rule · t · before → after
              · change) — used by the Derivation tab. `showDefs` reveals each rule's
              definition under its name (the Derivation tab's Definition toggle). -->
-        {#snippet traceSteps(steps, showDefs)}
+        {#snippet traceSteps(steps, showDefs, showAuto)}
           {@const hasTime = steps.some((s) => s.time != null)}
           <!-- The trace table hugs its content (nowrap form columns), so on a narrow
                screen it can exceed the card. Contain that overflow to a per-card scroll
@@ -954,6 +957,13 @@
                 </tr>
                 {#if showDefs && s.heading && s.definition}
                   <tr><td colspan={hasTime ? 5 : 4} class="def-cell">{s.definition}</td></tr>
+                {/if}
+                {#if showAuto && s.autosegmental?.length}
+                  <tr><td colspan={hasTime ? 5 : 4} class="auto-cell">
+                    {#each s.autosegmental as [, diagram]}
+                      <pre class="diagram">{diagram}</pre>
+                    {/each}
+                  </td></tr>
                 {/if}
               {/each}
             </tbody>
@@ -1244,16 +1254,26 @@
                 <header class="word-head">
                   <span class="word-ipa">{d.ipa}</span>
                   {#if d.gloss}<span class="gloss">‘{d.gloss}’</span>{/if}
-                  {#if d.steps.some((s) => s.definition)}
-                    <button
-                      class="def-toggle"
-                      class:active={singleDefs}
-                      title="Show the rule definitions for this word"
-                      onclick={() => (singleDefs = !singleDefs)}>Definitions</button
-                    >
-                  {/if}
+                  <div class="card-toggles">
+                    {#if d.steps.some((s) => s.autosegmental?.length)}
+                      <button
+                        class="card-toggle"
+                        class:active={singleAuto}
+                        title="Show the autosegmental diagram for each rule that spreads, docks, or delinks"
+                        onclick={() => (singleAuto = !singleAuto)}>Autosegmental</button
+                      >
+                    {/if}
+                    {#if d.steps.some((s) => s.definition)}
+                      <button
+                        class="card-toggle"
+                        class:active={singleDefs}
+                        title="Show the rule definitions for this word"
+                        onclick={() => (singleDefs = !singleDefs)}>Definitions</button
+                      >
+                    {/if}
+                  </div>
                 </header>
-                {@render traceSteps(d.steps, singleDefs)}
+                {@render traceSteps(d.steps, singleDefs, singleAuto)}
                 <div class="surface">
                   <span class="muted" aria-hidden="true">→</span>
                   <span class="form">{d.surface}</span>
@@ -1352,16 +1372,26 @@
               <header class="word-head">
                 <span class="word-ipa">{d.ipa}</span>
                 {#if d.gloss}<span class="gloss">‘{d.gloss}’</span>{/if}
-                {#if d.steps.some((s) => s.definition)}
-                  <button
-                    class="def-toggle"
-                    class:active={openDefs[i]}
-                    title="Show the rule definitions for this word"
-                    onclick={() => (openDefs[i] = !openDefs[i])}>Definitions</button
-                  >
-                {/if}
+                <div class="card-toggles">
+                  {#if d.steps.some((s) => s.autosegmental?.length)}
+                    <button
+                      class="card-toggle"
+                      class:active={openAuto[i]}
+                      title="Show the autosegmental diagram for each rule that spreads, docks, or delinks"
+                      onclick={() => (openAuto[i] = !openAuto[i])}>Autosegmental</button
+                    >
+                  {/if}
+                  {#if d.steps.some((s) => s.definition)}
+                    <button
+                      class="card-toggle"
+                      class:active={openDefs[i]}
+                      title="Show the rule definitions for this word"
+                      onclick={() => (openDefs[i] = !openDefs[i])}>Definitions</button
+                    >
+                  {/if}
+                </div>
               </header>
-              {@render traceSteps(d.steps, openDefs[i])}
+              {@render traceSteps(d.steps, openDefs[i], openAuto[i])}
               <div class="surface">
                 <span class="muted" aria-hidden="true">→</span>
                 <span class="form">{d.surface}</span>
@@ -2123,9 +2153,15 @@
     color: var(--muted);
     font-style: italic;
   }
-  .def-toggle {
+  /* The card's toggle buttons (Autosegmental · Definitions) float to the right of the
+     word/gloss as a group; Autosegmental sits left of Definitions. */
+  .card-toggles {
     margin-left: auto;
     align-self: center;
+    display: flex;
+    gap: 8px;
+  }
+  .card-toggle {
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2140,6 +2176,25 @@
     font-size: var(--fs-body);
     font-weight: 400;
     color: var(--muted);
+  }
+  /* The autosegmental diagram(s) revealed as a full-width merged row under a rule that
+     spreads/docks/delinks. One monospace diagram per spread (vowel harmony spreads several
+     nodes ⇒ several, stacked). */
+  .blame-traj td.auto-cell {
+    padding: 10px 9px 12px;
+  }
+  /* Diagrams must be monospace for the box-drawing association lines to align. */
+  .diagram {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: var(--fs-body);
+    line-height: 1.35;
+    color: var(--text-h);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .diagram + .diagram {
+    margin-top: 10px;
   }
   .blame-traj thead th:first-child {
     text-align: left;

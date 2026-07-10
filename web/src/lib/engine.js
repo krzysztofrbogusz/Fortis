@@ -55,6 +55,7 @@ from src.fortis.loaders.project import load_project, unfired_scoped_rules
 from src.fortis.application.deriving import derive, resolve_rule_letters
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.application.rendering import render_syllabified, describe_change
+from src.fortis.application.diagram import render_change
 from src.fortis.application.tiers import lower_tiers
 from src.fortis.analysis.accuracy import accuracy_by_stage, measure_accuracy, distance_to_target, ingest_targets
 from src.fortis.analysis.diagnosis import confusions, diagnose_stages, render_errors_csv, render_error_context_csv
@@ -130,7 +131,11 @@ def _card(d, project):
         steps.append({"timeHeader":time_header,"heading":heading,"definition":s.rule.raw_definition,
                       "time":s.rule.time,"name":s.rule.name or base,"sporadic":bool(s.rule.words),
                       "before":R(s.before,s.before_boundaries),"after":R(s.after,s.after_boundaries),
-                      "change":describe_change(lower_tiers(s.before),lower_tiers(s.after),project)})
+                      "change":describe_change(lower_tiers(s.before),lower_tiers(s.after),project),
+                      # [[sublabel, monospace diagram], …] for the rules using autosegmental
+                      # mechanisms (~n spread / dock / delink); empty for all others. Drives the
+                      # per-card AUTOSEGMENTAL toggle + its appearing rows.
+                      "autosegmental":render_change(s.before,s.after,s.rule,project)})
     # A leading "input" pseudo-step: how the raw lexicon IPA is syllabified/normalised on import
     # (raw string -> the form the first rule sees, or the surface if nothing fired).
     syllabified_input = steps[0]["before"] if steps else R(d.surface, d.surface_boundaries)

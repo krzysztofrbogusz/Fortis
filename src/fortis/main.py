@@ -64,6 +64,7 @@ from src.fortis.application.deriving import (
     derive_all_parallel,
     resolve_rule_letters,
 )
+from src.fortis.application.diagram import render_change
 from src.fortis.application.rendering import describe_change, render_syllabified
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.application.tiers import lower_tiers
@@ -186,6 +187,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "single_accuracy.csv, single_errors.csv, …) into the project's reports/ subfolder.",
     )
     parser.add_argument(
+        "--autosegmental",
+        dest="autosegmental",
+        action="store_true",
+        help="also write reports/autosegmental.md: for each word, an autosegmental tier "
+        "diagram of every rule that spreads, docks, or delinks (the ~n / ⟨⟩ / feature→none "
+        "operations). Off by default — only the rules using those mechanisms appear.",
+    )
+    parser.add_argument(
         "--serial",
         dest="serial",
         action="store_true",
@@ -281,6 +290,12 @@ def main(argv: list[str] | None = None) -> None:
         encoding="utf-8",
     )
     saved.append(dep_path)
+    # Optional: the autosegmental tier diagrams (--autosegmental), only for rules that spread,
+    # dock, or delink. Off by default — it is a separate lens, not part of the core trace.
+    if args.autosegmental:
+        auto_path = path.parent / "autosegmental.md"
+        auto_path.write_text(_build_autosegmental_md(derivations, project), encoding="utf-8")
+        saved.append(auto_path)
     write_done = time.perf_counter()
 
     where = f"`{args.project}`" if args.project is not None else "the shipped `projects/default`"
@@ -542,6 +557,30 @@ def _trace_lines(steps: Sequence[DerivationStep], project: Project) -> list[str]
             previous_base = base
         lines.append(f"    {before} → {after}   ({change})")
     return lines
+
+
+def _build_autosegmental_md(derivations: list[Derivation], project: Project) -> str:
+    """A Markdown report of every autosegmental change, one section per word.
+
+    For each word that any autosegmental rule touched, a ``##`` heading, then per firing rule
+    that spread / docked / delinked (``render_change`` returns something) a ``###`` header
+    (rule name, plus the spread node for a segmental spread) and its diagram in a fenced block —
+    monospace so the ``│`` kept · ``┊`` added · ``╪`` delinked association lines align. Words
+    with no autosegmental change are omitted, so the file lists exactly the processes at work.
+    """
+    lines = ["# Autosegmental changes", ""]
+    for derivation in derivations:
+        sections: list[str] = []
+        for step in derivation.steps:
+            for sublabel, diagram in render_change(step.before, step.after, step.rule, project):
+                title = f"{step.rule.name}" + (f" · {sublabel}" if sublabel else "")
+                sections += [f"### {title}", "", "```", diagram, "```", ""]
+        if sections:
+            gloss = f" ‘{derivation.word.gloss}’" if derivation.word.gloss else ""
+            lines += [f"## {derivation.word.ipa}{gloss}", "", *sections]
+    if len(lines) == 2:
+        lines.append("_No rule in this run uses autosegmental mechanisms._")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def _build_derivations_csv(derivations: list[Derivation], project: Project) -> str:
