@@ -2728,10 +2728,18 @@
     }
 
     /* The editor soft-wraps long lines instead of clipping them off the right edge — the
-       textarea and its highlight mirror share these metrics, so they stay aligned. */
+       textarea and its highlight mirror share these metrics, so they stay aligned. A wrapped
+       logical line spans several visual lines, which breaks the gutter's 1:1 line↔number
+       mapping — so the line numbers come off here (and the editors reclaim their space). */
     .editor {
       white-space: pre-wrap;
       overflow-wrap: break-word;
+    }
+    .editor-gutter {
+      display: none;
+    }
+    .editor-wrap .editor {
+      left: 0;
     }
 
     /* Drop the result actions onto their own full-width line (the tab row itself already
