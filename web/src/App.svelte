@@ -2028,7 +2028,9 @@
   .results {
     flex: 1;
     overflow: auto;
-    padding: 4px 16px 24px;
+    /* No top padding: the sticky card headers pin flush to the pane's edge, no gap where
+       passing rows would peek through. */
+    padding: 0 16px 24px;
   }
   /* IPA is opt-in: the results panel defaults to the Sans body face, and only the linguistic
      forms take the Charis (IPA) face — the computed forms (.form), the emphasised word/target
@@ -2471,6 +2473,17 @@
     align-items: baseline;
     gap: 10px;
     margin-bottom: 10px;
+  }
+  /* Sticky range = the bound's content box; the extra 10px of content (compensated by the
+     negative margin, so nothing moves) lets the header ride ~10px closer to the surface
+     line before the bound's edge pushes it out. */
+  .stick-bound {
+    margin-bottom: -10px;
+  }
+  .stick-bound::after {
+    content: "";
+    display: block;
+    height: 10px;
   }
   /* The card header (headword · gloss · toggles) stays pinned to the top of the results
      scroller while its own card scrolls by — sticky is bounded by the parent, so the card's
