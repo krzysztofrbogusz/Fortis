@@ -815,8 +815,8 @@
              line-number gutter sits to the left, scroll-synced with the textarea. -->
         <div class="editor-wrap" style:--gutter-w="{gutterCh}ch">
           <pre class="editor-gutter ipa" aria-hidden="true" bind:this={gutterEl}>{lineNumbers}</pre>
-          <pre class="editor editor-hl ipa" aria-hidden="true" bind:this={hlEl}>{#each editorLines as l, i}{#if i > 0}{"\n"}{/if}{l.code}<span
-                class="comment">{l.comment}</span>{/each}</pre>
+          <pre class="editor editor-hl ipa" aria-hidden="true" bind:this={hlEl}>{#each editorLines as l, i}<span class="hl-line" data-ln={i + 1}>{l.code}<span
+                class="comment">{l.comment}</span></span>{/each}</pre>
           <textarea
             class="editor editor-input ipa"
             spellcheck="false"
@@ -2013,6 +2013,13 @@
   .editor-hl::-webkit-scrollbar {
     display: none;
   }
+  /* Each logical line of the mirror is its own block: under white-space: pre these stack
+     exactly like the newline-joined text did, but a soft-wrapped line (mobile) grows its own
+     box — the hook the per-line number hangs from. min-height keeps empty lines one line tall. */
+  .editor-hl .hl-line {
+    display: block;
+    min-height: 1.55em;
+  }
   .editor-hl .comment {
     color: var(--muted);
   }
@@ -2728,18 +2735,35 @@
     }
 
     /* The editor soft-wraps long lines instead of clipping them off the right edge — the
-       textarea and its highlight mirror share these metrics, so they stay aligned. A wrapped
-       logical line spans several visual lines, which breaks the gutter's 1:1 line↔number
-       mapping — so the line numbers come off here (and the editors reclaim their space). */
+       textarea and its highlight mirror share these metrics, so they stay aligned. */
     .editor {
       white-space: pre-wrap;
       overflow-wrap: break-word;
     }
+    /* A wrapped logical line spans several visual lines, so the desktop gutter's one-number-
+       per-visual-line column can't align. Instead the number moves INTO the mirror: each
+       line's block carries its own number (position: absolute in a padding-left strip), so a
+       wrapped line keeps its single number however tall its box grows. The textarea shifts
+       right by the same width (the base .editor-wrap .editor rule), so both layers wrap at
+       the same width and stay aligned. */
     .editor-gutter {
       display: none;
     }
-    .editor-wrap .editor {
+    .editor-wrap .editor-hl {
       left: 0;
+    }
+    .editor-hl .hl-line {
+      position: relative;
+      padding-left: var(--gutter-w);
+    }
+    .editor-hl .hl-line::before {
+      content: attr(data-ln);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(var(--gutter-w) - 8px);
+      text-align: right;
+      color: var(--muted);
     }
 
     /* Drop the result actions onto their own full-width line (the tab row itself already
