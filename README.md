@@ -2,6 +2,10 @@
 
 A featural, autosegmental phonology engine for diachronic and synchronic use.
 
+The engine is **feature-system agnostic**: the features, their geometry, the segment
+inventory and its signs, the lexicon, and the rules are all user-provided data, not built
+in. Fortis ships no phonology of its own — the example projects are just sample data.
+
 ## What it is
 
 Fortis takes a lexicon and an ordered set of phonological rules and derives,
@@ -144,9 +148,19 @@ byte-identical to a serial run. Small lexica stay in a single process (the pool'
 startup cost is not worth paying below a couple hundred words). Pass `--serial` to
 force one process, or `--workers N` to pin the pool size.
 
+The `--lint` flag runs a static check over the rules instead of deriving: it flags any
+rule position whose feature bundle can never match a segment — a feature required present
+under a geometry node required absent, e.g. `[front, oral: none]` (`front` sits under
+`oral`, so no segment can satisfy both). It has no thresholds and no false positives, and
+exits non-zero when it finds one, so it works as a CI gate:
+
+```
+python -m src.fortis.main --project projects/latin_to_french --lint
+```
+
 ### Web app
 
-**Live: <https://krzysztofrbogusz.github.io/Fortis/>** — no install; it runs entirely in your
+**Live: <https://krbogusz.github.io/Fortis/>** — no install; it runs entirely in your
 browser.
 
 `web/` is a browser front end that runs the same Python engine used by the CLI —

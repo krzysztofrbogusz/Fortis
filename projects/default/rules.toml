@@ -161,3 +161,12 @@ application = "left_to_right"
 words      = ["morpheme boundary"]
 name       = "Morpheme-boundary loss"
 definition = "- -> ∅"
+
+# A deliberately never-firing rule: it is word-scoped to a gloss with no matching word in the
+# lexicon, so it can never apply. The run surfaces it as a warning (the CLI summary and the web
+# app's Diagnostics ▸ Warnings) — the showcase for that check, the way `tastsa` showcases the
+# syllabification fallback. Fix such a warning by correcting the word name or dropping the scope.
+[never_fires]
+words      = ["a gloss no word carries"]
+name       = "Never-firing rule (showcase)"
+definition = "a -> e"

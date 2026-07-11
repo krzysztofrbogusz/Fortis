@@ -107,10 +107,13 @@
     overflow: auto;
     background: var(--bg);
     position: relative;
+    /* Match the 16px horizontal frame every other result view uses (.results padding,
+       .table-timing, and CsvTable's .csv-wrap margin), so the Tree lines up with them. */
+    margin: 0 16px 16px;
   }
   .tree-meta {
     flex: none;
-    padding: 6px 12px;
+    padding: 6px 16px;
     font: var(--fs-body) / 1.4 var(--sans);
     color: var(--muted);
     background: var(--bg);

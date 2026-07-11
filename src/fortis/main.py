@@ -48,6 +48,7 @@ from src.fortis.analysis.diagnosis import (
     render_error_context_csv,
     render_errors_csv,
 )
+from src.fortis.analysis.diagnostics import unsatisfiable_rules
 from src.fortis.analysis.reporting import (
     accuracy_summary_line,
     render_accuracy_csv,
@@ -195,6 +196,15 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "operations). Off by default — only the rules using those mechanisms appear.",
     )
     parser.add_argument(
+        "--lint",
+        dest="lint",
+        action="store_true",
+        help="check the rules for unsatisfiable bundles — a position whose feature bundle can "
+        "never match any segment (a feature required present under a geometry node required "
+        "absent, e.g. [front, oral: none]) — then exit, skipping the derivation. Exits non-zero "
+        "if any are found, so it works as a CI check.",
+    )
+    parser.add_argument(
         "--serial",
         dest="serial",
         action="store_true",
@@ -246,6 +256,11 @@ def main(argv: list[str] | None = None) -> None:
         print(f"error: {error}", file=sys.stderr)
         raise SystemExit(1) from error
     init_done = time.perf_counter()
+
+    # Lint mode: a static check over the rules only (no derivation). Exits non-zero on findings.
+    if args.lint:
+        _run_lint(project, start)
+        return
 
     # Single-word mode: derive just one word and write single_*.csv, skipping the full run.
     if args.single is not None:
@@ -457,6 +472,36 @@ def _find_word(project: Project, word_str: str) -> tuple[str, Word, bool]:
         if ipa == word_str or word.gloss == word_str:
             return ipa, word, True
     return word_str, Word(ipa=word_str), False
+
+
+def _run_lint(project: Project, start: float) -> None:
+    """Report every unsatisfiable rule bundle, then exit non-zero if there were any.
+
+    A static check over the rules alone — no derivation, no inventory matching. Clean output on
+    stderr (matching the run summary); the exit code is the machine-readable signal for CI.
+    """
+    findings = unsatisfiable_rules(project)
+    out = sys.stderr
+    print("", file=out)
+    if not findings:
+        print(f"  {_label('Lint'.ljust(8))}  {_key('0')} unsatisfiable rule positions", file=out)
+        print(f"  {' ' * 8}  {_dim('every rule bundle can match at least one segment')}", file=out)
+        print("", file=out)
+        print(f"  {_key(f'{time.perf_counter() - start:.2f}s')}", file=out)
+        return
+    plural = "" if len(findings) == 1 else "s"
+    print(
+        f"  {_sgr('⚠', '33')}  {_key(str(len(findings)))} unsatisfiable rule position{plural} — "
+        "a bundle that can never match a segment:",
+        file=out,
+    )
+    for finding in findings:
+        head = finding.rule + (f" @{finding.time}" if finding.time is not None else "")
+        print(f"     {_label(head)} · {finding.role}  {_key(finding.label)}", file=out)
+        print(f"        {_dim(finding.reason)}", file=out)
+    print("", file=out)
+    print(f"  {_key(f'{time.perf_counter() - start:.2f}s')}", file=out)
+    raise SystemExit(1)
 
 
 def _run_single(

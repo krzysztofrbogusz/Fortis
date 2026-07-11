@@ -1,5 +1,7 @@
 """Smoke test for the end-to-end pipeline (src/fortis/main.py)."""
 
+import pytest
+
 from src.fortis.application.deriving import derive
 from src.fortis.application.segmentation import string_to_sequence
 from src.fortis.loaders.rules import load_rule
@@ -28,6 +30,26 @@ def test_main_writes_derivation_matrix_csv(tmp_path):
     # The rule×word matrix is written as derivation_matrix.csv, alongside the main report.
     main(["--output", str(tmp_path / "derivations.csv")])
     assert (tmp_path / "derivation_matrix.csv").exists()
+
+
+def test_lint_flag_passes_on_a_clean_project(capsys):
+    # The shipped showcase has no unsatisfiable bundle: --lint exits 0 and writes no reports.
+    main(["--project", "projects/default", "--lint"])
+    assert "0 unsatisfiable" in capsys.readouterr().err
+
+
+def test_lint_flag_fails_on_an_unsatisfiable_bundle(tmp_path, capsys):
+    # A feature required present under a node required absent can never match: --lint exits 1.
+    (tmp_path / "words.toml").write_text('"anpa" = "w"\n')
+    (tmp_path / "rules.toml").write_text(
+        '[impossible]\nwords = ["w"]\n'
+        'definition = "[+nasal] -> [oral: ~1] / _ [+consonantal, front, oral: none]"\n'
+    )
+    with pytest.raises(SystemExit) as exc:
+        main(["--project", str(tmp_path), "--lint"])
+    assert exc.value.code == 1
+    err = capsys.readouterr().err
+    assert "1 unsatisfiable" in err and "impossible" in err
 
 
 def test_main_writes_rule_firings_csv(tmp_path):
