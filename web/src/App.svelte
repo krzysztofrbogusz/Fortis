@@ -388,8 +388,7 @@
 
   function syncScroll() {
     if (hlEl && taEl) {
-      hlEl.scrollTop = taEl.scrollTop;
-      hlEl.scrollLeft = taEl.scrollLeft;
+      hlEl.style.transform = `translate(${-taEl.scrollLeft}px, ${-taEl.scrollTop}px)`;
     }
   }
 
@@ -807,8 +806,9 @@
         <!-- Highlight overlay: the mirror colours comment lines; the textarea on top holds
              the caret and real text (rendered transparent so only the mirror shows). -->
         <div class="editor-wrap">
-          <pre class="editor editor-hl" aria-hidden="true" bind:this={hlEl}>{#each editorLines as l, i}{#if i > 0}{"\n"}{/if}{l.code}<span
-                class="comment">{l.comment}</span>{/each}</pre>
+          <pre class="editor editor-hl" aria-hidden="true"><code
+              class="hl-content" bind:this={hlEl}>{#each editorLines as l, i}{#if i > 0}{"\n"}{/if}{l.code}<span
+                class="comment">{l.comment}</span>{/each}</code></pre>
           <textarea
             class="editor editor-input"
             wrap="off"
@@ -1985,10 +1985,19 @@
   .editor-hl {
     z-index: 0;
     pointer-events: none;
-    scrollbar-width: none; /* the textarea owns the visible scrollbar; the mirror is synced */
+    /* The mirror doesn't scroll: it clips, and .hl-content is translated by the textarea's
+       scroll offsets in syncScroll() — a compositor-cheap transform instead of a repaint-per-
+       frame scroll, which kept scrolling smooth once files got long. The padding moves onto
+       the content so the transform maps 1:1 onto the textarea's scroll position. */
+    overflow: hidden;
+    padding: 0;
   }
-  .editor-hl::-webkit-scrollbar {
-    display: none;
+  .hl-content {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    padding: 12px;
+    will-change: transform;
   }
   .editor-hl .comment {
     color: var(--muted);
