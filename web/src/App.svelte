@@ -378,10 +378,11 @@
     return { code: line, comment: "" };
   }
   const editorLines = $derived(content.split("\n").map(splitComment));
-  // Line numbers for the .toml editor gutter; its width tracks the digit count (in ch, so it
-  // resolves against the same font/size the editor itself uses and the offsets stay aligned).
+  // Line numbers for the .toml editor gutter; its width is exactly the digit count (in ch —
+  // one mono cell per digit, resolved against the editor's own font so offsets stay aligned)
+  // plus fixed breathing room: 4px left of the digits, 8px between digits and divider.
   const lineNumbers = $derived(editorLines.map((_, i) => i + 1).join("\n"));
-  const gutterCh = $derived(String(editorLines.length).length + 2);
+  const gutterW = $derived(`calc(${String(editorLines.length).length}ch + 12px)`);
 
   // Render a confusion cell's examples. Spaces inside each label are made non-breaking so a
   // single example ("acheter: a.ʃa.t̪e/aʃ.t̪e") never wraps mid-way; the "  • " separator's
@@ -813,7 +814,7 @@
         <!-- Highlight overlay: the mirror colours comment lines; the textarea on top holds
              the caret and real text (rendered transparent so only the mirror shows). A
              line-number gutter sits to the left, scroll-synced with the textarea. -->
-        <div class="editor-wrap" style:--gutter-w="{gutterCh}ch">
+        <div class="editor-wrap" style:--gutter-w={gutterW}>
           <pre class="editor-gutter" aria-hidden="true" bind:this={gutterEl}>{lineNumbers}</pre>
           <pre class="editor editor-hl" aria-hidden="true" bind:this={hlEl}>{#each editorLines as l, i}<span class="hl-line" data-ln={i + 1}>{l.code}<span
                 class="comment">{l.comment}</span></span>{/each}</pre>
