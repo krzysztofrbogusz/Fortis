@@ -45,6 +45,7 @@
   let blame = $state(null); // per-word blame, or null when all exact
   let warnings = $state([]); // syllabification-fallback warnings from the last run
   let unfiredRules = $state([]); // word-scoped rules naming a word absent from the lexicon: {rule, word}
+  const diagCount = $derived(warnings.length + unfiredRules.length); // diagnostics-pane alert badge
   let timing = $state(null); // {words, rules, deriveMs, analysisMs} from the last run (accuracy folded into analysis)
   let matrixCsv = $state(""); // derivation_matrix.csv content, for the right-pane Matrix view
   let dependencies = $state(null); // rule feeding-graph layout, for the right-pane Tree view
@@ -151,9 +152,10 @@
   let panelsEl; // the flex row that holds both panes, for the drag's coordinate frame
   let splitPct = $state(clampSplit(Number(localStorage.getItem("splitPct"))));
   $effect(() => localStorage.setItem("splitPct", String(splitPct)));
-  // Mobile only: which stacked panel is collapsed to just its header so the other gets
-  // full height. "" = split, "left" = editor collapsed, "right" = results collapsed.
-  let collapsed = $state("");
+  // The active top-level view mode. On mobile each is a full-screen pane, switched by the mode
+  // bar under the top bar; on desktop the editor + one of {results, diagnostics} show side by
+  // side and only "diagnostics" swaps the right pane. "project" | "diagnostics" | "results".
+  let mode = $state("project");
 
   function clampSplit(pct) {
     return Number.isFinite(pct) && pct > 0 ? Math.min(80, Math.max(20, pct)) : 50;
@@ -320,10 +322,8 @@
       if (!errorContext && resultView === "errorContext") resultView = "derivations"; // none ⇒ leave the tab
       blame = fin?.blame ?? null;
       if (!blame && resultView === "blame") resultView = "derivations"; // all exact ⇒ leave the tab
-      warnings = fin?.warnings ?? [];
+      warnings = fin?.warnings ?? []; // shown in the Diagnostics pane, not a result view
       unfiredRules = fin?.unfiredRules ?? [];
-      if (!warnings.length && !unfiredRules.length && resultView === "warnings")
-        resultView = "derivations"; // none ⇒ leave the tab
       matrixCsv = readFile("reports/derivation_matrix.csv"); // for the Matrix view
       rulesCsv = readFile("reports/rule_firings.csv"); // for the Rules view
       dependencies = fin?.dependencies ?? null; // for the Tree view
@@ -392,6 +392,7 @@
   }
 
   function runProject() {
+    if (mode !== "diagnostics") mode = "results"; // an explicit run brings its output forward (mobile)
     rerun(true); // force a run regardless of size (the Run project button)
   }
 
@@ -564,6 +565,18 @@
         onclick={() => (docsOpen = true)}>Docs</button
       >
     </div>
+    <!-- Desktop only: a single Diagnostics toggle centred in the top bar (the mobile mode bar
+         below the header carries the full Project/Diagnostics/Results switch instead). -->
+    <div class="bar-center">
+      <button
+        class="diag-btn"
+        class:active={mode === "diagnostics"}
+        class:has-alert={diagCount > 0}
+        title="System diagnostics: syllabification fallbacks and never-firing rules"
+        onclick={() => (mode = mode === "diagnostics" ? "results" : "diagnostics")}
+        >{#if diagCount}⚠ {/if}Diagnostics{#if diagCount}{" "}{diagCount}{/if}</button
+      >
+    </div>
     <div class="state">
       {#if initError}
         <span class="err-dot"></span> {status}
@@ -640,14 +653,29 @@
     </div>
   {/if}
 
+  <!-- Mobile only: the top-level mode switch. Each button shows one full-screen pane; on
+       desktop the panes lay out side by side and this bar is hidden (the header's Diagnostics
+       button toggles the diagnostics pane there instead). -->
+  <nav class="mode-bar" aria-label="View">
+    <button class:active={mode === "project"} onclick={() => (mode = "project")}>Project</button>
+    <button
+      class:active={mode === "diagnostics"}
+      class:has-alert={diagCount > 0}
+      onclick={() => (mode = "diagnostics")}
+      >{#if diagCount}⚠ {/if}Diagnostics{#if diagCount}{" "}{diagCount}{/if}</button
+    >
+    <button class:active={mode === "results"} onclick={() => (mode = "results")}>Results</button>
+  </nav>
+
   <main
     class="panels"
     class:disabled={!ready}
+    data-mode={mode}
     bind:this={panelsEl}
     style="--split-left: {splitPct}%"
   >
     <!-- LEFT: inventories -->
-    <section class="panel left" class:is-collapsed={collapsed === "left"}>
+    <section class="panel left">
       <div class="panel-head">
         <div class="project-picker">
           <select
@@ -786,45 +814,14 @@
       onpointerdown={startResize}
       onkeydown={keyResize}
       ondblclick={() => (splitPct = 50)}
-    >
-      <!-- Mobile only (see the max-width: 960px block): collapse one stacked panel so the
-           other fills the screen. ▴ = editor full, ▾ = results full; tap again to restore. -->
-      <button
-        type="button"
-        class="collapse-btn"
-        class:active={collapsed === "right"}
-        title={collapsed === "right" ? "Restore split" : "Editor full height"}
-        aria-label="Give the editor full height"
-        onclick={(e) => (e.stopPropagation(), (collapsed = collapsed === "right" ? "" : "right"))}
-        onpointerdown={(e) => e.stopPropagation()}>▴</button
-      >
-      <button
-        type="button"
-        class="collapse-btn"
-        class:active={collapsed === "left"}
-        title={collapsed === "left" ? "Restore split" : "Results full height"}
-        aria-label="Give the results full height"
-        onclick={(e) => (e.stopPropagation(), (collapsed = collapsed === "left" ? "" : "left"))}
-        onpointerdown={(e) => e.stopPropagation()}>▾</button
-      >
-    </div>
+    ></div>
 
     <!-- RIGHT: results -->
-    <section class="panel right" class:is-collapsed={collapsed === "right"}>
+    <section class="panel right">
       <div class="panel-head results-head">
         <div class="head-row">
           <div class="head-title">
             <h2>Results</h2>
-            {#if warnings.length || unfiredRules.length}
-              {@const warnTotal = warnings.length + unfiredRules.length}
-              <button
-                class="warn-tab"
-                class:active={resultView === "warnings"}
-                onclick={() => (resultView = "warnings")}
-                title="Rules that never fire, and words that fell back to sonority syllabification"
-                >⚠ {warnTotal} warning{warnTotal === 1 ? "" : "s"}</button
-              >
-            {/if}
           </div>
           <div class="actions">
             {#if result?.derivations}
@@ -1312,51 +1309,6 @@
           {@render contextBlock(errorContext)}
         {:else if resultView === "blame" && blame}
           {@render blameBlock(blame)}
-        {:else if resultView === "warnings" && (warnings.length || unfiredRules.length)}
-          {#if unfiredRules.length}
-            <p class="caveat">
-              These rules are word-scoped to a word that isn’t in the lexicon, so they can never
-              fire. Fix the word name, or drop the scope.
-            </p>
-            <table class="report-summary warnings-table">
-              <thead>
-                <tr><th>rule</th><th>scoped to missing word</th></tr>
-              </thead>
-              <tbody>
-                {#each unfiredRules as u}
-                  <tr>
-                    <td class="form">{u.rule}</td>
-                    <td class="tgt">{u.word}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          {/if}
-          {#if warnings.length}
-            <p class="caveat">
-              These words’ onset/coda patterns admitted no legal split for the listed cluster, so
-              syllabification fell back to the sonority Maximal Onset division. Loosen the patterns
-              to cover these clusters, or accept the fallback.
-            </p>
-            <table class="report-summary warnings-table">
-              <thead>
-                <tr
-                  ><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr
-                >
-              </thead>
-              <tbody>
-                {#each warnings as w}
-                  <tr>
-                    <td class="tgt">{w.word}</td>
-                    <td class="gloss-cell">{w.gloss}</td>
-                    <td class="form">{w.form}</td>
-                    <td class="form">{w.clusters.join(", ")}</td>
-                    <td class="form">{w.syllabified}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          {/if}
         {:else if !result}
           {#if !busy}<p class="muted">No results yet.</p>{/if}
         {:else if result.error}
@@ -1406,6 +1358,66 @@
       {/if}
       </div>
     </section>
+
+    <!-- DIAGNOSTICS: statements about the authored system, independent of any run. Step 1 houses
+         the last run's warnings (syllabification fallbacks + never-firing rules); the bundle
+         match-set query and rule lint land here next (step 2). -->
+    <section class="panel diagnostics">
+      <div class="panel-head"><h2>Diagnostics</h2></div>
+      <div class="result-area">
+        <div class="results">
+          {#if unfiredRules.length}
+            <p class="caveat">
+              These rules are word-scoped to a word that isn’t in the lexicon, so they can never
+              fire. Fix the word name, or drop the scope.
+            </p>
+            <table class="report-summary warnings-table">
+              <thead>
+                <tr><th>rule</th><th>scoped to missing word</th></tr>
+              </thead>
+              <tbody>
+                {#each unfiredRules as u}
+                  <tr>
+                    <td class="form">{u.rule}</td>
+                    <td class="tgt">{u.word}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {/if}
+          {#if warnings.length}
+            <p class="caveat">
+              These words’ onset/coda patterns admitted no legal split for the listed cluster, so
+              syllabification fell back to the sonority Maximal Onset division. Loosen the patterns
+              to cover these clusters, or accept the fallback.
+            </p>
+            <table class="report-summary warnings-table">
+              <thead>
+                <tr
+                  ><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr
+                >
+              </thead>
+              <tbody>
+                {#each warnings as w}
+                  <tr>
+                    <td class="tgt">{w.word}</td>
+                    <td class="gloss-cell">{w.gloss}</td>
+                    <td class="form">{w.form}</td>
+                    <td class="form">{w.clusters.join(", ")}</td>
+                    <td class="form">{w.syllabified}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {/if}
+          {#if !diagCount}
+            <p class="muted">
+              {result ? "No diagnostics — every rule fires and every word syllabified cleanly." : "No diagnostics yet — run a project."}
+            </p>
+          {/if}
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -1451,6 +1463,7 @@
   }
 
   .bar {
+    position: relative; /* anchors the absolutely-centred .bar-center */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1463,6 +1476,42 @@
     display: flex;
     align-items: center;
     gap: 14px;
+  }
+  /* Desktop only: the Diagnostics toggle, centred in the top bar independent of the flanking
+     brand/status widths. Hidden on mobile, where the .mode-bar carries the switch instead. */
+  .bar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .diag-btn {
+    font-size: var(--fs-body);
+    padding: 4px 14px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .diag-btn:hover {
+    color: var(--text-h);
+    background: var(--accent-bg);
+  }
+  .diag-btn.active {
+    color: var(--text-h);
+    border-color: var(--accent-border);
+    background: var(--accent-bg);
+  }
+  /* Warned state — coloured to draw the eye, like the old inline warning chip. */
+  .diag-btn.has-alert {
+    color: var(--warn-fg);
+    border-color: var(--warn-border);
+    background: var(--warn-bg);
+  }
+  .diag-btn.has-alert:hover {
+    background: var(--warn-bg-hover);
+    border-color: var(--warn-fg);
   }
   .docs-btn {
     font-size: var(--fs-body);
@@ -1543,8 +1592,21 @@
   .left {
     flex: 0 0 var(--split-left, 50%);
   }
-  .right {
+  .right,
+  .diagnostics {
     flex: 1 1 0;
+  }
+  /* Desktop: the editor (.left) is always shown; the right slot holds either results or the
+     diagnostics pane, chosen by the mode. "project" and "results" both mean "not diagnostics". */
+  .panels[data-mode="diagnostics"] .right {
+    display: none;
+  }
+  .panels:not([data-mode="diagnostics"]) .diagnostics {
+    display: none;
+  }
+  /* The mode bar is a mobile-only control; on desktop the header's Diagnostics button stands in. */
+  .mode-bar {
+    display: none;
   }
   /* The editor pane's body is: .panel-head, then .file-selection (the file tabs), then
      .editor-area (the active editor/CSV table, which fills the rest). The results pane's
@@ -1583,11 +1645,6 @@
   .divider:focus-visible {
     outline: none;
   }
-  /* The panel-collapse buttons live in the divider but only appear on mobile (see the
-     max-width: 960px block); on desktop the divider is a resize handle only. */
-  .collapse-btn {
-    display: none;
-  }
 
   .panel-head {
     display: flex;
@@ -1614,24 +1671,6 @@
     gap: 10px;
     flex: none; /* keep the "Results" label + warning badge at content width — don't let
                    space-between squeeze it so the badge overflows into the wrapping tabs */
-  }
-  .warn-tab {
-    font-size: var(--fs-body);
-    padding: 2px 9px;
-    border: 1px solid var(--warn-border);
-    border-radius: 999px;
-    background: var(--warn-bg);
-    color: var(--warn-fg);
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .warn-tab:hover:not(:disabled) {
-    background: var(--warn-bg-hover);
-    border-color: var(--warn-fg);
-  }
-  .warn-tab.active {
-    border-color: var(--warn-fg);
-    font-weight: 600;
   }
   .panel-head h2 {
     margin: 0;
@@ -2272,63 +2311,57 @@
     .panels {
       flex-direction: column;
     }
-    /* Stacked: the horizontal split no longer applies. Give the editor a little more of
-       the height than the results, since editing is the cramped half on a phone. */
-    .left {
-      flex: 1 1 56%;
+    /* Moded, not stacked: exactly one pane shows full-screen, chosen by the .mode-bar. The
+       shown pane fills the column; the divider (a desktop resize handle) is not needed. */
+    .left,
+    .right,
+    .diagnostics {
+      display: none;
+      flex: 1 1 auto;
     }
-    .right {
-      flex: 1 1 44%;
+    .panels[data-mode="project"] .left,
+    .panels[data-mode="results"] .right,
+    .panels[data-mode="diagnostics"] .diagnostics {
+      display: flex;
     }
-    /* Collapse a stacked panel to just its header so the other fills the screen. The
-       remaining panel keeps flex-grow, so it expands into the freed space automatically. */
-    .panel.is-collapsed {
-      flex: 0 0 auto;
-    }
-    /* :global so this also hides child-component roots that don't carry App's scope class
-       (CsvTable's .csv-wrap, DependencyTree's .tree-outer) — otherwise a collapsed pane
-       showing a CSV/Matrix/Tree wouldn't actually collapse. */
-    .panel.is-collapsed > :global(:not(.panel-head)) {
+    .divider {
       display: none;
     }
-    /* The divider stops being a drag handle and becomes the collapse control bar. */
-    .divider {
-      width: auto;
-      height: auto;
-      flex: none;
-      cursor: default;
-      touch-action: auto;
+    /* The mode bar replaces the header's centred Diagnostics button on mobile. */
+    .bar-center {
+      display: none;
+    }
+    .mode-bar {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 5px 0;
+      gap: 6px;
+      padding: 6px 12px;
       background: var(--panel);
-      border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      flex: none;
     }
-    .divider::before {
-      display: none; /* no resize line on mobile */
-    }
-    .collapse-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 24px;
-      padding: 0;
-      font-size: 13px;
-      line-height: 1;
+    .mode-bar button {
+      flex: 1 1 0;
+      min-width: 0; /* allow equal thirds — without this, wider labels refuse to shrink and overflow */
+      padding: 7px 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--fs-body);
       color: var(--muted);
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 6px;
       cursor: pointer;
     }
-    .collapse-btn.active {
+    .mode-bar button.active {
       color: var(--text-h);
       border-color: var(--accent-border);
-      background: var(--panel);
+      background: var(--accent-bg);
+    }
+    .mode-bar button.has-alert:not(.active) {
+      color: var(--warn-fg);
+      border-color: var(--warn-border);
+      background: var(--warn-bg);
     }
 
     /* Compact single-line header: drop the tagline and the long "modified" note (the
