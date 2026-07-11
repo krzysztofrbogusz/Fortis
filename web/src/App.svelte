@@ -811,6 +811,7 @@
                 class="comment">{l.comment}</span>{/each}</pre>
           <textarea
             class="editor editor-input"
+            wrap="off"
             spellcheck="false"
             disabled={!ready}
             bind:value={content}
@@ -822,6 +823,7 @@
       {:else}
         <textarea
           class="editor"
+          wrap="off"
           spellcheck="false"
           disabled={!ready}
           bind:value={content}
@@ -2700,13 +2702,6 @@
        edit area) to the space above it (the header's 8px bottom padding). */
     .editor-area {
       margin-top: 8px;
-    }
-
-    /* The editor soft-wraps long lines instead of clipping them off the right edge — the
-       textarea and its highlight mirror share these metrics, so they stay aligned. */
-    .editor {
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
     }
 
     /* Drop the result actions onto their own full-width line (the tab row itself already
