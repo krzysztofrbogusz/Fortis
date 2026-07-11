@@ -62,6 +62,7 @@ from src.fortis.analysis.diagnosis import confusions, diagnose_stages, render_er
 from src.fortis.analysis.blame import blame_all, render_blame_csv
 from src.fortis.analysis.reporting import render_accuracy_csv, render_distance_to_target_csv
 from src.fortis.analysis.warnings import syllabification_warnings, render_warnings
+from src.fortis.analysis.diagnostics import match_set
 from src.fortis.main import _build_derivations_csv, _build_matrix_csv, _build_rule_firings_csv
 from src.fortis.analysis.dependencies import build_dependency_graph, dependency_layout, render_dependency_html
 from src.fortis.models.inventories import Word
@@ -364,6 +365,18 @@ def run_single(word_str):
                        "derivations": [card], "accuracy": accuracy, "errors": errors,
                        "errorContext": error_context, "blame": blame})
 
+def query_classes(bundle_str):
+    # Diagnostics: which inventory segments a feature bundle matches, read fresh from the overlay
+    # so the answer reflects the current (unsaved) feature system. Errors surface verbatim.
+    res = load_project(Path(OVERLAY))
+    if res.is_err():
+        err = res.unwrap_err()
+        return json.dumps({"error": "\\n".join(err) if isinstance(err, list) else str(err)})
+    r = match_set(bundle_str or "", res.unwrap())
+    if r.is_err(): return json.dumps({"error": r.unwrap_err()})
+    ms = r.unwrap()
+    return json.dumps({"matched": ms.matched, "total": ms.total})
+
 def run_derivations():
     prep = json.loads(prepare_run())
     if "error" in prep: return json.dumps(prep)
@@ -522,6 +535,21 @@ export function runSingle(word) {
   const fn = py.globals.get("run_single");
   try {
     return JSON.parse(fn(word));
+  } finally {
+    fn.destroy();
+  }
+}
+
+/**
+ * Diagnostics: the inventory segments a feature bundle matches (the engine's own denotation),
+ * read from the current overlay so it reflects unsaved feature-system edits.
+ * @param {string} bundle a feature bundle, e.g. "+front, +sonorant, -syllabic"
+ * @returns {{matched: string[], total: number}|{error: string}}
+ */
+export function queryClasses(bundle) {
+  const fn = py.globals.get("query_classes");
+  try {
+    return JSON.parse(fn(bundle));
   } finally {
     fn.destroy();
   }

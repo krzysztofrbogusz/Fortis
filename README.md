@@ -158,7 +158,11 @@ toggle (the rule bodies) and — for a word touched by a rule that spreads, dock
 delinks — a **Graph** toggle that draws the same autosegmental diagram as
 `--autosegmental` inline. Result tabs (**Rules**, **Tree**, **Matrix**, **Accuracy**,
 **Errors**, **Context**, **Blame**) score and analyse the run against the lexicon's
-attested forms when it has them. The layout is responsive down to a phone. See
+attested forms when it has them. A **Diagnostics** pane sits alongside results: its
+**Classes** query matches a feature bundle with the engine's own matcher against the
+current inventory — so you can see the real reach of a class (e.g. that `[+front]`
+also picks out every coronal) — and **Warnings** collects syllabification fallbacks
+and never-firing rules. The layout is responsive down to a phone. See
 [`web/README.md`](web/README.md) for the full picture, including the type scale and
 theming. To run it locally:
 

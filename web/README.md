@@ -39,6 +39,19 @@ reflected on the next build — the glue only calls stable public functions
   it to the switcher; **Save** downloads the active file. `letters.csv` has a table
   view. The generated reports are in the right pane, not here.
 
+The layout has three modes, switched by the bar under the top bar (on a phone) or,
+on desktop, by the **Diagnostics** button centred in the top bar — the editor and one
+of {results, diagnostics} then show side by side:
+
+- **Project** — the left panel (inventories/rules editor).
+- **Diagnostics** — statements about the authored system, independent of any run.
+  **Classes** answers "which segments does this feature bundle pick out?" by matching
+  it with the engine's own matcher against the current (even unsaved) inventory — so
+  the surprise that `[+front]` also catches every coronal is visible, not latent.
+  **Warnings** lists syllabification fallbacks and never-firing rules from the last run.
+  The button carries a ⚠ badge when either warning is present.
+- **Results** — the right panel described next.
+
 - **Right panel** shows the results, with a view switcher: **Derivations** (the
   firing-rule trace, each word a card with per-card **Definition** and **Graph** toggles),
   **Rules** (`rule_firings.csv` — one row per rule with its fire count), **Tree** (the

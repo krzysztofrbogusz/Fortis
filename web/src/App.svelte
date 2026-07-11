@@ -13,6 +13,7 @@
     finalizeRun,
     analysisStep,
     runSingle,
+    queryClasses,
     listExampleProjects,
     loadExampleProject,
   } from "./lib/engine.js";
@@ -68,6 +69,8 @@
   let singleBusy = $state(false); // a single-word derivation is in flight
   let singleDefs = $state(false); // whether the single derivation card shows its rule definitions
   let singleAuto = $state(false); // whether the single derivation card shows its autosegmental diagrams
+  let classInput = $state(""); // the Diagnostics class-query bundle text
+  let classResult = $state(null); // last class query: {matched, total} | {error} | null
 
   let fileInput; // single-file <input>
   let projectInput; // multi-file (folder) <input>
@@ -410,6 +413,17 @@
       single = { error: [e?.message ?? String(e)] };
     } finally {
       singleBusy = false;
+    }
+  }
+
+  // Diagnostics class query: which inventory segments a feature bundle matches. Reads the live
+  // overlay, so it reflects unsaved feature-system edits — the edit→diagnose loop.
+  function runClassQuery() {
+    if (!ready) return;
+    try {
+      classResult = queryClasses(classInput);
+    } catch (e) {
+      classResult = { error: e?.message ?? String(e) };
     }
   }
 
@@ -1359,62 +1373,101 @@
       </div>
     </section>
 
-    <!-- DIAGNOSTICS: statements about the authored system, independent of any run. Step 1 houses
-         the last run's warnings (syllabification fallbacks + never-firing rules); the bundle
-         match-set query and rule lint land here next (step 2). -->
+    <!-- DIAGNOSTICS: statements about the authored system, independent of any run — the bundle
+         match-set query (Classes) plus the last run's warnings (syllabification fallbacks +
+         never-firing rules). Rule lint lands here next. -->
     <section class="panel diagnostics">
       <div class="panel-head"><h2>Diagnostics</h2></div>
       <div class="result-area">
         <div class="results">
-          {#if unfiredRules.length}
+          <!-- Classes: type a feature bundle, see which segments the engine matches — the real
+               reach of a class, read live from the (possibly unsaved) inventory. -->
+          <section class="diag-classes">
+            <h3>Classes</h3>
             <p class="caveat">
-              These rules are word-scoped to a word that isn’t in the lexicon, so they can never
-              fire. Fix the word name, or drop the scope.
+              Which segments does a feature bundle pick out? Enter one to see the engine’s own
+              match against this project’s inventory.
             </p>
-            <table class="report-summary warnings-table">
-              <thead>
-                <tr><th>rule</th><th>scoped to missing word</th></tr>
-              </thead>
-              <tbody>
-                {#each unfiredRules as u}
-                  <tr>
-                    <td class="form">{u.rule}</td>
-                    <td class="tgt">{u.word}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          {/if}
-          {#if warnings.length}
-            <p class="caveat">
-              These words’ onset/coda patterns admitted no legal split for the listed cluster, so
-              syllabification fell back to the sonority Maximal Onset division. Loosen the patterns
-              to cover these clusters, or accept the fallback.
-            </p>
-            <table class="report-summary warnings-table">
-              <thead>
-                <tr
-                  ><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr
-                >
-              </thead>
-              <tbody>
-                {#each warnings as w}
-                  <tr>
-                    <td class="tgt">{w.word}</td>
-                    <td class="gloss-cell">{w.gloss}</td>
-                    <td class="form">{w.form}</td>
-                    <td class="form">{w.clusters.join(", ")}</td>
-                    <td class="form">{w.syllabified}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          {/if}
-          {#if !diagCount}
-            <p class="muted">
-              {result ? "No diagnostics — every rule fires and every word syllabified cleanly." : "No diagnostics yet — run a project."}
-            </p>
-          {/if}
+            <form class="class-query" onsubmit={(e) => (e.preventDefault(), runClassQuery())}>
+              <input
+                class="class-input ipa"
+                spellcheck="false"
+                placeholder="+front, +sonorant, -syllabic"
+                disabled={!ready}
+                bind:value={classInput}
+              />
+              <button type="submit" disabled={!ready}>Match</button>
+            </form>
+            {#if classResult?.error}
+              <p class="class-error">{classResult.error}</p>
+            {:else if classResult}
+              <p class="class-count muted">
+                {classResult.matched.length} of {classResult.total} segments
+              </p>
+              {#if classResult.matched.length}
+                <div class="class-matches">
+                  {#each classResult.matched as sym}
+                    <span class="seg ipa">{sym}</span>
+                  {/each}
+                </div>
+              {/if}
+            {/if}
+          </section>
+
+          <section class="diag-warnings">
+            <h3>Warnings</h3>
+            {#if !diagCount}
+              <p class="muted">
+                {result
+                  ? "Every rule fires and every word syllabified cleanly."
+                  : "Run a project to check for syllabification fallbacks and never-firing rules."}
+              </p>
+            {/if}
+            {#if unfiredRules.length}
+              <p class="caveat">
+                These rules are word-scoped to a word that isn’t in the lexicon, so they can never
+                fire. Fix the word name, or drop the scope.
+              </p>
+              <table class="report-summary warnings-table">
+                <thead>
+                  <tr><th>rule</th><th>scoped to missing word</th></tr>
+                </thead>
+                <tbody>
+                  {#each unfiredRules as u}
+                    <tr>
+                      <td class="form">{u.rule}</td>
+                      <td class="tgt">{u.word}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            {/if}
+            {#if warnings.length}
+              <p class="caveat">
+                These words’ onset/coda patterns admitted no legal split for the listed cluster, so
+                syllabification fell back to the sonority Maximal Onset division. Loosen the patterns
+                to cover these clusters, or accept the fallback.
+              </p>
+              <table class="report-summary warnings-table">
+                <thead>
+                  <tr
+                    ><th>word</th><th>gloss</th><th>form</th><th>cluster</th><th>syllabified as</th></tr
+                  >
+                </thead>
+                <tbody>
+                  {#each warnings as w}
+                    <tr>
+                      <td class="tgt">{w.word}</td>
+                      <td class="gloss-cell">{w.gloss}</td>
+                      <td class="form">{w.form}</td>
+                      <td class="form">{w.clusters.join(", ")}</td>
+                      <td class="form">{w.syllabified}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            {/if}
+          </section>
         </div>
       </div>
     </section>
@@ -2057,6 +2110,66 @@
     border-left: 3px solid var(--border);
     padding: 6px 12px;
     margin: 0 0 16px;
+  }
+
+  /* Diagnostics pane: the Classes match-set query and the Warnings section beneath it. */
+  .diag-classes,
+  .diag-warnings {
+    margin-bottom: 24px;
+  }
+  .diag-classes h3,
+  .diag-warnings h3 {
+    margin: 0 0 8px;
+    font-size: var(--fs-header);
+    font-weight: 600;
+    color: var(--text-h);
+  }
+  .class-query {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .class-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 7px 10px;
+    font-size: var(--fs-body);
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .class-input:focus {
+    outline: none;
+    border-color: var(--accent-border);
+  }
+  .class-query button {
+    flex: 0 0 auto;
+    padding: 7px 16px;
+  }
+  .class-error {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: var(--fs-body);
+    color: var(--error);
+    border-left: 3px solid var(--error);
+    background: var(--error-bg);
+  }
+  .class-count {
+    margin: 0 0 8px;
+    font-size: var(--fs-body);
+  }
+  .class-matches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .class-matches .seg {
+    padding: 3px 9px;
+    font-size: var(--fs-body);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
   }
 
   .report-detail {
