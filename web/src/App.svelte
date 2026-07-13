@@ -1976,7 +1976,7 @@
     /* Mono, not the IPA serif: these are config files. Noto Sans Mono (bundled, first in
        the stack) still covers the IPA glyphs in words/letters entries. */
     font-family: var(--mono);
-    font-size: var(--fs-content);
+    font-size: var(--fs-body);
     line-height: 1.55;
     resize: none;
     tab-size: 4;
