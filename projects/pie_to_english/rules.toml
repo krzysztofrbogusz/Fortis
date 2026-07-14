@@ -1281,6 +1281,24 @@ definition = "[+syll, length: short, aperture: mid, +back, +rounded] → [advanc
 # It must run BEFORE i-mutation (t=420): the front vowels i-mutation creates do NOT trigger
 # palatalisation, which is exactly why OE cynd keeps its /k/ — its /y/ is younger than the
 # change. Ordered after i-mutation instead, the rule turns cynd into **t͡ʃynd and loses ground.
+[oe_parasite_vowel]
+time = 450
+name = "Parasite vowel: an epenthetic *e breaks a final consonant + liquid"
+description = """Minkova §4.4 (svarabhakti). Once apocope has stripped the ending, a word can be
+left with a consonant + liquid in the coda, and Old English will not have it — an *e is inserted:
+
+    *wedrą  > *wedr  > OE weder        *bebruz  > *befr > OE befer
+    *fingraz > *fingr > OE finger      *akraz   > *æcr  > OE æcer
+
+Dated 450, after the apocope that creates the cluster in the first place."""
+# Before *l the preceding segment must be an OBSTRUENT. Written `[-syll]` it also matches the
+# first half of a GEMINATE — *fullaz > *full and *stallaz > *stall are l+l, and the rule split them
+# into **fulel and **stalel. A geminate is one long consonant, not a cluster that needs breaking.
+definition = [
+    "∅ → e / [-syll] _ r #",
+    "∅ → e / [-son] _ l #",
+]
+
 [oe_palatalisation]
 time = 410
 name = "Velars palatalise before a front vowel; sk becomes ʃ"
