@@ -948,7 +948,10 @@ syllable lowers and shortens, and *ē lands on *o.
 
 Dated 404, before the fronting and apocope machinery: the *o it makes is a BACK vowel, and it has
 to be there in time for `oe_a_restoration` (407) to see it."""
-definition = "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [aperture: mid, +back, front: none, length: short, advancement: rtr]"
+# The OE *o is ROUNDED (labial + rounded, advancement: atr). Say only "back and mid" and the
+# merge lands on *ʌ instead, which is a real letter and renders perfectly happily — brōþor came
+# out **brōþʌr.
+definition = "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [aperture: mid, +back, front: none, length: short, +rounded, +labial, advancement: atr]"
 
 [oe_unstressed_ae_to_e]
 time = 410
