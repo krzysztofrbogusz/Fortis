@@ -1685,13 +1685,17 @@ definition = "oː → ə ʊ"
 
 [me_h_cluster_loss]
 time = 1250
-name = "Initial /h/ is lost before a sonorant"
-description = """OE hwīt, hlūd, hnutu, hring lose their *h in Middle English: white, loud, nut,
-ring. The cluster *hC- is not tolerated, and the *h simply goes.
+name = "Initial /h/ is lost before a liquid or nasal"
+description = """OE hlūd, hnutu, hring, hlāf lose their *h in Middle English: loud, nut, ring, loaf.
+The cluster *hC- is not tolerated, and the *h simply goes.
+
+NOT BEFORE *w. Middle English still has hw- — hwal, hwīt, hwete are written and said with it, and
+the reduction to /w/ is a later and still incomplete change. An unrestricted rule gave **wal for
+the attested ME hwal.
 
 t = 1250, BEFORE `me_x_to_h` (1300). That rule turns the initial *x into an *h, and at the same
 date it wins on file order and leaves this one nothing to match."""
-definition = "x → ∅ / # _ [+son, -syll]"
+definition = "x → ∅ / # _ [+son, -syll, +cons]"
 
 [me_degemination]
 time = 1250
@@ -1736,8 +1740,13 @@ name = "The dental fricative voices between vowels"
 description = """other /ˈʌðə/, brother /ˈbɹʌðə/, weather /ˈwɛðə/ — the Old English /θ/ is voiced here.
 
 t = 1200, before the Middle English checkpoint: ME already HAS the voiced fricative (other is
-/ˈuðər/ there), so dating it in the modern block misses the column that records it."""
-definition = "θ → ð / [+syll] _ [+syll]"
+/ˈuðər/ there), so dating it in the modern block misses the column that records it.
+
+Written on *θ̠/*ð̠, NOT *θ/*ð. The engine's fricative is NON-DENTAL until eme_dentalisation moves
+it at 1900 (it inherits PIE *t's alveolar coding), so a rule spelled with the dental letters names
+a segment that does not exist yet and never fired at all — brother, other, weather, mother all
+kept a voiceless fricative through Middle English and into RP."""
+definition = "θ̠ → ð̠ / [+syll] _ [+syll]"
 
 
 # ─── Middle English ───────────────────────────────────────────────────────────────────────────
@@ -1788,7 +1797,13 @@ Three conditions, and the gold forces every one of them:
   ONE CONSONANT AFTER — *oxa is ox-a and its *o is closed. Our syllabifier, working on sonority
               alone, makes an onset of the *ks and leaves the *o open, so the rule fires and gives
               **ōx. Requiring a single consonant after the boundary reproduces the real
-              syllabification without needing an onset table."""
+              syllabification without needing an onset table.
+
+NOT restricted to an open SECOND syllable, though the misses invite it. ME fader, weder, ater, oter
+stay short while nama, talu, scaru lengthen, and the difference looks like the *r that closes the
+second syllable of the first set — but requiring the word to end after the second vowel then blocks
+hæfen, bebr, æcer, which DO lengthen (ME haven, beaver, acre). The fader/water class is a genuine
+Middle English exception, not a conditioning this rule is missing."""
 definition = "[+syll, length: short, stress: primary, aperture: !high] → [length: long] / _ $ [-syll] [+syll]"
 
 [eme_trap_vowel]
@@ -1913,3 +1928,34 @@ word-finally, and `oe_high_vowel_deletion` (460) then deletes it as the short *-
 the same heavy-syllable condition as every other final high vowel. Stated as one rule it would say
 the weight condition twice."""
 definition = "[+syll, length: long, aperture: high] → [length: short] / _ #"
+
+
+[me_a_before_nasal_rounds]
+time = 1140
+name = "A short *a rounds before a nasal"
+description = """OE lang, gang, hand > ME long, gong, hond. The nasal must CLOSE the syllable —
+ME nama, bana keep their *a (name, bane) because theirs is an onset, and an unrestricted rule gave
+**nome, **bone. Dated before the æ/ɑ merger (1150), which would otherwise front the vowel out from
+under it."""
+definition = "[+syll, length: short, aperture: low, +back] → [aperture: mid, +rounded, +labial, advancement: rtr] / _ [+nas] [-syll]"
+
+[me_gg_affrication]
+time = 1000
+name = "The geminate palatal *ġġ affricates to /d͡ʒ/"
+description = """OE heċġ, seċġ, bryċġ are /jj/ in the engine's transcription — the West Germanic
+gemination of a palatalised *g. Middle English has the affricate: hegge, segge, brigge."""
+definition = "j j → d͡ʒ"
+
+[me_lh_to_lk]
+time = 1000
+name = "The fricative in *lh hardens to /k/"
+description = "OE eolh, seolh > ME elk, selk — the velar fricative becomes a stop after *l."
+definition = "x → k / l _"
+
+[me_w_rounding]
+time = 1150
+name = "A vowel rounds to /u/ between *w and *r"
+description = """OE word, wyrm, worold > ME wurd, wurm, wurld — the *w rounds the vowel after it and
+the *r keeps it back. The vowel is already ROUNDED (OE o and y): ME werk, wer, kwern keep their
+unrounded *e in the same environment, and a rule written for any short vowel gave **wurk, **wur."""
+definition = "[+syll, length: short, +rounded] → u / w _ r"
