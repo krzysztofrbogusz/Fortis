@@ -303,7 +303,30 @@ every mention of analogy in its 716 rules is in a *comment*, never a rule. Where
 analogy, DiaSim goes looking for the regular conditioning instead, and eats the miss when it
 cannot find one. Modelling the levelling would be a different project from modelling sound change.
 
-#### What the weak presents did expose: Sievers' Law is missing
+#### SIEVERS' LAW — found by the weak presents, fixed by the 1sg
+
+The weak verbs showed the cascade had no Sievers' Law, and the **1sg** stated it as a minimal pair
+sharp enough to implement. The cascade had it exactly **inverted** — it was faithfully passing
+through whichever suffix PIE happened to write, where Germanic redistributes the two by the weight
+of the preceding syllable:
+
+| | derived | attested |
+|---|---|---|
+| `*sodéyoh₂` → light stem `*sat-` | `*sat**ij**ō` | `*sat**j**ō` |
+| `*séh₂gyoh₂` → heavy stem `*sōk-` | `*sōk**j**ō` | `*sōk**ij**ō` |
+
+**Heavy** is a long vowel plus a consonant (`*sōk-`), or any vowel plus **two** (`*wurk-`,
+`*hauz-`); **light** is a short vowel plus exactly one (`*sat-`, `*lag-`, `*straw-`). The diphthong
+stems need no special case: `*hauz-` is `*a` + `*w` + `*z` — two consonants before the `*j`, so
+heavy — while `*straw-` is `*a` + `*w`, one consonant, so light. Exactly as attested.
+
+`sievers_law` (t = −900) is dated after `unstressed_e_to_i`, which is what makes the `*i` of the
+`*-éye-` suffix in the first place; Sievers then takes it away again where the stem is light.
+
+**+13 exact at 200, zero regressions at any checkpoint.** The 1sg verbs went 23/37 → **34/37
+(92%)**. Two nouns came along for free.
+
+#### (superseded) What the weak presents first exposed
 
 Before they were switched off, the weak verbs showed a second and genuinely **phonological** gap,
 independent of the analogy — the length of the suffix vowel is inverted:

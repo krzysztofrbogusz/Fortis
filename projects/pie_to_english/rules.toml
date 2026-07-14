@@ -319,6 +319,33 @@ definition = [
     "[+syll, aperture: mid, +fr, length: short, stress: none]j → iː // _ r"
 ]
 
+[sievers_law]
+time = -900
+name = "Sievers' law: the *j suffix is *-ij- after a heavy syllable, *-j- after a light one"
+description = """The weight of the preceding syllable decides whether the suffixal *j is preceded
+by an *i, and Germanic redistributes the two REGARDLESS of which the PIE suffix had.
+
+The 1sg of the weak verbs states it as a minimal pair, and the cascade had it exactly INVERTED —
+it was faithfully passing through whichever suffix PIE happened to write:
+
+    *sodéyoh₂  (light stem *sat-)  ->  we derived *satijō   attested *satjō
+    *séh₂gyoh₂ (heavy stem *sōk-)  ->  we derived *sōkjō    attested *sōkijō
+
+HEAVY is a long vowel plus a consonant (*sōk-), or any vowel plus TWO (*wurk-, *hauz-); LIGHT is a
+short vowel plus exactly one (*sat-, *lag-, *straw-). Note the diphthong stems fall out of that
+without a special case: *hauz- is *a + *w + *z, two consonants before the *j, and so heavy — while
+*straw- is *a + *w, one consonant, and so light, exactly as attested.
+
+Dated after `unstressed_e_to_i`, which is what makes the *i of the *-éye- suffix in the first
+place; Sievers then takes it away again where the stem is light."""
+definition = [
+    # HEAVY, and so an *i appears: a long vowel + one consonant, or any vowel + two.
+    "∅ → i / [+syll, length: !short] [-syll] _ j",
+    "∅ → i / [+syll] [-syll] [-syll] _ j",
+    # LIGHT, and so the *i goes: a short vowel + exactly one consonant.
+    "i → ∅ / [+syll, length: short] [-syll] _ j",
+]
+
 [unstressed_ji_to_i]
 time = -1000
 name = "Unstressed */ji/ > */i/"
