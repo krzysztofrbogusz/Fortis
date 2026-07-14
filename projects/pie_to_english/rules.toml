@@ -466,9 +466,21 @@ definition = "gʷ → w"
 # hardening below turn the plain *ɣ into the *g the attested form shows.
 [gwh_to_w]
 time = 0
-name = "*/ɣʷ/ > */w/, but */g/ after a nasal"
-description = "*snojgʷʱos > *snɑjwɑz 'snow'; *lengʷʱros > *luŋgrɑz 'lungs'"
+name = "*/ɣʷ/ > */b/ word-initially, */g/ after a nasal, */w/ elsewhere"
+description = """*snojgʷʱos > *snɑjwɑz 'snow'; *lengʷʱros > *luŋgrɑz 'lungs'.
+
+Ringe §5.3.3: "In word-initial position PIE *gʷʰ became PGmc *b, except when it had already been
+delabialized by a following *u", and his examples are exactly ours — *gʷʰédʰyeti > *bidiþi,
+*gʷʰen-/*gʷʰon- > *banô, *banjō. The path is *gʷʰ > *ɣʷ (Grimm) > *b, so the clause has to come
+before the *ɣʷ > *w that follows it.
+
+Wiktionary's *gʷʰórmos > *warmaz looks like a counterexample and is not one: Ringe REJECTS that
+etymology outright, in the footnote to this very passage — "I connect PGmc *warmaz 'warm' with
+Hitt. warnuzzi, not with Av. garəmō". So *warmaz is a bad etymon in the source, not a bad rule
+here, and the source hierarchy (Ringe > Wiktionary) says the rule wins. Its miss is a preform
+problem and is recorded as one."""
 definition = [
+    "ɣʷ → b / # _",
     "ɣʷ → ɣ / [+cons, nasal: 1] _",
     "ɣʷ → w",
 ]

@@ -265,6 +265,14 @@ PREFORM_FIXES = {
     "skarō": "skoréh₂",     # *skarō — keeps the s-mobile
 
     # ── DELIBERATELY NOT FIXED ──────────────────────────────────────────────────────────────
+    # *warmaz is a BAD ETYMON in the source, and Ringe says so by name. Wiktionary derives it from
+    # *gʷʰórmos, which would make it a counterexample to the word-initial *gʷʰ > *b that `gwh_to_w`
+    # now implements. It is not one: in the footnote to that very passage Ringe writes "I connect
+    # PGmc *warmaz 'warm' with Hitt. warnuzzi, not with Av. garəmō" — i.e. he rejects the
+    # labiovelar etymology outright. The source hierarchy (Ringe > Wiktionary) says the rule wins
+    # and the datum loses. He gives no PIE form to put here in its place, and inventing one is the
+    # thing this table exists not to do, so *warmaz stays a miss ON PURPOSE. Do not "fix" the rule.
+    #
     # *hlūdaz has a long *ū that the cited *ḱlutós cannot give, and a laryngeal-final root
     # (*ḱluh₁tós) would supply it exactly. But every cognate has a SHORT u — Greek klutós,
     # Sanskrit śrutá-, Latin inclutus — and Wiktionary says in as many words that "the origin of
