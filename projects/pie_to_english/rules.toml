@@ -1195,11 +1195,25 @@ description = "æ > æɑ, e > eo — the source of OE's eald, earm, heorte"
 # has to take the replacement path, because a bundle merge across unequal counts is ambiguous and
 # the rule simply never fires. So the left side asks for a front vowel (however it was made) and
 # the right side spells the diphthong out.
+# *e AND *æ ARE NOT BROKEN BY THE SAME CLUSTERS, and writing one clause for both cost real words:
+#
+#   before *r + C, and before *h, BOTH break     — heard, earm, heorte, eolh, feoh
+#   before *l + C, only *æ breaks                — eald, healf, weall
+#   before *l, *e breaks ONLY in *lh and *lc     — eolh, meolc … but OE helm, self, help, delfan
+#                                                  keep a plain *e, and the broad rule gave
+#                                                  **heolm, **seolf.
+#
+# And the *h that breaks is the LABIOVELAR too: *ehwaz is OE eoh, not **eh. Breaking (408) runs
+# long before oe_labiovelar_resolution (480), so the *xʷ is still one segment here and a rule
+# written for plain *x looks straight past it.
 definition = [
     "[+syll, -cons, aperture: low, +front] → æ ɑ / _ [+son, -syll, +cons, nasal: none] [+cons]",
-    "[+syll, -cons, aperture: mid, +front] → e o / _ [+son, -syll, +cons, nasal: none] [+cons]",
+    "[+syll, -cons, aperture: mid, +front] → e o / _ [+trill] [+cons]",
+    "[+syll, -cons, aperture: mid, +front] → e o / _ [+lat] [-son, +back]",
     "[+syll, -cons, aperture: low, +front] → æ ɑ / _ x",
     "[+syll, -cons, aperture: mid, +front] → e o / _ x",
+    "[+syll, -cons, aperture: low, +front] → æ ɑ / _ xʷ",
+    "[+syll, -cons, aperture: mid, +front] → e o / _ xʷ",
 ]
 
 # The Proto-Germanic long mid vowels raise on the way to Old English: ō [ɔː] > [oː] (*dōmaz >
@@ -1413,7 +1427,7 @@ first would take the trigger away — *badją needs its *a fronted to *e before 
 definition = "1=[+cons, -syll, trill: none] j → @1 @1 / [+syll, length: short] _"
 
 [oe_parasite_vowel]
-time = 450
+time = 466
 name = "Parasite vowel: an epenthetic *e breaks a final consonant + liquid"
 description = """Minkova §4.4 (svarabhakti). Once apocope has stripped the ending, a word can be
 left with a consonant + liquid in the coda, and Old English will not have it — an *e is inserted:
@@ -1421,22 +1435,26 @@ left with a consonant + liquid in the coda, and Old English will not have it —
     *wedrą  > *wedr  > OE weder        *bebruz  > *befr > OE befer
     *fingraz > *fingr > OE finger      *akraz   > *æcr  > OE æcer
 
-Dated 450, after the apocope that creates the cluster in the first place."""
+Dated 466, after EVERY rule that can strip a final vowel — not just `wg_final_apocope` (450) but
+`oe_high_vowel_deletion` (460) as well. At 450 the u-stems still HAVE their ending: *bebruz is
+*befru, its *fr is not yet final, and the rule cannot see it. The a-stems were already bare, so
+*wibraz > wifer worked and hid the bug; *bebruz, *swegrō came out **befr, **swejr."""
 # THE VOWEL HARMONISES with the one before it, and the gold is unanimous about which is which:
 #
 #     back  -> *o :  *sundr > sundor,  *ātr > ātor,  *hleoþr > hlēoþor,  *āfr > āfor
 #     front -> *e :  *wedr  > weder,   *æcr > æcer,  *hafr   > hafer,    *bebr > befer
 #
 # So the back clause has to come first; with only an *e the eight back-vowel words all come out
-# with a spurious front vowel.
+# with a spurious front vowel. It looks back to the NEAREST vowel across however many consonants
+# stand between: *sundr is u-n-d-r, and a single-consonant environment cannot reach its *u.
 #
 # Before *l the preceding segment must be an OBSTRUENT. Written `[-syll]` it also matches the
 # first half of a GEMINATE — *fullaz > *full and *stallaz > *stall are l+l, and the rule split them
 # into **fulel and **stalel. A geminate is one long consonant, not a cluster that needs breaking.
 definition = [
-    "∅ → o / [+syll, +back] [-syll] _ r #",
+    "∅ → o / [+syll, +back] [-syll]* [-syll] _ r #",
     "∅ → e / [-syll] _ r #",
-    "∅ → o / [+syll, +back] [-son] _ l #",
+    "∅ → o / [+syll, +back] [-syll]* [-son] _ l #",
     "∅ → e / [-son] _ l #",
 ]
 
@@ -1823,3 +1841,26 @@ time = 1350
 name = "Final /mb/ loses its stop"
 description = "OE camb, lamb, climban > ME coom, lomb, climben — the silent b of comb and climb."
 definition = "b → ∅ / m _ #"
+
+
+[oe_back_mutation]
+time = 425
+name = "Back mutation: e diphthongises before a back vowel across a liquid"
+description = """Minkova §3.4 (u-umlaut). A short *e becomes *eo when a BACK vowel stands in the
+next syllable and a single liquid separates them: *heruz > heoru, *gelu > ġeolu, *seofon.
+
+The liquid is the condition — *bebruz keeps its plain *e (OE befer, not **beofor) because the
+consonant between is an *f. Dated 425, after i-mutation (420): the two are in complementary
+environments (a FRONT vowel in the next syllable fronts, a BACK one breaks) and neither can see
+what the other has done."""
+definition = "[+syll, -cons, aperture: mid, +front, length: short] → e o / _ [+son, -syll, +cons, nasal: none] [+syll, +back]"
+
+[oe_final_w_vocalisation]
+time = 468
+name = "A final *w after a consonant becomes *u"
+description = """Once apocope has stripped the ending, *falwaz, *salwaz, *gelwaz are left ending in
+a consonant + *w, and Old English writes the *w as a vowel: fealu, salu, ġeolu, mearu.
+
+Dated 468, beside oe_parasite_vowel (466) — both repair a final cluster the apocope has just
+created, and both need every ending already gone."""
+definition = "w → u / [-syll] _ #"
