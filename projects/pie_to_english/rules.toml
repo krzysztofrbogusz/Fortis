@@ -797,7 +797,19 @@ description = "Minkova §3.4 n.9. Held before a lateral — *fullaz > full, *wul
 # Block on a nasal ANYWHERE in the cluster and horn, corn and thorn go with it; block on none at
 # all and hund, mund, guma and sundor come out **hond, **mond, **goma, **sondor. The first
 # consonant is the one that decides.
-definition = "[+syll, aperture: high, length: short, +back] → [aperture: mid] / _ [-syll, lateral: none, nasal: none] [-syll, lateral: none]* [+syll, aperture: !high]"
+# The LATERAL is the delicate one, and the gold splits it cleanly by what FOLLOWS the *l:
+#
+#     l + dental/velar : *hulþaz > hold, *wulkną > wolcen, *fulką > folc, *muldô > molde   LOWERS
+#     l + l (geminate) : *fullaz > full, *wullō > wull                                     HOLDS
+#     l + LABIAL       : *wulfaz > wulf                                                    HOLDS
+#
+# So a blanket "held before a lateral" (what stood here) costs hold, wolcen, folc and molde, while
+# no lateral condition at all costs full, wull and wulf. Two clauses, and the second says exactly
+# what the data says: an *l lowers unless a lateral or a labial follows it.
+definition = [
+    "[+syll, aperture: high, length: short, +back] → [aperture: mid] / _ [-syll, nasal: none, lateral: none] [-syll]* [+syll, aperture: !high]",
+    "[+syll, aperture: high, length: short, +back] → [aperture: mid] / _ [-syll, +lateral] [-syll, lateral: none, labial: none] [-syll]* [+syll, aperture: !high]",
+]
 
 [wg_final_z_loss]
 time = 400
