@@ -26,6 +26,25 @@ name = "Centumization"
 description = "Merging of PIE 'palatovelar' and 'velar' plosives"
 definition = "[+cons, -sonorant, +back, +front] → [front: none]"
 
+[sr_to_str]
+time = -2000
+name = "Word-initial */sr/ > */str/"
+description = """Ringe §5.2.2 (iii): PIE "*sr-, which became PGmc *str-". A *t is epenthesised
+between the *s and the *r — *srówmos > *straumaz 'stream', *sr̥- > *sturkaz 'stork'.
+
+Dated at -2000 and placed BEFORE `u_epenthesis`, which is the whole trick: *sturkaz comes from
+*sr̥- with a SYLLABIC rhotic, and u_epenthesis turns that *r̥ into *ur at this same time. Run the
+epenthesis first and there is no *sr- left for this rule to see — the form is already *sur-.
+
+Grimm then leaves the new *t alone: it stands after *s, where Grimm's first clause is blocked, and
+the attested *str- has a plain *t."""
+# Two clauses because the rhotic comes in two segments: the consonant *r and the SYLLABIC *r̥,
+# which is a nucleus and a different letter. *sr̥- is exactly the shape of *sturkaz.
+definition = [
+    "∅ → t / # s _ r",
+    "∅ → t / # s _ [+trill, +syll]",
+]
+
 [u_epenthesis]
 time = -2000
 name = "'u' epenthesis"
