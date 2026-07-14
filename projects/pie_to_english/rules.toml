@@ -1071,11 +1071,14 @@ description = "Minkova §6.3 — FOOT-FEET, FULL-FILL, SELL-SALE"
 # of raising by *i, *ī, or *j in the following syllable." Their own example is one of ours —
 # PGmc *stadiz > *stædi > OE stedi > stede — and it is what gives mere, heċġ and here their /e/.
 # The two clauses above only front a BACK vowel; æ is already front, so nothing reached it.
+# The raising is of the SHORT *æ. Ringe & Taylor's fifty-odd examples are all short, and the long
+# ǣ does not take part: OE dǣd, sǣd, hǣs (< *dēdiz, *sēdiz, *haisiz) keep it, and an unrestricted
+# clause raised all three to **dēd, **sēd, **hēs.
 definition = [
     "[+syll, +back] → [+front, back: none] / _ [-syll]* [+syll, aperture: high, +front]",
     "[+syll, +back] → [+front, back: none] / _ [-syll][-syll]* j",
-    "[+syll, aperture: low, +front] → [aperture: mid] / _ [-syll]* [+syll, aperture: high, +front]",
-    "[+syll, aperture: low, +front] → [aperture: mid] / _ [-syll][-syll]* j",
+    "[+syll, aperture: low, +front, length: short] → [aperture: mid] / _ [-syll]* [+syll, aperture: high, +front]",
+    "[+syll, aperture: low, +front, length: short] → [aperture: mid] / _ [-syll][-syll]* j",
 ]
 
 # West Germanic hardens the voiced velar fricative to a stop: *trugaz > trog, *jungaz > jung.
@@ -1879,3 +1882,19 @@ description = """OE yfel, hafen, æcer: the second syllable of *ubilaz, *habanō
 *i; the vowel does it wherever it is unstressed, and *ubilaz > **yfil showed the restriction was
 an accident of the words that first exercised the rule."""
 definition = "[+syll, -cons, aperture: high, +front, length: short, stress: none] → e"
+
+
+[oe_i_mutation_unrounding]
+time = 421
+name = "The i-mutated mid back vowels UNROUND"
+description = """Old English i-mutation fronts *o and *ō and unrounds them — *bōniz > OE bēn,
+*oli > ele — while the HIGH ones front and stay round: *fullijaną > fyllan, *mūsiz > mȳs.
+
+The engine's i-mutation fronts on the lingual node and leaves the labial one alone, which is right
+for *u > *y and wrong for *ō > *ē: it gave **bøːn. Rather than complicate that rule with a
+rounding clause it cannot state on the same node, the two-step is written out — front first,
+unround the mid vowels after."""
+definition = [
+    "øː → eː",
+    "ø → e",
+]
