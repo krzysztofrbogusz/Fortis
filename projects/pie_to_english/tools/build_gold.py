@@ -477,6 +477,12 @@ def normalise(ipa: str, *, reconstructed: bool) -> str:
     s = ipa.split(",")[0].split("/")[1] if ipa.count("/") >= 2 else ipa
     s = s.strip("/[] ")
     s = s.replace("ɡ", "g")            # script g U+0261 → ascii g
+    # A nasal before a velar IS velar. Wiktionary does not mark the allophone — it writes OE
+    # ġeong /junɡ/, finger /fingɛr/, þanc /θank/ — but the engine derives the [ŋ] the spelling
+    # stands for, and the two are the same segment. This is a notational identity of exactly the
+    # kind θ/θ̠ already is, and it applies to EVERY column: it is a fact about the transcription,
+    # not about the form, so it does not touch what the attested columns actually attest.
+    s = re.sub(r"n(?=[gk])", "ŋ", s)
     # The tie bar BELOW (U+035C) binds the OE diphthongs, e͜o — two vowel segments, so it goes.
     # The tie bar ABOVE (U+0361) binds the AFFRICATES, t͡ʃ and d͡ʒ — ONE segment, and the engine's
     # own letter carries it, so it must stay. Stripping both (as this did) split every affricate

@@ -32,8 +32,8 @@ new,1400,ˈniw,adj,,
 new,final,ˈnjuː,adj,,
 long,-2000,ˈdlongʱos,adj,long,496267
 long,200,ˈlɑŋgɑz,adj,,
-long,900,ˈlɑng,adj,,
-long,1400,ˈlɔːng,adj,,
+long,900,ˈlɑŋg,adj,,
+long,1400,ˈlɔːŋg,adj,,
 long,final,ˈlɒŋ,adj,,
 old,-2000,ħelˈtos,adj,old,431911
 old,200,ˈɑldɑz,adj,,
@@ -108,8 +108,8 @@ heart,1400,ˈhɛrt,noun,,
 heart,final,ˈhɑːt,noun,,
 young,-2000,ħjuχn̩ˈkʲos,adj,young,194810
 young,200,ˈjuŋgɑz,adj,,
-young,900,ˈjung,adj,,
-young,1400,ˈjung,adj,,
+young,900,ˈjuŋg,adj,,
+young,1400,ˈjuŋg,adj,,
 young,final,ˈjʌŋ,adj,,
 death,-2000,ˈdʱowtus,noun,death,189000
 death,200,ˈdɑwθ̠uz,noun,,
@@ -299,7 +299,7 @@ loud,final,ˈlaʊ̯d,adj,,
 finger,-2000,penˈkʷros,noun,finger,26967
 finger,200,ˈɸiŋgrɑz,noun,,
 finger,900,ˈfinger,noun,,
-finger,1400,ˈfingər,noun,,
+finger,1400,ˈfiŋgər,noun,,
 finger,final,ˈfɪŋgəː,noun,,
 weather,-2000,ˈwedʱrom,noun,weather,26740
 weather,200,ˈweð̠rɑ̃,noun,,
@@ -954,7 +954,7 @@ werką,1400,ˈwɛrk,noun,,
 anguz,-2000,ˈħengʲʱus,adj,anguz,1
 anguz,200,ˈɑŋguz,adj,,
 anguz,900,ˈɑnge,adj,,
-anguz,1400,ˈang,adj,,
+anguz,1400,ˈaŋg,adj,,
 arbaidiz,-2000,ˈʁʷorbʱos,noun,arbaidiz,1
 arbaidiz,200,ˈɑrβɑjð̠iz,noun,,
 arbaidiz,900,ˈæɑrfoθ̠e,noun,,
@@ -1145,8 +1145,8 @@ stōraz,900,ˈstoːr,adj,,
 stōraz,1400,ˈstɔːr,adj,,
 gangaz,-2000,ˈgʲʱongʱos,noun,gangaz,1
 gangaz,200,ˈɣɑŋgɑz,noun,,
-gangaz,900,ˈgɑng,noun,,
-gangaz,1400,ˈgɔng,noun,,
+gangaz,900,ˈgɑŋg,noun,,
+gangaz,1400,ˈgɔŋg,noun,,
 gulþīnaz,-2000,ˈgʲʱolʁʷtinos,adj,gulþīnaz,1
 gulþīnaz,200,ˈɣulθ̠iːnɑz,adj,,
 gulþīnaz,900,ˈgylden,adj,,
@@ -1158,7 +1158,7 @@ duniz,1400,ˈdin,noun,,
 angô-bend,-2000,ˈħenkoː,noun,angô-bend,1
 angô-bend,200,ˈɑŋgɔːː,noun,,
 angô-bend,900,ˈɑngɑ,noun,,
-angô-bend,1400,ˈang,noun,,
+angô-bend,1400,ˈaŋg,noun,,
 þarbō,-2000,torˈpeħ,noun,þarbō,1
 þarbō,200,ˈθ̠ɑrβɔː,noun,,
 þarbō,900,ˈθ̠æɑrf,noun,,
@@ -1327,7 +1327,7 @@ hersô,900,ˈxærn,noun,,
 hersô,1400,ˈhɛrns,noun,,
 wastijō,-2000,ˈwestis,noun,wastijō,1
 wastijō,200,ˈwɑstijɔː,noun,,
-wastijō,900,ˈwæstling,noun,,
+wastijō,900,ˈwæstliŋg,noun,,
 gesteraz,-2000,ˈdʱgʲʱjesteros,adj,gesteraz,1
 gesteraz,200,ˈɣesterɑz,adj,,
 gesteraz,900,ˈjiystrɑn,adj,,
@@ -1366,7 +1366,7 @@ wadją,200,ˈwɑð̠jɑ̃,noun,,
 wadją,900,ˈwedd,noun,,
 þankaz,-2000,ˈtongos,noun,þankaz,1
 þankaz,200,ˈθ̠ɑŋkɑz,noun,,
-þankaz,900,ˈθ̠ɑnk,noun,,
+þankaz,900,ˈθ̠ɑŋk,noun,,
 kustiz,-2000,ˈgʲustis,noun,kustiz,1
 kustiz,200,ˈkustiz,noun,,
 kustiz,900,ˈkyst,noun,,

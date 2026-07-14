@@ -1315,11 +1315,21 @@ left with a consonant + liquid in the coda, and Old English will not have it —
     *fingraz > *fingr > OE finger      *akraz   > *æcr  > OE æcer
 
 Dated 450, after the apocope that creates the cluster in the first place."""
+# THE VOWEL HARMONISES with the one before it, and the gold is unanimous about which is which:
+#
+#     back  -> *o :  *sundr > sundor,  *ātr > ātor,  *hleoþr > hlēoþor,  *āfr > āfor
+#     front -> *e :  *wedr  > weder,   *æcr > æcer,  *hafr   > hafer,    *bebr > befer
+#
+# So the back clause has to come first; with only an *e the eight back-vowel words all come out
+# with a spurious front vowel.
+#
 # Before *l the preceding segment must be an OBSTRUENT. Written `[-syll]` it also matches the
 # first half of a GEMINATE — *fullaz > *full and *stallaz > *stall are l+l, and the rule split them
 # into **fulel and **stalel. A geminate is one long consonant, not a cluster that needs breaking.
 definition = [
+    "∅ → o / [+syll, +back] [-syll] _ r #",
     "∅ → e / [-syll] _ r #",
+    "∅ → o / [+syll, +back] [-son] _ l #",
     "∅ → e / [-son] _ l #",
 ]
 
