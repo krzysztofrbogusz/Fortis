@@ -35,6 +35,7 @@ from pathlib import Path
 sys.path.insert(0, "src")
 sys.path.insert(0, str(Path(__file__).parent))
 
+import pgmc_ipa  # noqa: E402
 from pie_ipa import (  # noqa: E402
     ACUTE,
     PieError,
@@ -570,7 +571,22 @@ def main() -> None:
             blank("no segmentable modern IPA")
 
         # The 200 column, with any cited correction to the RECONSTRUCTION applied (ATTESTED_FIXES).
-        pgmc = segmentable(ATTESTED_FIXES.get(c["pgmc"], c["pgmc_ipa"]))
+        #
+        # Where no correction applies, the target is TRANSCRIBED FROM THE HEADWORD rather than
+        # taken from Wiktionary's hand-written IPA — because the two disagree, and the headword is
+        # the reconstruction while the IPA is only a rendering of it. Wiktionary writes *harduz
+        # with a STOP [d] and *liudiz with a fricative [ð] though both are the one Proto-Germanic
+        # phoneme in the same environment; it spells `ready`'s vowel with an `a` where every other
+        # entry has `ɑ`; and it gives *wissiz an IPA carrying a `ga-` prefix its own headword does
+        # not have. Transcribing the headword makes the gold internally consistent, and the
+        # transcriber is not guesswork: it agrees with Wiktionary's own IPA on 452 of 469 targets,
+        # and the 17 disagreements are the inconsistencies above. Where the headword will not
+        # transcribe, their IPA still stands.
+        transcribed = pgmc_ipa.transcribe(c["pgmc"]) if c["pgmc"] else None
+        pgmc = segmentable(
+            ATTESTED_FIXES.get(c["pgmc"])
+            or (f"/{transcribed}/" if transcribed else c["pgmc_ipa"])
+        )
         oe, me = segmentable(c["oe_ipa"]), segmentable(c["me_ipa"])
         # A row with no target at ANY checkpoint scores nothing and is only noise in the reports.
         if not (pgmc or oe or me or final):

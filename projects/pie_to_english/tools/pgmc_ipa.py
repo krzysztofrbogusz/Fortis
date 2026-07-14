@@ -127,6 +127,12 @@ def transcribe(word: str) -> str | None:
         if seg == "n" and n + 1 < len(out) and out[n + 1] in ("k", "ɡ", "ɣ", "kʷ", "xʷ", "x"):
             out[n] = "ŋ"
 
+    # A *u after another vowel is the second half of a DIPHTHONG, not a syllable of its own:
+    # ahtōu /ˈɑxtɔːu̯/. Same fact as the *w rule below, spelled with the other letter.
+    for n, seg in enumerate(out):
+        if seg == "u" and n and out[n - 1][0] in IPA_VOWELS:
+            out[n] = "u̯"
+
     # *w is non-syllabic u̯ when it closes a syllable — that is, before a consonant:
     # niwjaz /ˈniu̯jɑz/, awjō /ˈɑu̯jɔː/. It stays a glide before a vowel (strawiþi) and in the
     # geminate, whose second half is the onset of the next syllable (blewwaną /ˈblew.wɑ.nɑ̃/).
