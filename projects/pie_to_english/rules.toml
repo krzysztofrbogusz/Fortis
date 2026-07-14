@@ -472,10 +472,26 @@ definition = "m → n / _#"
 # is a question for PREFORM_FIXES. Adding /s/ here buys *ansuz and loses *amsaz, dead even, and
 # leaves a rule the corpus contradicts. The stops only.
 [m_to_n_before_t_d]
-time = 0
-name = "*/m/ > */n/ before */t/, */d/, */θ̠/, */ð̠/"
-description = "*/m/ > */n/ before */t/, */d/, */θ̠/, */ð̠/"
-definition = "m → n / _ (t | d | θ̠ | ð̠)"
+time = -1500
+name = "*/m/ > */n/ before a dental stop, after an UNSTRESSED vowel"
+description = """The gold gives a minimal pair, and it settles both the condition and the date:
+
+    *ḱm̥tóm   (oxytone)  > *hundą   — the *m̥ assimilates:  *m > *n
+    *gʷḿ̥tis  (barytone) > *kumþiz  — it does NOT:         *m stays
+
+Same syllabic *m̥, same following dental, opposite outcomes. The only thing that differs is the
+accent, and the assimilation happens where the *m̥ is UNSTRESSED. (*mundiz, *munþaz and *kunþaz
+look like more assimilation but are not: their PIE forms have a syllabic *n̥ to begin with —
+*mn̥tís, *mń̥tos, *ǵń̥h₃tos — so the *n is simply inherited and this rule never touches them.)
+
+Dated -1500, which is forced: it must come AFTER `u_epenthesis` (-2000), which turns the syllabic
+*m̥ into *um and gives the rule a consonant to work on, and BEFORE `stress_change` (-1000), which
+puts the accent on the first syllable of every word and so erases the very contrast the rule
+reads. At the old date of 0 both vowels are stressed and the pair is indistinguishable — which is
+why the rule fired on *kumþiz and produced **kunþiz.
+
+The dentals are still plain *t and *d here: Grimm has not run yet."""
+definition = "m → n / [+syll, stress: none] _ (t | d)"
 
 [final_n_loss]
 time = 0
