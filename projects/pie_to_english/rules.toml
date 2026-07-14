@@ -119,9 +119,36 @@ definition = [
     # syllable and stay short (> *sunuz, *jungaz). Without the stress condition, doom comes out
     # **damaz. The second clause repeats it for a SYLLABIC resonant (*n̥ is [+syll, +cons], so it
     # matches neither the vowel clause above nor the consonant clause here).
-    "[+cons, advancement: rtr] → ∅ / [+syll, stress: none] _ [+son, -syll, +cons]",
     "[+cons, advancement: rtr] → ∅ / [+syll, stress: none] _ [+syll, +cons]",
 ]
+
+# SPORADIC. Ringe §5.3.1 is explicit that losing the laryngeal WITHOUT lengthening is the
+# exception, not the rule:
+#
+#   "Usually the laryngeal was lost with compensatory lengthening of the preceding vowel:
+#    PIE *priHtós > PGmc *frīdaz ... PIE *túh₂ > PGmc *þū ...
+#    Occasionally, however, the laryngeal is simply lost WITHOUT lengthening of the vowel:
+#    PIE *wih₁rós >! PGmc *wiraz;  PIE *suh₃nús >! PGmc *sunuz;  PIE *luH- in PGmc *lunaz"
+#
+# The `!` is his own mark for a step that is not regular sound change, and he says why it is
+# LEXICAL rather than phonological: "the short vowels of 'son' and 'ransom' reappear in other
+# derivatives of the same roots in various languages". It is a property of these words.
+#
+# So the cascade lengthens, and this rule is scoped to the handful that do not — which is exactly
+# what `words` is for. What stood here before was a STRESS condition on the general rule, fitted
+# to make *sunuz and *weraz land; it cost *glēmaz, *hūnaz, *mēraz and *dūnaz, all four of which
+# have a real (specified) laryngeal and lengthen precisely as Ringe says they should. It even
+# drove a note in PREFORM_FIXES calling *hūnaz an honest miss "whose long *ū the corpus flatly
+# contradicts" — reasoning from the exceptions to condemn the rule.
+#
+# t = -2000, NOT earlier: `syllable_parts` is time-keyed, and a rule dated before the first
+# nucleus definition is syllabified against nothing — which strands the stress autoseg and
+# silently unstresses every word in the lexicon.
+[lex_laryngeal_lost_without_lengthening]
+time = -2000
+name = "SPORADIC: the laryngeal is lost without lengthening (a lexical handful — Ringe)"
+words = ["son", "weraz", "lunaz", "ell", "young", "youth"]
+definition = "[+cons, advancement: rtr] → ∅ / [+syll] _ [+son, +cons]"
 
 [loss_of_laryngeals_after_vowels]
 time = -2000

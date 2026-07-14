@@ -328,8 +328,14 @@ PREFORM_FIXES = {
     # Sanskrit śrutá-, Latin inclutus — and Wiktionary says in as many words that "the origin of
     # the long vowel is unclear". Writing the laryngeal in would not be reading the preform off
     # the attested form, the way every entry above does; it would be inventing the one feature
-    # needed to make the cascade land. It stays a miss, and so does *hūnaz (*ḱuh₁nós), whose long
-    # *ū the corpus flatly contradicts: *suh₁nús gives *sunuz with a SHORT u, same environment.
+    # needed to make the cascade land. It stays a miss.
+    #
+    # *hūnaz USED to be listed here on the same grounds — "*suh₁nús gives *sunuz with a SHORT u,
+    # same environment" — and that reasoning is now known to be backwards. Ringe §5.3.1: losing the
+    # laryngeal WITHOUT lengthening is the EXCEPTION ("Occasionally, however..."), and *sunuz,
+    # *wiraz and *lunaz are the lexical exceptions he marks with his own `!`. Reasoning from them
+    # to condemn *hūnaz was arguing from the irregulars against the rule. It now derives exactly;
+    # see `lex_laryngeal_lost_without_lengthening` in rules.toml.
     # *ansuz stays a miss too — see the note on m_to_n_before_t_d in rules.toml: *amsaz keeps its
     # *ms, so *ansuz's *n cannot be a sound change and we have no independent evidence for its
     # preform. *wapsō keeps a STOP *p that no accent or grade can produce from *wóbʰseh₂.
