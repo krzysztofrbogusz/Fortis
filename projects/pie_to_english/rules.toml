@@ -96,20 +96,15 @@ name = "Overlong vowels creation"
 description = "Word-final long vowels are lengthened to 'overlong' vowels"
 definition = "[length: long]# → [length: overlong]"
 
-[coronal_cluster_simplification]
-time = -1050
-name = "*ts > *s after a long vowel, a diphthong, or a consonant"
-description = """Ringe §5.2.1 (i), on the outcome of the coronal clusters: "The outcome of this
-sound change was simplified to *s when a long vowel, a diphthong, or a consonant immediately
-preceded" — *káydstis > *haisiz, *pn̥tstós > *funsaz, *(h₁)ēdstos > *ēsaz.
-
-Our *TsT rule leaves a *ts, and after a heavy nucleus it must lose the stop: *weydsós > *wīsaz,
-*swḗdʰh₁sos > *swēsaz. After a SHORT vowel the geminate stands, which is why *wissaz, *sessaz and
-*hwassaz keep theirs."""
-# ONLY after a long vowel or a diphthong. Ringe's third environment — "or a consonant" — is about
-# the *ts that the CORONAL CLUSTER makes, not about any *t standing before an *s: written that way
-# the rule also eats the *t of *nahts and *tanþs, which Old English keeps (niht, tōþ).
-definition = "t → ∅ / [+syll, length: !short] _ s"
+# NO *ts > *s RULE, though Ringe §5.2.1 (i) states one ("simplified to *s when a long vowel, a
+# diphthong, or a consonant immediately preceded") and *weydsós > *wīsaz, *swḗdʰh₁sos > *swēsaz
+# both want it. It cannot be had: *pṓds > *fōts and *wrōds > *wrōts have the SAME long vowel and
+# the SAME *ts, and they KEEP it (OE fōt, wyrt). The two are phonologically indistinguishable.
+#
+# Ringe himself settles which side is wrong — footnote 9 to that very passage: "PGmc *wīsaz
+# 'wise', adduced here in the first edition, is unlikely to have contained a 'double dental'
+# cluster". So the preform is the doubtful thing, not the rule's absence, and a rule written to
+# make *wīsaz land would cost *fōts and *wyrt to do it.
 
 [loss_of_initial_laryngeals]
 time = -2000
@@ -345,6 +340,14 @@ AFTER A VOWEL only. Word-initial *sm- is a perfectly good onset and stays: witho
 *sméldoh₂ came out **mmeltō."""
 definition = "s → m / [+syll] _ m"
 
+[dl_simplification]
+time = -1100
+name = "Word-initial */dl/ loses its stop"
+description = """*dlóngʰos > PGmc *langaz. A word-initial stop + *l is not a licit onset in
+Germanic and the stop simply goes; the cascade otherwise carried it through Grimm and produced
+**tlangaz, with an onset no attested Germanic word has."""
+definition = "d → ∅ / # _ l"
+
 [grimms_law]
 time = -1000
 name = "Grimm's law"
@@ -570,6 +573,7 @@ definition = [
     # After a heavy nucleus there is no room for the geminate, and the *ð simply goes:
     # *h₂éydʰlom > *ailą, with a single *l and no trace of the *ð.
     "ð̠ → ∅ / [+syll, length: !short] _ l",
+    "θ̠ → ∅ / [+syll, length: !short] _ l",   # …and the voiceless one too: *spōþlǭ > *spōlǭ
     # …or after the glide half of a diphthong. Matched as the LETTERS *j and *w: in this feature
     # system a glide is [+cons] (it is a consonant that happens to be non-syllabic), so a
     # `[-syll, +son, -cons]` pattern — the obvious way to write "glide" — matches nothing at all.

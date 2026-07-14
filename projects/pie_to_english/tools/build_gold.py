@@ -188,6 +188,9 @@ PREFORM_FIXES = {
     # Same reasoning as round one: Verner's Law is independently established, so the VOICING of
     # the attested Germanic fricative reads the accent straight off. Nothing is taken from our
     # derivation.
+    "aunaz": "h₂egʷʰnós",   # *aunaz — the attested *w can only come from the labiovelar FRICATIVE
+                            # *ɣʷ, and only the ASPIRATE *gʷʰ gives one. The cited plain *gʷ is a
+                            # stop: Grimm makes it *kʷ, and the word comes out **akwnaz.
     "fergunją": "perkʷúnyom",  # *fergunją — the attested *ɣ is a Verner-voiced labiovelar, so the
                             # cited *w cannot be right: *perkʷ- is the well-known root (cf. Perkūnas)
     "hahtuz": "kóḱtus",     # *hahtuz — the attested initial is a PLAIN *h. A labiovelar *kʷ gives
