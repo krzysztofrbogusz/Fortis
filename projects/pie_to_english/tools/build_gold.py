@@ -129,6 +129,29 @@ PREFORM_FIXES = {
     "algiz": "h₁olḱís",     # *algiz — voiced *ɣ ⇒ oxytone, and the attested *a refutes the cited
                             # e-grade (PGmc *a is the regular reflex of PIE *o)
 
+    # ── The Verner pass (2026-07-14) ─────────────────────────────────────────────────────────
+    # Six words whose Germanic consonant flatly contradicts the accent the input carried. Four of
+    # them (*braidaz, *sēdiz, *þrēduz, *hreubaz) had NO cited accent at all — they came in on the
+    # initial-stress default, which is exactly the case that default was documented as not
+    # settling. Two (*hulþaz, *munþaz) had a cited oxytone that the attested VOICELESS *þ refutes.
+    #
+    # In every case the reasoning runs the same way and it runs from the consonant, not from us:
+    # Verner's Law is independently established, so a VOICED fricative proves it fired (the
+    # preceding syllable was unaccented ⇒ oxytone) and a VOICELESS one proves it did not (that
+    # syllable was accented ⇒ root accent). Nothing here is read off the derivation.
+    "braidaz": "bʰroytós",  # *braidaz — VOICED *ð ⇒ Verner fired ⇒ oxytone
+    "sēdiz": "seh₁tís",     # *sēdiz — VOICED *ð ⇒ oxytone. The same shape as *dēdiz : *dʰeh₁tís
+                            # above, and it takes the same fix.
+    "þrēduz": "treh₁tús",   # *þrēduz — VOICED *ð ⇒ oxytone; a u-stem, like *furduz : *pr̥tús
+    "hreubaz": "krewpós",   # *hreubaz — VOICED *β ⇒ oxytone
+    "hulþaz": "ḱĺ̥tos",      # *hulþaz — VOICELESS *þ ⇒ Verner did NOT fire ⇒ ROOT accent, against
+                            # the cited oxytone *ḱl̥tós
+    "munþaz": "mń̥tos",      # *munþaz 'mouth' — VOICELESS *þ ⇒ root accent, against the cited
+                            # *mn̥tós. Set it beside *mundiz 'hand' : *mn̥tís above — the SAME root
+                            # shape with the OPPOSITE accent, and it is the consonant that tells
+                            # them apart: *mundiz has a voiced *d (Verner fired), *munþaz a
+                            # voiceless *þ (it did not). That is the whole doctrine in one pair.
+
     # ── STEM CLASS: the attested ENDING names the declension ─────────────────────────────────
     # *-ą is neuter, *-ǭ / *-ō feminine, *-az a masculine a-stem, *-uz a u-stem, *-iz an i-stem.
     # Wiktionary cites each of these in a class its Germanic reflex does not continue; the ending

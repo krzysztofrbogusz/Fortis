@@ -437,10 +437,49 @@ form *at all* — and that is measurable, not assumed. Of the 49 unaccented noun
 **40 give a byte-identical Proto-Germanic form under every possible placement of the accent**.
 Initial is simply one of them, and it is where Germanic puts the stress anyway.
 
-For the other 9 the accent does change the outcome, and those are honest untuned misses. Reading
-the accent off the attested Germanic consonant is legitimate — a voiced fricative proves Verner
-fired — but that is the `PREFORM_FIXES` move, a separate and deliberate curation pass. **Admission
-is not curation, and the two must not blur.**
+For the other 9 the accent does change the outcome. Those were admitted as honest untuned misses,
+and then corrected in a **separate, deliberate curation pass** — because admission is not curation
+and the two must not blur. See below.
+
+### The Verner pass
+
+Six words whose Germanic consonant flatly contradicts the accent their input carried. **All six
+land, with no regressions**, and they carry downstream (+2 at 900, +3 at 1400, +1 at the surface).
+
+| word | attested | so Verner… | ⇒ the accent | the fix |
+|---|---|---|---|---|
+| `*braidaz` | voiced `*ð` | fired | oxytone | `*bʰroytós` |
+| `*sēdiz` | voiced `*ð` | fired | oxytone | `*seh₁tís` |
+| `*þrēduz` | voiced `*ð` | fired | oxytone | `*treh₁tús` |
+| `*hreubaz` | voiced `*β` | fired | oxytone | `*krewpós` |
+| `*hulþaz` | **voiceless** `*þ` | did not | root | `*ḱĺ̥tos` |
+| `*munþaz` | **voiceless** `*þ` | did not | root | `*mń̥tos` |
+
+Four of them had **no cited accent at all** — they came in on the initial-stress default, which is
+exactly the case that default was documented as not settling. Two had a *cited* oxytone that the
+attested voiceless `*þ` refutes.
+
+**This is inference, not fitting, and the difference is where the evidence comes from.** Verner's
+Law is independently established; a voiced fricative therefore *proves* the preceding syllable was
+unaccented, and a voiceless one proves it was not. Nothing is read off our derivation — the
+consonant would say the same thing if the cascade did not exist. That the reasoning predicted all
+six correctly, rather than some of them, is itself the check.
+
+Set `*munþaz` 'mouth' beside `*mundiz` 'hand', which the table already carried:
+
+| | attested | accent |
+|---|---|---|
+| `*mundiz` | `*mun**d**iz` — voiced | oxytone `*mn̥tís` |
+| `*munþaz` | `*mun**þ**az` — voiceless | root `*mń̥tos` |
+
+The same root shape with the opposite accent, and it is the consonant that tells them apart. That
+is the whole doctrine in one pair.
+
+**Three lookalikes were deliberately NOT touched.** `*harduz`, `*wurdą` and `*skaudō` also show a
+`d`/`ð` mismatch, but theirs is not Verner: it is Wiktionary's own inconsistency about the
+Proto-Germanic `*d` allophony (a fricative `[ð]` medially, but written `[d]` after `*r` in some
+entries and `[ð]` in others). Bending an accent to chase a notation would be exactly the fitting
+this pass is careful not to be.
 
 ### A gloss collision is no longer a reason to lose a word
 
