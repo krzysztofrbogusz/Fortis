@@ -568,8 +568,16 @@ definition = "[+syll, aperture: low, length: long] → [back, rounded, labial, a
 [lvl_nominative_z]
 time = 150
 name = "The nominative *-az is levelled across the thematic nouns"
-description = "ANALOGICAL — Verner leaves oxytones with *-as (*þurnas); Germanic levels the *-az of the barytone type (*wulfaz) onto them"
-definition = "s → z / [+syll] _ #"
+description = """ANALOGICAL — Verner leaves oxytones with *-as (*þurnas); Germanic levels the *-az
+of the barytone type (*wulfaz) onto them.
+
+The vowel before it must be UNSTRESSED, because what is being levelled is a SUFFIX. Written
+`/ [+syll] _ #` the rule reached every word-final *s there is, including the ones that are not a
+nominative ending at all: *mū́s 'mouse' is a monosyllabic root noun whose *s belongs to the root,
+and *kʷésyo > *hwes, *tósyo > *þas are pronouns. All three came out with a spurious *z. An
+unstressed vowel before the *s is what identifies the ending — a thematic nominative never carries
+the accent on its own suffix."""
+definition = "s → z / [+syll, stress: none] _ #"
 
 # A nasal is lost before */x/, nasalising the vowel and lengthening it: *wonkos > *wɑ̃ːxɑz.
 #
