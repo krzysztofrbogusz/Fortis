@@ -957,10 +957,25 @@ syllable lowers and shortens, and *ē lands on *o.
 
 Dated 404, before the fronting and apocope machinery: the *o it makes is a BACK vowel, and it has
 to be there in time for `oe_a_restoration` (407) to see it."""
-# The OE *o is ROUNDED (labial + rounded, advancement: atr). Say only "back and mid" and the
-# merge lands on *ʌ instead, which is a real letter and renders perfectly happily — brōþor came
-# out **brōþʌr.
-definition = "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [aperture: mid, +back, front: none, length: short, +rounded, +labial, advancement: atr]"
+# ...but only after a HEAVY stem, and Old English draws the line itself:
+#
+#     HEAVY: *brōþēr > brōþor, *mōdēr > mōdor, *dohtēr > dohtor, *swestēr > sweostor   (-OR)
+#     light: *fadēr  > fæder,  *watēr > wæter                                          (-ER)
+#
+# A long root vowel or a consonant cluster gives *-or; a short vowel plus a single consonant gives
+# *-er. Without the weight condition *fadēr becomes *fador, whose BACK *o then fires
+# `oe_a_restoration` and un-fronts the *æ as well — fæder came out **fador, and wæter with it.
+#
+# The OE *o is ROUNDED (labial + rounded, advancement: atr). Say only "back and mid" and the merge
+# lands on *ʌ instead, which is a real letter and renders perfectly happily — brōþor came out
+# **brōþʌr.
+definition = [
+    "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [aperture: mid, +back, front: none, length: short, +rounded, +labial, advancement: atr] / [+syll, length: !short] [-syll] _",
+    "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [aperture: mid, +back, front: none, length: short, +rounded, +labial, advancement: atr] / [-syll] [-syll] _",
+    # ...and after a LIGHT stem it merely shortens — to *e, which is [atr]. Shorten it without
+    # saying so and it lands on *ɛ, and fæder comes out **fædɛr.
+    "[+syll, -cons, aperture: mid, +front, length: long, stress: none] → [length: short, advancement: atr]",
+]
 
 [oe_unstressed_ae_to_e]
 time = 410
