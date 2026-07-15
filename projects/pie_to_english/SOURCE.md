@@ -408,12 +408,32 @@ book text or extract belongs in the repo.
 
 553 words.
 
-| checkpoint | assessed | exact | within 1 phone | rules reaching it |
-|---|---|---|---|---|
-| 200 Proto-Germanic | 528 | 445 | 463 | 68 |
-| 900 Old English | 333 | 200 | 236 | 43 |
-| 1400 Middle English | 226 | 104 | 148 | 26 |
-| final Modern (RP) | 177 | 74 | 107 | 21 |
+| checkpoint | assessed | exact | within 1 phone |
+|---|---|---|---|
+| 200 Proto-Germanic | 528 | 449 (85.0%) | 465 |
+| 900 Old English | 333 | 250 (75.1%) | 279 |
+| 1400 Middle English | 226 | 147 (65.0%) | 176 |
+| final Modern (RP) | 177 | 103 (58.2%) | 128 |
+
+### Sporadic changes — how the regular cascade and the word-scoped ones divide the work
+
+A sound-law cascade cannot reach everything, and the honest thing is to say why, not to bend a
+regular rule until it fits. **Reanalysis, leveling, rebracketing, compounding, and the lexically
+diffused sound changes are SPORADIC** — they act on individual words, not on every word in an
+environment — so they are written as **word-scoped rules** (`words = [...]`), named `sporadic_*`,
+and kept apart from the regular cascade. Each is licensed by the *attested* form, which is the
+evidence the word underwent the change, exactly as a Verner-voiced consonant is the evidence for a
+PIE accent: `*þunnuz > þynne` (u-stem → i-stem, the ending and the i-mutation both attest it),
+`*kustuz > cost` (the lexically diffused *u > *o), DEATH / FLOOD / BROAD (the famous English
+splits), `*sehs > six` (numeral), the Anglian close *ē*, the `-ow` vocalisation. A blanket rule for
+any of these was *measured* to regress — the geminate-blocked a-umlaut, the general *u > *o, the
+final velar vocalisation each broke more than they fixed — which is the empirical case that they
+are not regular.
+
+This keeps the two figures legible: the regular cascade's accuracy is what it derives with no
+word-scoped help, and the sporadic layer is a labelled, auditable list of the morphological and
+lexical facts on top. The provenance of every gold word travels with it in `words.toml`; the
+sporadic *decisions* live in `rules.toml`, where the change itself is.
 
 The 900 denominator is 333, not 337, because the descendant-picker now drops four words whose only
 Old English reflex is a COMPOUND — *fetą survives solely in sīþfæt ('journey-vat'), *skaibaz in
@@ -494,7 +514,7 @@ reconstructing Anglian targets wholesale (inventing forms, i.e. circularity) or 
 rules to hit the citation forms (fitting). **The dialect normalisation is the honest lever, and it
 is real but incremental; the rest of the gap is a property of the gold, not the rules.**
 
-Proto-Germanic is **445/528 (84.3%)** exact. Report the **count and the denominator**, never the
+Proto-Germanic is **449/528 (85.0%)** exact. Report the **count and the denominator**, never the
 percentage alone: an earlier expansion took it from 222/260 (85.4%) to 310/425 — **+88 exact**
 while the rate *fell 12 points*, because 165 new and entirely untuned words entered the
 denominator. The old 260 still scored exactly 222; nothing regressed.
