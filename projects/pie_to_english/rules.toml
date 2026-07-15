@@ -2806,3 +2806,11 @@ description = """The cluster *zd loses its *z with compensatory lengthening of t
 rhotacism of *z can reach it: *mizdō > *mīdō > OE mēd 'reward'. Dated 404, before wg_rhotacism (405),
 which would otherwise give **merd."""
 definition = "[+syll] z → [length: long] ∅ / _ d"
+
+
+[sporadic_anguz_no_rounding]
+time = 1200
+name = "SPORADIC: *ange keeps *a before *ŋg in ME — ang, not **ong"
+description = "ME ang, hang, sang keep the unrounded *a before *ŋg, where long, song round (me_a_before_nasal_rounds is lexically split). Word-scoped, undoing the rounding."
+words = ["anguz"]
+definition = "ɔ → a / _ [+nas]"
