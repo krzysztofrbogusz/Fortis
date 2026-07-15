@@ -2752,3 +2752,14 @@ name = "SPORADIC: *hōfaz > RP hoof /huːv/ — raised vowel, voiced final"
 description = "*hōfaz gives ME/RP hoof with a raised *oː > *uː and a voiced final *f > *v. Word-scoped."
 words = ["hoof"]
 definition = ["oː → uː", "f → v / _ #"]
+
+[eme_w_rounding_a]
+time = 1600
+name = "Short *a rounds to *ɒ after *w (Early Modern English)"
+description = """After /w/ (including /kw/), Early Modern English rounds short *a to *ɒ: was, what,
+wash, want, swan, wander, and before *r the long START vowel to *ɔː — war, warm, ward, swarm, quart,
+dwarf (Jones ch. 4; the WATH/WASP rounding). NOT before a velar, where it stays (wag, wax, twang,
+swank). Dated 1600, before the START backing (eme_short_a_backs, 1740) so the *w-rounded words never
+reach START."""
+definition = ["a → ɔ / w _ r", "a → ɒ / w _"]
+
