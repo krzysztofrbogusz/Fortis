@@ -2200,3 +2200,28 @@ only these adjectives made the move — *harduz stayed a strong a-stem and keeps
 one per stem vowel; the *-e is added by sporadic_weak_reanalysis_final_e."""
 words = ["thin", "sweet"]
 definition = ["u → y", "oː → eː"]
+
+
+[sporadic_grindel]
+time = 476
+name = "SPORADIC (derivation): *grindiz is extended by the instrumental *-el — OE grindel"
+description = """*grindiz 'bar, bolt' is continued in Old English as grindel, with the *-el suffix
+that forms instrument nouns (as in þīxl, stapol). A derivational extension, not a sound change."""
+words = ["grindiz"]
+definition = "∅ → e l / [-syll] _ #"
+
+[sporadic_marrow_spirantisation]
+time = 404
+name = "SPORADIC: *mazȝaz spirantises its final velar word-finally — OE mearh"
+description = """OE mearh has a voiceless *x from the *ȝ of *mazȝaz, but the change is lexical, not
+regular: *berȝaz keeps its stop (beorg), *talȝaz keeps its (tealg), both in the same environment.
+Word-scoped to mearh; dated 404, before wg_g_hardening (405) turns the *ȝ into a stop."""
+words = ["marrow"]
+definition = "ɣ → x / _ #"
+
+[me_final_g_spirantisation]
+time = 1250
+name = "A word-final velar stop spirantises to *x — the ME -gh words"
+description = """OE trog gives Middle English trough with the *x that Middle English spells -gh: a
+late hardening of the final velar to the voiceless fricative, before me_x_loss takes it later."""
+definition = "g → x / [+syll] _ #"
