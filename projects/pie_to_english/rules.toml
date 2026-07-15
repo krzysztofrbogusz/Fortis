@@ -2950,3 +2950,17 @@ name = "SPORADIC: *sunþraz syncopates the *-teros suffix vowel before *r"
 description = "The attested PGmc *sunþraz 'south' has the syncopated *-þr-, where *anþeraz 'other' keeps the vowel — the *-tero- suffix's vowel is lost lexically. Word-scoped, justified by the attested form."
 words = ["south"]
 definition = "ɑ → ∅ / θ _ r"
+
+[sporadic_bumblebee_no_raising]
+time = -900
+name = "SPORADIC: *humelaz keeps *e — no unstressed *e > *i raising"
+description = "OE humela keeps the *e that unstressed_e_to_i raises to *i (the raising is doubtful — Kroonen/Lloyd; cf. the *nista-/*fiska- discussion). Word-scoped restoration of the *e."
+words = ["bumblebee"]
+definition = "i → e / m _ l"
+
+[sporadic_riutidi_suffix]
+time = 0
+name = "SPORADIC: *riutidi keeps the suffix *i (no syncope)"
+description = "The 3sg *riutidi keeps its *-i-, which our syncope wrongly drops (giving **riwtði). Word-scoped restoration."
+words = ["riutidi"]
+definition = "∅ → i / [-syll] _ ð"
