@@ -2943,3 +2943,10 @@ name = "SPORADIC (numeral): *sehstō > OE sixta — *x gives /k/ + /s/ before *t
 description = "The same *hs > /ks/ as six (sporadic_six_numeral2): *sehstō > sixta /siksta/. After Anglian smoothing/raising the sequence is *sixt-, so the *x becomes /ks/ before the *t. Word-scoped."
 words = ["sixth"]
 definition = "x → k s / _ t"
+
+[sporadic_south_syncope]
+time = -940
+name = "SPORADIC: *sunþraz syncopates the *-teros suffix vowel before *r"
+description = "The attested PGmc *sunþraz 'south' has the syncopated *-þr-, where *anþeraz 'other' keeps the vowel — the *-tero- suffix's vowel is lost lexically. Word-scoped, justified by the attested form."
+words = ["south"]
+definition = "ɑ → ∅ / θ _ r"
