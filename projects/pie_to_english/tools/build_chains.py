@@ -75,6 +75,27 @@ def walk(nodes, want: str) -> list[dict]:
     return hits
 
 
+def root_nodes(nodes, want: str, _under: bool = False) -> list[dict]:
+    """The *want*-language nodes that do NOT descend from another *want* node.
+
+    A word's direct reflex is the SHALLOWEST node of its language; anything below one is a
+    derivative or compound of it, not a reflex of the original word. *fetą survives in Old English
+    only as the reconstructed *fæt, whose attested children are the compounds sīþfæt 'journey-vat'
+    and fæthengest — and only *fæt's second element descends from *fetą. The flat `walk` cannot
+    tell the two apart and picks the compound (it is the one with attested IPA); this keeps only the
+    roots, so the simplex is chosen where it is attested and, where it is not (the root is a
+    reconstruction, marked *), the word is left with no Old English reflex rather than scored
+    against a compound no sound change can produce from it.
+    """
+    hits = []
+    for n in nodes or []:
+        is_want = n.get("lang_code") == want and n.get("word")
+        if is_want and not _under:
+            hits.append(n)
+        hits += root_nodes(n.get("descendants"), want, _under or bool(is_want))
+    return hits
+
+
 def pie_parent(d: dict) -> str:
     """The PIE form this record inherits from, bare of its asterisk ("" if none)."""
     for t in d.get("etymology_templates", []):
@@ -304,22 +325,36 @@ def main() -> None:
             "oe": "", "oe_ipa": "", "me": "", "me_ipa": "", "me_variants": 0, "pde": [],
             "pos": d.get("pos", ""), "gloss": gloss_of(d),
         }
-        oe_nodes = walk(d.get("descendants"), "ang")
+        # Only the ROOT Old English nodes — a reflex, not a compound or derivative built on one
+        # (see root_nodes). The compound sīþfæt is a child of the simplex *fæt, and only its second
+        # element descends from *fetą; scoring our simplex derivation against the whole compound is
+        # a category error, and it was costing real words.
+        oe_nodes = root_nodes(d.get("descendants"), "ang")
         if not oe_nodes:
-            # Stops at Proto-Germanic. Still a complete chain for the 200 checkpoint.
             stats["pgmc_only (no OE descendant)"] += 1
             cand = base
         else:
             stats["has_oe"] += 1
             # Per PGmc etymon, keep the single best OE branch: one that has IPA, whose ME
             # descendants have IPA, and which yields exactly one Modern English reflex.
+            #
+            # A root written with a leading * is a RECONSTRUCTION — Wiktionary gives *fæt, *nēora
+            # because the Old English spelling is unrecorded — and two cases hide under that mark,
+            # which the tree tells apart. *nēora runs straight into an ATTESTED Middle English nere
+            # (> the modern kidney-word): a real simplex line whose only gap is the OE spelling, so
+            # its ME and modern cells are kept and ONLY the OE cell is blanked (that column is
+            # attestations, and a reconstruction is not one). *fæt runs only into the compounds
+            # sīþfæt, fæthengest — walking its line finds no simplex Middle English at all, so the
+            # whole chain comes out empty on its own, no special case needed.
             best = None
             for oe in oe_nodes:
                 me_nodes = [m["word"] for m in walk([oe], "enm")]
                 pde = sorted({e["word"] for e in walk([oe], "en")})
                 me_hit = [m for m in me_nodes if m in me_ipa]
+                reconstructed = oe["word"].startswith("*")
                 branch = base | {
-                    "oe": oe["word"], "oe_ipa": oe_ipa.get(oe["word"], ""),
+                    "oe": "" if reconstructed else oe["word"],
+                    "oe_ipa": "" if reconstructed else oe_ipa.get(oe["word"], ""),
                     "me": me_hit[0] if me_hit else (me_nodes[0] if me_nodes else ""),
                     "me_ipa": me_ipa.get(me_hit[0], "") if me_hit else "",
                     "me_variants": len(me_nodes), "pde": pde,
