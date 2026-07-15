@@ -2283,3 +2283,29 @@ description = """ME hert gives RP heart /hɑːt/ with START /ɑː/, not the NURS
 START. Word-scoped, dated with the other pre-/r/ vowels."""
 words = ["heart"]
 definition = "ɛ → ɑ / _ r"
+
+[sporadic_ansuz_nasal]
+time = 150
+name = "SPORADIC: *amsuz > *ansuz — *m assimilates to *n before *s (West/North Germanic)"
+description = """*h₂emsus gives *ansuz with an *n; the change *m > *n before *s is West and North
+Germanic, and Gothic *amsa (which keeps the *m) shows it is not general Germanic — so it is
+word-scoped, not a rule on the whole lexicon."""
+words = ["ansuz"]
+definition = "m → n / _ s"
+
+[sporadic_warm_w]
+time = 1
+name = "SPORADIC: *warmaz keeps a *w-, not the *b- the labiovelar would give"
+description = """*warmaz 'warm' has a disputed etymology; whatever its PIE onset, the Proto-Germanic
+form is *w-, where our labiovelar treatment yields *b-. Word-scoped to the attested outcome."""
+words = ["warm"]
+definition = "b → w / # _"
+
+[sporadic_glide_gemination]
+time = -1000
+name = "SPORADIC: a *w geminates after a short vowel (Germanic sharpening) — dew, lawwō"
+description = """*dawwaz, *lawwō have a geminate *ww where our cascade leaves a single *w — the
+Germanic sharpening (Holtzmann's Law) of a glide, which is sporadic and hits only some words.
+Word-scoped."""
+words = ["dew", "lawwō"]
+definition = "∅ → w / [+syll] w _"
