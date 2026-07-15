@@ -2130,11 +2130,12 @@ definition = ["e o → e ∅ / _ x t", "æ ɑ → æ ∅ / _ x t"]
 
 [oe_anglian_raising]
 time = 425
-name = "Anglian raising of *e to *i before /xt/"
-description = """The smoothed *e raises to *i before the *ht cluster — Anglian niht, riht, miht,
-liht, the direct ancestors of night, right, might, light. Dated after i-mutation (420), which has
-already turned the *æ of *mæht into an *e for this to raise."""
-definition = "e → i / _ x t"
+name = "Anglian raising to *i before /xt/"
+description = """The smoothed vowel raises to *i before the *ht cluster — Anglian niht, riht, miht,
+liht, the direct ancestors of night, right, might, light. Both *e (from the i-mutated *mæht) and
+the plain *æ of *næht (no i-mutation trigger — its ending is *-s) raise; Anglian has one outcome
+before *ht regardless of how the vowel got there."""
+definition = ["e → i / _ x t", "æ → i / _ x t"]
 
 [oe_anglian_smoothing_liquid]
 time = 426
