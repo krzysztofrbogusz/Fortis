@@ -2936,3 +2936,10 @@ the following *a — the same lexical patchiness Jones §3.2 notes for these cha
 re-front the stressed vowel, and the *-anō ending reduces to *-en (the *a to *e, the *u lost)."""
 words = ["haven"]
 definition = ["[+syll, stress: primary, +back, aperture: low] → [+front, back: none, advancement: atr]", "ɑ → e", "u → ∅ / n _ #"]
+
+[sporadic_sixth_ks]
+time = 426
+name = "SPORADIC (numeral): *sehstō > OE sixta — *x gives /k/ + /s/ before *t"
+description = "The same *hs > /ks/ as six (sporadic_six_numeral2): *sehstō > sixta /siksta/. After Anglian smoothing/raising the sequence is *sixt-, so the *x becomes /ks/ before the *t. Word-scoped."
+words = ["sixth"]
+definition = "x → k s / _ t"
