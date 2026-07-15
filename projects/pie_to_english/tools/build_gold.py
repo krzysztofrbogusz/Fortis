@@ -405,6 +405,10 @@ PREFORM_FIXES = {
                             # lemma reconstructs *rugʰ-is from Balto-Slavic *rugís, and Klein (OE
                             # ryge : Lith. rugys : OSl. rŭžĭ) and Hoad (Gmc *rugiz) both give a
                             # w-less form. The attested Germanic *rugiz has no *w either.
+    "harmaz": "ḱormos",     # *harmaz 'harm' — kaikki cites *pḱor-mos, whose *p gives the cluster
+                            # **ɸk-, but the cognates have a plain *h-/*s-: Klein gives OSlav. sramŭ
+                            # 'shame' (< *ḱormo-) and Pers. šarm, so the onset is the palatal *ḱ-
+                            # (> Germanic *h-) with no *p. Read off the cognate set.
 }
 
 

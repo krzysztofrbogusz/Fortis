@@ -2466,7 +2466,12 @@ definition = "i w → e oː"
 [sporadic_glemaz_o]
 time = 300
 name = "SPORADIC: *glōmaz > OE glōm — a back *ō, where we carry a front *ǣ"
-description = "gloom continues *glōmaz with a back *ō; the Wiktionary input's *ē gives our front *ǣ, so the vowel is corrected to the attested back one."
+description = """The attested OE glōm 'twilight' (Klein; > modern gloom /gluːm/) has a back *ō, but
+Wiktionary reconstructs the Proto-Germanic with *ē (which our cascade regularly makes into a front
+*ǣ). The two are inconsistent, and the ATTESTED form wins: OE glōm is a recorded word, the PGmc *ē a
+reconstruction, and no regular change turns *ǣ into OE *ō. Word-scoped, and justified by the
+attestation (like reading Verner voicing off a consonant), not by the fit — the PIE laryngeal that
+would give *ō is uncertain, which is why this is left as a late override rather than a preform fix."""
 words = ["glēmaz"]
 definition = "æː → oː"
 

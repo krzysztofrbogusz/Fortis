@@ -825,9 +825,9 @@ forms = [
 id = "harm"
 gloss = "harm"
 frequency = 26574
-note = "Source: Wiktionary (kaikki)."
+note = "Source: Wiktionary (kaikki). PREFORM corrected: the cited *pḱór-mo-s is replaced by *ḱormos on the evidence of the attested Germanic form (Ringe / Kroonen)."
 forms = [
-  { time = -2000, ipa = "ˈpkʲormos", category = "noun", note = "PIE *pḱór-mo-s, as cited by Wiktionary. Morpheme hyphens are stripped for a complete form." },
+  { time = -2000, ipa = "ˈkʲormos", category = "noun", note = "PIE *pḱór-mo-s, as cited by Wiktionary. Morpheme hyphens are stripped for a complete form." },
   { time = 200, ipa = "ˈxɑrmɑz", category = "noun" },
   { time = 900, ipa = "ˈxæɑrm" },
   { time = "final", ipa = "ˈhɑːm" },
