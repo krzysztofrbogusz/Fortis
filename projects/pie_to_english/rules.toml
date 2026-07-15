@@ -2592,3 +2592,47 @@ name = "SPORADIC: *þrīz > ME þrē lowers the long vowel"
 description = "*þrīz gives ME þrē /θreː/ — the long *ī lowers to *ē. Word-scoped."
 words = ["three"]
 definition = "iː → eː"
+
+[sporadic_me_open_e]
+time = 1100
+name = "SPORADIC: OE ǣ from *ai continues as the OPEN ME ē (bōniz, eath)"
+description = """*bōniz, *auþuz reach OE ǣ from a different source (*ai) than seed/queen, and it is
+the OPEN ME ē: bēn, ēþe give /bɛːn/, /ɛːðe/. Word-scoped to distinguish them from the close-ē set."""
+words = ["bōniz", "eath"]
+definition = "eː → ɛː"
+
+[sporadic_other_u]
+time = 1150
+name = "SPORADIC: *anþeraz > ME other /uðer/ has a short *u"
+description = "*anþeraz gives ME other with a short *u where our cascade carries a long *oː. Word-scoped."
+words = ["other"]
+definition = "oː → u"
+
+[sporadic_weather_short]
+time = 1210
+name = "SPORADIC: *wedrą > ME weder keeps a short vowel"
+description = "*wedrą gives ME weder /wɛder/; open-syllable lengthening wrongly lengthens it here. Word-scoped shortening."
+words = ["weather"]
+definition = "ɛː → ɛ"
+
+[sporadic_gome_full_osl]
+time = 1200
+name = "SPORADIC: *gumô, *fullaz lower and lengthen — ME gome, fool"
+description = """ME gome, fool (/goːm/, /foːl/) lower the high *u to *oː and lengthen it — a variant
+of open-syllable lengthening that our rule skips because it excludes high vowels. Word-scoped."""
+words = ["gome", "full"]
+definition = "[+syll, aperture: high, +back, length: short] → [aperture: mid, length: long]"
+
+[sporadic_full_foot]
+time = 1650
+name = "SPORADIC: FULL shortens to the FOOT vowel"
+description = "ME fool /foːl/ > RP full /fʊl/: the *uː the Vowel Shift makes shortens to FOOT. Word-scoped (cf. flood > STRUT)."
+words = ["full"]
+definition = "uː → ʊ"
+
+[sporadic_gome_strut]
+time = 1650
+name = "SPORADIC: GOME shortens to the STRUT vowel"
+description = "ME gome /goːm/ > RP /gʌm/: the *uː shortens and unrounds to STRUT. Word-scoped."
+words = ["gome"]
+definition = "uː → ʌ"
