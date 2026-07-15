@@ -2387,3 +2387,34 @@ description = """*gunþiz would give i-mutated **gynþ, but OE gūþ keeps the b
 is levelled out from the rest of the paradigm. Word-scoped: the fronted *y is restored to *u."""
 words = ["gunþiz"]
 definition = ["y → u", "yː → uː"]
+
+[sporadic_kurthra_parasite]
+time = 467
+name = "SPORADIC: *kurþrą > OE corþer takes an *e parasite, not the *o our harmony gives"
+description = """The parasite vowel of *kurþr is *e (corþer), where oe_parasite_vowel's back-vowel
+harmony gives *o. A lexical exception to the harmony, word-scoped."""
+words = ["kurþrą"]
+definition = "o → e / θ̠ _ r"
+
+[sporadic_sengreen_apocope]
+time = 473
+name = "SPORADIC: *siniz > OE sin loses its final vowel"
+description = "*siniz gives OE sin — the light-syllable final *-i, kept by rule, is lost here."
+words = ["sengreen"]
+definition = "[+syll, stress: none] → ∅ / _ #"
+
+
+[sporadic_ready_istem]
+time = 476
+name = "SPORADIC: *raidijaz > OE rǣde — i-stem final -e, front vowel"
+description = "*raidijaz gives OE rǣde with the i-stem *-e and a front *ǣ where we derive *ɑː."
+words = ["ready"]
+definition = ["ɑː → æː", "∅ → e / [-syll] _ #"]
+
+[sporadic_star_assimilation]
+time = 450
+name = "SPORADIC: *sternô > OE steorra — *rn assimilates to *rr, ending -a"
+description = """*sternô gives OE steorra: the *rn assimilates to a geminate *rr and the n-stem
+takes *-a. Word-scoped."""
+words = ["star"]
+definition = "n → r / r _"
