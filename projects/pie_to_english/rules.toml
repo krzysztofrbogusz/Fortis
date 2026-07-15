@@ -1704,7 +1704,7 @@ the attested ME hwal.
 
 t = 1250, BEFORE `me_x_to_h` (1300). That rule turns the initial *x into an *h, and at the same
 date it wins on file order and leaves this one nothing to match."""
-definition = "x → ∅ / # _ [+son, -syll, +cons]"
+definition = "x → ∅ / # _ [+son, -syll, +cons, back: none]"
 
 [me_degemination]
 time = 1250
