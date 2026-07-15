@@ -2471,12 +2471,6 @@ description = "gloom continues *glōmaz with a back *ō; the Wiktionary input's 
 words = ["glēmaz"]
 definition = "æː → oː"
 
-[sporadic_guda_long]
-time = 360
-name = "SPORADIC: *gōdaz > OE gōd lengthens"
-description = "*gōdaz gives OE gōd with a long vowel; word-scoped lengthening of the short *o our cascade leaves."
-words = ["gudą"]
-definition = "[+syll, aperture: mid, +back, length: short] → [length: long]"
 
 [sporadic_ell_syncope]
 time = 461

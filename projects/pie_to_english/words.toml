@@ -2375,7 +2375,7 @@ note = "Source: Wiktionary (kaikki). PREFORM corrected: the cited *ǵʰutós is 
 forms = [
   { time = -2000, ipa = "gʲʱuˈtom", category = "noun", note = "PIE *ǵʰutós, as cited by Wiktionary." },
   { time = 200, ipa = "ˈɣuð̠ɑ̃", category = "noun" },
-  { time = 900, ipa = "ˈgoːd" },
+  { time = 900, ipa = "ˈgod" },
   { time = 1400, ipa = "ˈgɔd" },
 ]
 

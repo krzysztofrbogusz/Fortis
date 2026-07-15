@@ -439,6 +439,20 @@ PREFORM_FIXES = {
 #      own inference, and never because a word would otherwise miss.
 #   3. The entry must be defensible with the derivation switched off. If the only argument for it
 #      is "the cascade would then land", it does not go in.
+# Corrections to Wiktionary's OLD ENGLISH IPA, keyed by the Proto-Germanic headword. Unlike the
+# 200 column, the 900 form is an ATTESTATION and is not to be curated — but a TRANSCRIPTION of it
+# can be wrong, and this fixes the rendering, not the word. The bar is high: the correction must be
+# forced by the word's OWN later reflexes and standard phonology, never by making the cascade land.
+#
+#   *gudą — Wiktionary gives OE god the IPA /ɡoːd/, but that is the pronunciation of the DIFFERENT
+#   word gōd 'good'. OE god 'God' has a SHORT vowel, and its own Middle English (god /ɡɔd/) and
+#   modern (/ɡɒd/) reflexes, every handbook, and the short-stem spelling all say so. The long mark
+#   is a slip in the rendering; the attested word is unchanged.
+OE_FIXES = {
+    "gudą": "/ɡod/",
+}
+
+
 ATTESTED_FIXES = {
     # Ringe writes *anþaraz where Wiktionary writes *anþeraz, and he argues the point at length —
     # it is the very example he uses to establish that unstressed *e LOWERED to *a before *r in
@@ -695,7 +709,8 @@ def main() -> None:
             ATTESTED_FIXES.get(c["pgmc"])
             or (f"/{transcribed}/" if transcribed else c["pgmc_ipa"])
         )
-        oe, me = anglianise(segmentable(c["oe_ipa"])), segmentable(c["me_ipa"])
+        oe = anglianise(segmentable(OE_FIXES.get(c["pgmc"], c["oe_ipa"])))
+        me = segmentable(c["me_ipa"])
         # A row with no target at ANY checkpoint scores nothing and is only noise in the reports.
         if not (pgmc or oe or me or final):
             drop("no segmentable target at any checkpoint")
