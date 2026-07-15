@@ -30,9 +30,9 @@ forms = [
 id = "two"
 gloss = "two"
 frequency = 764564
-note = "Source: Wiktionary (kaikki)."
+note = "Source: Wiktionary (kaikki). PREFORM corrected: the cited *dwóh₁ is replaced by *dwoy on the evidence of the attested Germanic form (Ringe / Kroonen)."
 forms = [
-  { time = -2000, ipa = "ˈdwoχ", category = "num", note = "PIE *dwóh₁, as cited by Wiktionary." },
+  { time = -2000, ipa = "ˈdwoj", category = "num", note = "PIE *dwóh₁, as cited by Wiktionary." },
   { time = 200, ipa = "ˈtwɑj", category = "num" },
   { time = 900, ipa = "ˈtweːjen" },
   { time = 1400, ipa = "ˈtwæj" },

@@ -409,6 +409,10 @@ PREFORM_FIXES = {
                             # **ɸk-, but the cognates have a plain *h-/*s-: Klein gives OSlav. sramŭ
                             # 'shame' (< *ḱormo-) and Pers. šarm, so the onset is the palatal *ḱ-
                             # (> Germanic *h-) with no *p. Read off the cognate set.
+    "twai": "dwoy",         # *twai 'two' (masc. nom.) — kaikki cites the neuter/adverbial *dwoh₁,
+                            # which gives *twō; but the attested *twai has the *ai diphthong, and
+                            # *ai continues PIE *oy, NOT *oh₁ (which gives *ō). So the masculine
+                            # *dwoy is what the attested form points to — the grade read off it.
 }
 
 
