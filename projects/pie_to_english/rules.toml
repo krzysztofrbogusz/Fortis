@@ -1935,7 +1935,7 @@ altogether. It gets there in two steps, and only the first is stated here: the l
 word-finally, and `oe_high_vowel_deletion` (460) then deletes it as the short *-i it now is, under
 the same heavy-syllable condition as every other final high vowel. Stated as one rule it would say
 the weight condition twice."""
-definition = "[+syll, length: long, aperture: high] → [length: short] / _ #"
+definition = "[+syll, length: long, aperture: high, stress: none] → [length: short] / _ #"
 
 
 [me_a_before_nasal_rounds]
