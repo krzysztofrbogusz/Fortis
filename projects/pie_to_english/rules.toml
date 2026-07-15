@@ -2115,3 +2115,23 @@ definition = [
     "t → ∅ / [+syll, length: long] _ s [+syll]",
     "t → ∅ / [-syll] _ s [+syll]",
 ]
+
+[oe_anglian_smoothing]
+time = 412
+name = "Anglian smoothing before /x/ + consonant"
+description = """Anglian (Ringe & Taylor §7.3) undoes breaking before a velar: the diphthong that
+oe_breaking made in front of an *h collapses back to a monophthong. Present-Day English descends
+from the Anglian dialects, not West Saxon, and the modern words are the Anglian outcome — niht >
+night, riht > right, miht > might. Restricted to *h + CONSONANT (the *ht cluster): word-final and
+pre-vocalic *h keep their West Saxon diphthong in the gold (feax, eoh), so the smoothing there
+would trade one dialect's words for the other's. Pinned to *ht specifically — *fax keeps its West
+Saxon *feax in the gold, and *hs is a velar + consonant too."""
+definition = ["e o → e ∅ / _ x t", "æ ɑ → æ ∅ / _ x t"]
+
+[oe_anglian_raising]
+time = 425
+name = "Anglian raising of *e to *i before /xt/"
+description = """The smoothed *e raises to *i before the *ht cluster — Anglian niht, riht, miht,
+liht, the direct ancestors of night, right, might, light. Dated after i-mutation (420), which has
+already turned the *æ of *mæht into an *e for this to raise."""
+definition = "e → i / _ x t"
