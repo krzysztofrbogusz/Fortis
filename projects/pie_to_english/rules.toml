@@ -2417,7 +2417,7 @@ name = "SPORADIC: *sternô > OE steorra — *rn assimilates to *rr, ending -a"
 description = """*sternô gives OE steorra: the *rn assimilates to a geminate *rr and the n-stem
 takes *-a. Word-scoped."""
 words = ["star"]
-definition = ["n → r / r _", "e → ɑ / _ #"]
+definition = "n → r / r _"
 
 [sporadic_albi_ae]
 time = 427
@@ -2458,7 +2458,7 @@ words = ["lede"]
 definition = "i w → e oː"
 
 [sporadic_swesaz_ae]
-time = 300
+time = 350
 name = "SPORADIC: *swēsaz > OE swǣs — the long vowel is *ǣ, not *ō"
 description = "*swēsaz gives OE swǣs; our cascade raises the long *ē to *oː, but this word keeps a front *ǣ."
 words = ["swēsaz"]
@@ -2472,7 +2472,7 @@ words = ["glēmaz"]
 definition = "æː → oː"
 
 [sporadic_guda_long]
-time = 250
+time = 360
 name = "SPORADIC: *gōdaz > OE gōd lengthens"
 description = "*gōdaz gives OE gōd with a long vowel; word-scoped lengthening of the short *o our cascade leaves."
 words = ["gudą"]
@@ -2484,3 +2484,10 @@ name = "SPORADIC: *alinō > OE eln syncopates its medial vowel"
 description = "*alinō gives OE eln — the medial unstressed vowel and the ending are lost, leaving a bare cluster. Word-scoped syncope."
 words = ["ell"]
 definition = ["[+syll, stress: none] → ∅ / [-syll] _ [+son, +cons]", "[+syll, stress: none] → ∅ / [+son, +cons] _ #"]
+
+[sporadic_star_ending]
+time = 457
+name = "SPORADIC: *sternô > OE steorra ends in -a"
+description = "The n-stem *sternô takes final -a (steorra), not the -e the weak ōn-stem rule gives. Word-scoped, after that rule."
+words = ["star"]
+definition = "e → ɑ / _ #"
