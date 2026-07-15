@@ -1197,7 +1197,7 @@ description = "Minkova §6.5.2 — Gmc *stain- > OE stān; *dauþuz > dēaþ; *b
 # page. The low back vowel is what the change is about, so that is what the rule asks for.
 definition = [
     "[+syll, -cons, aperture: low, +back] j → [length: long] ∅",
-    "[+syll, -cons, aperture: low, +back] w → [+front, back: none, advancement: atr] ɑː",
+    "[+syll, -cons, aperture: low, +back, length: short] w → [+front, back: none, advancement: atr] ɑː",
     "[+syll, -cons, aperture: mid, +front] w → [+syll] oː",
 ]
 
@@ -2798,3 +2798,11 @@ name = "SPORADIC: *bytt keeps a rounded *u in ME — butt, not **bitt"
 description = "OE bytt gives ME but(t) /but/ (> butt /bʌt/) with the rounded reflex of *y, not the East-Midland unrounding to *i. Word-scoped, before me_y_unrounding."
 words = ["buttaz-end"]
 definition = "y → u"
+
+[wg_zd_simplification]
+time = 404
+name = "*zd simplifies to *d, lengthening the vowel — *mizdō > mēd"
+description = """The cluster *zd loses its *z with compensatory lengthening of the vowel before the
+rhotacism of *z can reach it: *mizdō > *mīdō > OE mēd 'reward'. Dated 404, before wg_rhotacism (405),
+which would otherwise give **merd."""
+definition = "[+syll] z → [length: long] ∅ / _ d"
