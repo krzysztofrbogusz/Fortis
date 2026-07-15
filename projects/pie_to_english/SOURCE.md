@@ -400,9 +400,18 @@ book text or extract belongs in the repo.
 | checkpoint | assessed | exact | within 1 phone | rules reaching it |
 |---|---|---|---|---|
 | 200 Proto-Germanic | 528 | 445 | 463 | 68 |
-| 900 Old English | 337 | 200 | 236 | 43 |
+| 900 Old English | 333 | 200 | 236 | 43 |
 | 1400 Middle English | 226 | 104 | 148 | 26 |
 | final Modern (RP) | 177 | 74 | 107 | 21 |
+
+The 900 denominator is 333, not 337, because the descendant-picker now drops four words whose only
+Old English reflex is a COMPOUND — *fetą survives solely in sīþfæt ('journey-vat'), *skaibaz in
+sċāffōt — of which just the second element descends from our Proto-Germanic word. Scoring a simplex
+derivation against the whole compound is a category error, and `root_nodes` in build_chains keeps
+only the Old English node that is not itself descended from another (the compound is a child of the
+simplex), leaving those four to score at Proto-Germanic alone. No derived form changed and no hit
+moved — the correction is entirely in the denominator, removing rows that never belonged in the
+Old English column.
 
 ### The later legs were not broken — they were UNBUILT
 
