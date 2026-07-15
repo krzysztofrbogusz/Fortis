@@ -2863,3 +2863,25 @@ name = "SPORADIC: *lindō > ME line loses the *d of *nd"
 description = "OE lind 'linden' gives ME line /liːn/ — the *d of the *nd cluster is lost. Word-scoped."
 words = ["lindō"]
 definition = "d → ∅ / n _ #"
+
+[pde_mouth_r_centring]
+time = 1745
+name = "MOUTH before *r takes a schwa offglide — sour, hour, flower"
+description = """The MOUTH diphthong the Vowel Shift made from *uː takes a centring schwa before
+*r: sour /saʊə/, hour, flower, power. The parallel of pde_centring_diphthongs, but for the diphthong
+rather than the long monophthong. Dated 1755, after the shift and before r-loss."""
+definition = "a ʊ → a ʊ ə / _ ɹ"
+
+[sporadic_weather_dental]
+time = 1550
+name = "SPORADIC: *weder > weather — intervocalic *d becomes *ð"
+description = "OE weder gives modern weather /ˈwɛðə/ — the intervocalic *d fricativises to *ð, as in father, mother, gather, hither (a lexical set; ladder, adder keep *d). Word-scoped."
+words = ["weather"]
+definition = "d → ð / [+syll] _ [+syll]"
+
+[sporadic_evil_long]
+time = 1500
+name = "SPORADIC: evil keeps a long *iː"
+description = "OE yfel > ME evel lengthens in the open syllable to /eːvəl/ (whence modern /ˈiːvəl/ via the Vowel Shift); our cascade carries a short high vowel, so it is set to the long mid *eː the shift then raises. Word-scoped."
+words = ["evil"]
+definition = "i → eː"
