@@ -2245,3 +2245,41 @@ description = """OE hwæs 'sharp' has a single *s where *hwassaz has the geminat
 oblique stem (*hwasa-), which never had the doubling. A paradigmatic leveling, word-scoped."""
 words = ["hwassaz"]
 definition = "1=[-syll] @1 → @1 / _ #"
+
+# ─── SPORADIC (later legs): the famous lexical splits of English ────────────────────────────────
+
+[sporadic_dread_shortening]
+time = 1550
+name = "SPORADIC: the DEATH/STEAD/BREAD class shortens its vowel before the Vowel Shift"
+description = """ME dēth, stēd, thrēd, brēd, dēd shorten to a short DRESS vowel — death, stead,
+thread — before the Great Vowel Shift can raise them, while mēd, sēd, dēd keep their length (mead,
+seed). The split is lexical, so it is word-scoped; dated 1550, before the shift (1600)."""
+words = ["death", "stead", "thread"]
+definition = "ɛː → ɛ"
+
+[sporadic_broad_thought]
+time = 1590
+name = "SPORADIC: BROAD and DAUGHTER lower to THOUGHT, not GOAT"
+description = """ME brōd, dohter give RP broad /brɔːd/, daughter /dɔːtə/ with THOUGHT /ɔː/, not the
+GOAT diphthong the regular *oː takes. A lexical exception; the vowel lowers to *ɔː just before the
+GOAT diphthongisation would otherwise catch it."""
+words = ["broad", "daughter"]
+definition = "oː → ɔː"
+
+[sporadic_flood_strut]
+time = 1600
+name = "SPORADIC: FLOOD shortens to the STRUT vowel"
+description = """ME flōd gives RP flood /flʌd/ — the long *oː shortens and unrounds to STRUT, as in
+blood and (with FOOT) good. Lexically split from the words that keep /uː/ (mood, food). Word-scoped:
+the *uː the Vowel Shift makes is shortened to the STRUT *ʌ."""
+words = ["flood"]
+definition = "uː → ʌ"
+
+[sporadic_heart_start]
+time = 1740
+name = "SPORADIC: HEART has the START vowel, not NURSE"
+description = """ME hert gives RP heart /hɑːt/ with START /ɑː/, not the NURSE /ɜː/ its short *ɛ before
+*r would regularly take (as in her, herd). A lexical irregularity — heart and hearth both back to
+START. Word-scoped, dated with the other pre-/r/ vowels."""
+words = ["heart"]
+definition = "ɛ → ɑ / _ r"
