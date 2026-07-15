@@ -2972,3 +2972,10 @@ name = "SPORADIC: *stōjō keeps its intervocalic *j"
 description = "The attested *stōjō keeps the *j our cascade drops between the two long vowels. Word-scoped restoration."
 words = ["stōjō"]
 definition = "∅ → j / [+syll] _ [+syll]"
+
+[sporadic_seven_t_loss]
+time = 10
+name = "SPORADIC: *septm̥ > *seƀun loses the *t of *ft"
+description = "The cluster *ft (< *pt) loses its *t: *septm̥ > *seƀun (OE seofon), keeping the Verner-voiced *ƀ. Our cascade instead devoices the *ƀ before the surviving *t. Word-scoped t-loss, before that devoicing."
+words = ["seven"]
+definition = "t → ∅ / β _"
