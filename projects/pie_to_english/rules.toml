@@ -2369,3 +2369,21 @@ description = """*frijaz, *frijō give OE frēo: once the intervocalic *j is los
 the following back vowel contract to the *ēo diphthong. Word-scoped to these two."""
 words = ["free", "frijō"]
 definition = "i → e oː / _ #"
+
+[sporadic_geminate_no_umlaut]
+time = 355
+name = "SPORADIC: a-umlaut does not lower *u before a geminate — OE bucc, bytt"
+description = """*bukkaz > bucc, *buttaz > bytt keep the high vowel: a-umlaut (wg_a_umlaut) does
+not fire before a geminate, but our rule wrongly lowered them to *o. Word-scoped raise back to *u
+(bytt then i-mutates to *y by the regular rule)."""
+words = ["buck", "buttaz-end"]
+definition = "[+syll, aperture: mid, +back, length: short] → [aperture: high]"
+
+
+[sporadic_gunthiz_no_umlaut]
+time = 421
+name = "SPORADIC (leveling): *gunþiz > OE gūþ keeps *u, i-mutation levelled out"
+description = """*gunþiz would give i-mutated **gynþ, but OE gūþ keeps the back *u — the i-mutation
+is levelled out from the rest of the paradigm. Word-scoped: the fronted *y is restored to *u."""
+words = ["gunþiz"]
+definition = ["y → u", "yː → uː"]
