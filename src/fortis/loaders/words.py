@@ -12,7 +12,7 @@ from src.fortis.result import Err, Ok, Result
 # :func:`~src.fortis.models.inventories.time_order`.
 FINAL = "final"
 
-_WORD_KEYS = ("id", "gloss", "frequency", "forms")
+_WORD_KEYS = ("id", "gloss", "frequency", "forms", "note")
 _CSV_COLUMNS = ("id", "time", "ipa", "category", "gloss", "frequency")
 
 
@@ -285,12 +285,30 @@ def _parse_word_table(index: int, table: dict, error_list: list[str]) -> Word | 
         if not isinstance(category, str):
             error_list.append(f"{where} has a form at {raw_time} whose category is not a string")
             return None
+        note = entry.get("note", "")
+        if not isinstance(note, str):
+            error_list.append(f"{where} has a form at {raw_time} whose note is not a string")
+            return None
+        unknown_form = [k for k in entry if k not in ("time", "ipa", "category", "note")]
+        if unknown_form:
+            error_list.append(
+                f"{where} has a form at {raw_time} with unknown key(s): "
+                f"{', '.join(sorted(unknown_form))}"
+            )
+            return None
         if time in forms:
             error_list.append(f"{where} has two forms at {raw_time}")
             return None
-        forms[time] = Attestation(ipa=ipa.strip(), category=category.strip())
+        forms[time] = Attestation(ipa=ipa.strip(), category=category.strip(), note=note.strip())
 
-    return Word(id=word_id, forms=forms, gloss=gloss.strip(), frequency=frequency)
+    word_note = table.get("note", "")
+    if not isinstance(word_note, str):
+        error_list.append(f"{where} has a note that is not a string")
+        return None
+
+    return Word(
+        id=word_id, forms=forms, gloss=gloss.strip(), frequency=frequency, note=word_note.strip()
+    )
 
 
 def validate_word_inventory(inventory: WordInventory) -> Result[None, list[str]]:

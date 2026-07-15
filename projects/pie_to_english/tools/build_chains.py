@@ -1,7 +1,7 @@
 """Walk the kaikki Proto-Germanic extract into PIE → PGmc → OE → ME → English chains.
 
 Stage one of two: this writes `chains.json`, which `build_gold.py` then filters and scores into
-`words.csv`. `chains.json` is an intermediate and is not committed; `words.csv` is, under
+`words.toml`. `chains.json` is an intermediate and is not committed; `words.toml` is, under
 CC BY-SA 4.0 — the data is Wiktionary's, and that licence is share-alike. See SOURCE.md.
 
 The spine is the **Proto-Germanic** record: it carries its PIE parent (an `inh` template) and a

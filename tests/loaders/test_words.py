@@ -95,6 +95,30 @@ forms = [
             tmp_path, '[[words]]\nid = "a"\nforms = [{ time = 0, ipa = "a" }]\n'
         ).unwrap()["a"]
         assert word.gloss == "" and word.frequency == 1 and word.seed.category == ""
+        assert word.note == "" and word.seed.note == ""
+
+    def test_provenance_note_round_trips_on_word_and_form(self, tmp_path):
+        # A note is free-text provenance the engine ignores; it is carried on the word and on any
+        # of its forms so a lexicon can document its own evidence.
+        word = _toml(tmp_path, """
+[[words]]
+id = "heart"
+gloss = "heart"
+note = "n-stem gender reanalysis: PGmc neuter *hertô is OE feminine heorte"
+forms = [
+  { time = -2000, ipa = "kʲerdoː", note = "PIE *ḱḗr, cited by Wiktionary" },
+  { time = 900, ipa = "xeorte" },
+]
+""").unwrap()["heart"]
+        assert word.note.startswith("n-stem gender reanalysis")
+        assert word.forms[-2000].note == "PIE *ḱḗr, cited by Wiktionary"
+        assert word.forms[900].note == ""  # omitted ⇒ empty
+
+    def test_a_form_with_an_unknown_key_is_rejected(self, tmp_path):
+        errors = _toml(
+            tmp_path, '[[words]]\nid = "a"\nforms = [{ time = 0, ipa = "a", src = "x" }]\n'
+        ).unwrap_err()
+        assert "unknown key(s): src" in errors[0]
 
     def test_coexists_with_the_concise_form(self, tmp_path):
         # ABOVE the array: TOML binds a bare key/value to the table header above it, so a

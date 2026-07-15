@@ -52,7 +52,7 @@ attribution. Per-project provenance also lives beside the data:
   [kaikki.org](https://kaikki.org/) machine-readable extracts (produced by
   [wiktextract](https://github.com/tatuylonen/wiktextract), MIT — the *tool* is MIT; the *data*
   is Wiktionary's).
-- **Use:** `projects/pie_to_english/words.csv` — the reconstructed Proto-Indo-European inputs and
+- **Use:** `projects/pie_to_english/words.toml` — the reconstructed Proto-Indo-European inputs and
   the attested Proto-Germanic / Old English / Middle English / Modern English forms it is scored
   against. Built by `projects/pie_to_english/tools/`.
 - **Licence:** **CC BY-SA 4.0**, and it is *share-alike*: the derived lexicon carries the same
@@ -89,7 +89,7 @@ noncommercial use only, with the copyright notice kept on any copy passed on.
 | -------------------------------------------------------------------------------------------- | --------------------------------------- |
 | Fortis engine + docs                                                                         | PolyForm Noncommercial 1.0.0            |
 | Derived Latin→French `rules.toml` + lexicon (from DiaSim's DiaCLEF2025 / FLLAPS / FLLexPlus) | GPL-3.0 (derivative of GPL-3.0 sources) |
-| PIE→English lexicon `projects/pie_to_english/words.csv` (from Wiktionary)                    | CC BY-SA 4.0 (share-alike)              |
+| PIE→English lexicon `projects/pie_to_english/words.toml` (from Wiktionary)                    | CC BY-SA 4.0 (share-alike)              |
 | PIE→English `rules.toml` + `tools/` (original)                                               | PolyForm Noncommercial 1.0.0            |
 | French / English frequency lists                                                             | MIT (hermitdave/FrequencyWords)         |
 

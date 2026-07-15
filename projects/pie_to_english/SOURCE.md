@@ -4,7 +4,7 @@ Proto-Indo-European to Present-Day English, scored at four checkpoints.
 
 > **Licensing — this directory is not all under one licence.**
 >
-> - **`words.csv` is CC BY-SA 4.0.** It is derived from **Wiktionary**, whose text is CC BY-SA
+> - **`words.toml` is CC BY-SA 4.0.** It is derived from **Wiktionary**, whose text is CC BY-SA
 >   4.0, and that licence is *share-alike*: the derived lexicon carries it too, and so must any
 >   redistribution of it. Attribution: **[Wiktionary](https://www.wiktionary.org/) contributors**,
 >   via the [kaikki.org](https://kaikki.org/) extracts.
@@ -18,7 +18,7 @@ Proto-Indo-European to Present-Day English, scored at four checkpoints.
 > Recorded in [`docs/acknowledgements.md`](../../docs/acknowledgements.md), alongside the same
 > arrangement for `latin_to_french` (GPL-3.0).
 
-## Lexicon (`words.csv`) — CC BY-SA 4.0
+## Lexicon (`words.toml`) — CC BY-SA 4.0
 
 Built in two stages from the [kaikki.org](https://kaikki.org/) machine-readable Wiktionary
 extracts (produced by [wiktextract](https://github.com/tatuylonen/wiktextract), MIT; the *data*
@@ -26,12 +26,12 @@ is Wiktionary's, CC BY-SA 4.0). Neither stage's output is stored — run them to
 
 ```
 PYTHONPATH=. python projects/pie_to_english/tools/build_chains.py   # kaikki → chains.json
-PYTHONPATH=. python projects/pie_to_english/tools/build_gold.py     # chains.json → words.csv
+PYTHONPATH=. python projects/pie_to_english/tools/build_gold.py     # chains.json → words.toml
 ```
 
 `PYTHONPATH=.` (the repo root), **not** `src`: `fortis.analysis.accuracy` imports
 `from src.fortis...`, so the root must be on the path. The obvious invocations crash on
-`ModuleNotFoundError: No module named 'src'` *before writing anything*, which leaves `words.csv`
+`ModuleNotFoundError: No module named 'src'` *before writing anything*, which leaves `words.toml`
 untouched and makes a diff falsely read as "reproduced byte-identically". Check the exit status,
 not just the diff.
 
@@ -56,12 +56,23 @@ English, or simply is not linked to one. But the 200 checkpoint is scored agains
 that stops at Proto-Germanic is a *complete* chain for that column. Lifting the requirement took
 the lexicon from 114 rows (111 scorable at 200) to **249 rows, 240 scorable at 200**.
 
-Columns: `word` (the PIE input, in IPA), `gloss`, `frequency`, then the attested forms at
-**200** (Proto-Germanic), **900** (Old English) and **1400** (Middle English), and the modern
-**final** surface. An empty cell means "not attested here" — the engine scores each word at
-whichever checkpoints it has. `gloss` is the modern reflex where there is one and the
-Proto-Germanic headword (`hurnaz`) where the word died before Modern English; it is a label and
-a `--single` lookup key, not necessarily an English word.
+Each word is a `[[words]]` table with an `id`, a `gloss`, a `frequency`, and a `forms` array —
+the PIE seed at **−2000** and the attested forms at **200** (Proto-Germanic), **900** (Old
+English), **1400** (Middle English) and the modern **final** surface. A form that is not attested
+is simply absent from the array — the engine scores each word at whichever checkpoints it has.
+`gloss` is the modern reflex where there is one and the Proto-Germanic headword (`hurnaz`) where
+the word died before Modern English; it is a label and a `--single` lookup key, not necessarily
+an English word.
+
+**Provenance travels with the data.** Every word carries a `note` — its source (Wiktionary, or
+Ringe, who outranks it) and any correction made to its input (`PREFORM_FIXES`) or its 200 target
+(`ATTESTED_FIXES`). Each form may carry its own `note`: the PIE seed records the form as *cited*
+by Wiktionary and whether hyphens were stripped, and a corrected 200 form says so. The engine
+never reads `note` — it is documentation that round-trips through the loader, so the lexicon
+explains its own evidence rather than leaving it in a separate `provenance.csv`. The word-scoped
+SPORADIC decisions (reanalysis, leveling, the lexically-diffused sound changes) live in
+`rules.toml`, where the change itself is; the lexicon's notes are about the *data*, the rules'
+about the *changes*.
 
 ### What the builder throws away, and why
 

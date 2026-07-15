@@ -231,6 +231,10 @@ class Attestation:
     ipa: str
     category: str = ""
     form: Form | None = None
+    note: str = ""
+    """Free-text provenance for THIS form — where the IPA came from, why it is what it is (a
+    citation, a correction, a reconstruction choice). The engine never reads it; it is carried so
+    a lexicon can document its own evidence, and it round-trips through the TOML loader/writer."""
 
 
 @dataclass
@@ -256,6 +260,10 @@ class Word:
     forms: dict[int | None, Attestation] = field(default_factory=dict)
     gloss: str = ""
     frequency: int = 1
+    note: str = ""
+    """Free-text provenance for the WORD as a whole — its etymology, the sources behind it, why a
+    correction was made. Per-time evidence goes on the form's own :attr:`Attestation.note`. Ignored
+    by the engine; carried for documentation and round-tripped through the TOML loader/writer."""
 
     @classmethod
     def from_series(
