@@ -10,13 +10,14 @@ Proto-Indo-European to Present-Day English, scored at four checkpoints.
 >   via the [kaikki.org](https://kaikki.org/) extracts.
 > - **`rules.toml`, `tools/`, `SOURCE.md`** are original work and carry the repo's own
 >   **PolyForm Noncommercial 1.0.0**, like the rest of Fortis.
-> - **`sources/` is NOT in the repo and must never be.** It holds four copyrighted reference
->   books (Minkova; Ringe; Ringe & Taylor; Kroonen). They are read and cited, never
->   redistributed — `.gitignore` keeps them out. Sound laws are facts and are encoded as rules;
->   no book text belongs here.
->
-> Recorded in [`docs/acknowledgements.md`](../../docs/acknowledgements.md), alongside the same
-> arrangement for `latin_to_french` (GPL-3.0).
+> - **`sources/` is NOT in the repo and must never be.** It holds copyrighted reference books —
+>   for PIE/PGmc: Ringe (*From PIE to Proto-Germanic*), Kroonen (*Etymological Dictionary of
+>   Proto-Germanic*), Ringe & Taylor (*The Development of Old English*); for the English legs:
+>   Minkova, Jones (*A History of English Phonology*), McMahon, Steponavičius, Plotkin. A sound
+>   law is a fact, and facts are not copyrightable: they are **read and cited in the rule that
+>   uses them, never redistributed** — `.gitignore` keeps the books out, and no book text belongs
+>   in the tree. Because nothing here is redistributed, none of this appears in
+>   `docs/acknowledgements.md` (which lists only the CC BY-SA lexicon we do redistribute).
 
 ## Lexicon (`words.toml`) — CC BY-SA 4.0
 
