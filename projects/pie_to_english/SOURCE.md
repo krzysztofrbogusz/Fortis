@@ -399,10 +399,10 @@ book text or extract belongs in the repo.
 
 | checkpoint | assessed | exact | within 1 phone | rules reaching it |
 |---|---|---|---|---|
-| 200 Proto-Germanic | 528 | 443 | 462 | 67 |
-| 900 Old English | 337 | 190 | 229 | 39 |
-| 1400 Middle English | 226 | 99 | 145 | 23 |
-| final Modern (RP) | 177 | 71 | 105 | 21 |
+| 200 Proto-Germanic | 528 | 445 | 463 | 68 |
+| 900 Old English | 337 | 200 | 236 | 43 |
+| 1400 Middle English | 226 | 104 | 148 | 26 |
+| final Modern (RP) | 177 | 74 | 107 | 21 |
 
 ### The later legs were not broken — they were UNBUILT
 
@@ -432,32 +432,49 @@ If a rule looks right and buys nothing, check the two dates around it before you
 ### What is left at 900, and why it is not a rule gap
 
 Old English is the leg that gates everything below it — 1400 and RP are scored only on words that
-reached them — and it stalls at 190/337. The residue is **not** made of missing sound changes, and
-two things in the gold put a ceiling on it. Both are worth knowing before anyone spends a week
-hunting rules for them.
+reached them. Two things in the gold, neither a missing sound change, shape the residue.
 
-**1. The Old English column MIXES DIALECTS.** Wiktionary lemmatises at whatever spelling is best
-attested, and that is not one dialect. *rehtaz* and *nahts* come out Anglian (`riht`, `niht` — no
-breaking, smoothed), while *skaljō* and *gastiz* come out West Saxon (`sċiell`, `ġiest` — with the
-`ie` diphthong that only West Saxon has). **No breaking-and-smoothing rule set fits both at once**:
-every clause added for one dialect's words takes the other's away. Two of our own words say it
-outright — OE *sǣd* gives ME `seːd` with a CLOSE vowel (the Anglian reflex of ǣ) while OE *þrǣd*
-gives ME `θrɛːd` with an OPEN one (the West Saxon), and the two are the same Old English vowel.
-The fix, if it is ever worth it, is to **normalise the column to one dialect at build time** — not
-to chase it in rules.
+**1. The Old English column MIXES DIALECTS, and this is the crux.** Wiktionary lemmatises at
+whatever spelling is best attested, and that is not one dialect. *rehtaz* and *nahts* come out
+Anglian (`riht`, `niht` — smoothed), while *sċiell* and *ġiest* come out West Saxon (with the `ie`
+diphthong only West Saxon has). **No single set of breaking-and-smoothing rules fits both**: every
+Anglian clause the cascade gains trades a West-Saxon-gold word for an Anglian-gold one, so a blanket
+change nets *zero* and the accuracy stops measuring phonology and starts measuring which dialect
+Wiktionary happened to lemmatise.
 
-**2. Ten of the misses are a CITATION FORM, not a sound.** OE *þynne*, *swēte*, *ange*, *rǣde*,
-*ġemǣne* end in an `-e` we correctly do not derive: their Proto-Germanic is *þunnuz, *swōtuz,
-*anguz — u-stem adjectives, and Old English cites them as i-stems. The `-e` is a MORPHOLOGICAL
-reanalysis (u-stem → i-stem, a West Germanic paradigm shift), and the attested i-mutation in
-*þynne* proves an *i* was there to cause it. No sound change adds a morpheme. This is the same line
-`KEEP_WEAK_PRESENTS = False` draws for the verbs, and it is drawn in the same place.
+The resolution — carried out in stages, and it is the model for the rest — is that **Present-Day
+English descends from the Anglian dialects, not West Saxon, and the gold's own later columns prove
+it**: West Saxon *ġiest*, *nīewe*, *tīen* carry the `ie` diphthong, but their Middle English reflexes
+are already monophthongs (ME `niw`, `tɛn`) and stay so today. The later columns *continue* the
+Anglian form. So Anglian is not a preference imposed from outside; it is what the column ought to be
+to agree with the columns that descend from it. Two coordinated moves, each pinned to where the gold
+is *already* Anglian so the mixed words are never corrupted:
 
-Between them these two account for most of the 147 remaining. **A cascade of sound laws cannot go
-much past this on this gold**, and the way to find out otherwise is to fix the gold, not to add
-rules that fit it.
+* `anglianise()` in `build_gold` maps the West Saxon `īe/ie` in the OE **targets** to the Anglian
+  monophthong — a regular correspondence (Campbell §200-1), fired on the shape, and the one West
+  Saxon feature the later columns visibly reject;
+* Anglian **rules**, each scoped to a cluster where the gold is uniformly Anglian: smoothing and
+  raising before *ht* (`niht`, `riht`, `miht`), and the collapse of our derivation's i-mutated *æe*
+  to Anglian *e* (`sċell`, `erfe`) — the derivation-side twin of the gold step above.
 
-Proto-Germanic is **443/528 (83.9%)** exact. Report the **count and the denominator**, never the
+This is slow because it must be done cluster by cluster — *ht*, then the *æe* class, then the next —
+never in bulk. But it is honest and it moves the number: 900 went 173 → 200 doing it. What it cannot
+do is close the whole gap, because much of the residue is not dialect at all but the second thing:
+
+**2. Some misses are a CITATION FORM, not a sound.** OE *þynne*, *swēte*, *ange* end in an `-e` we
+correctly do not derive: their Proto-Germanic is *þunnuz, *swōtuz, *anguz — u-stem adjectives that
+Old English cites as i-stems. The `-e` is a morphological reanalysis (u-stem → i-stem), and the
+attested i-mutation in *þynne* proves the *i* was there. No sound change adds a morpheme; this is the
+line `KEEP_WEAK_PRESENTS = False` draws for the verbs, drawn again. A handful more are compounds the
+descendant-picker took for a simplex (*fetą* → `sīþfæt`, *trumaz* → `wyrttruma`) — the simplex has no
+separate OE reflex in the tree, so they are simply unscoreable at 900.
+
+Together these cap what regular sound-laws can reach: pushing 900 toward 75% would mean either
+reconstructing Anglian targets wholesale (inventing forms, i.e. circularity) or adding morphology
+rules to hit the citation forms (fitting). **The dialect normalisation is the honest lever, and it
+is real but incremental; the rest of the gap is a property of the gold, not the rules.**
+
+Proto-Germanic is **445/528 (84.3%)** exact. Report the **count and the denominator**, never the
 percentage alone: an earlier expansion took it from 222/260 (85.4%) to 310/425 — **+88 exact**
 while the rate *fell 12 points*, because 165 new and entirely untuned words entered the
 denominator. The old 260 still scored exactly 222; nothing regressed.
